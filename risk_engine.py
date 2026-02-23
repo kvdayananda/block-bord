@@ -1,5 +1,7 @@
 import re
 
+from sqlalchemy import text
+
 # High risk keywords (job scams, phishing)
 HIGH_RISK_KEYWORDS = {
     "government job": 30,
@@ -32,6 +34,7 @@ def calculate_risk(text: str):
     risk_score = 0
     reasons = []
     text_lower = text.lower()
+    
 
     # High risk keywords
     for keyword, weight in HIGH_RISK_KEYWORDS.items():
@@ -56,6 +59,23 @@ def calculate_risk(text: str):
     if re.search(email_pattern, text):
         risk_score += 5
         reasons.append("Contains email address (+5)")
+
+
+    # Detect suspicious URL patterns
+    if "http://" in text_lower or "https://" in text_lower:
+        if any(tld in text_lower for tld in [".xyz", ".tk", ".click"]):
+            risk_score += 20
+            reasons.append("Suspicious URL detected (+20)")
+
+# Detect excessive capital letters
+    if sum(1 for c in text if c.isupper()) > 10:
+        risk_score += 10
+        reasons.append("Excessive capital letters detected (+10)")
+
+# Detect multiple exclamation marks
+    if text.count("!") >= 3:
+        risk_score += 10
+        reasons.append("Multiple exclamation marks detected (+10)")
 
     # Cap at 100
     risk_score = min(risk_score, 100)
