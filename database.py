@@ -1,7 +1,15 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
-from sqlalchemy import Boolean
+
+DATABASE_URL = "sqlite:///blockbord.db"
+
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(bind=engine)
+
+Base = declarative_base()
+
+# ----------- USER TABLE -----------
 
 class User(Base):
     __tablename__ = "users"
@@ -12,12 +20,7 @@ class User(Base):
     password = Column(String)
     is_active = Column(Boolean, default=True)
 
-DATABASE_URL = "sqlite:///blockbord.db"
-
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(bind=engine)
-
-Base = declarative_base()
+# ----------- SCAN HISTORY TABLE -----------
 
 class ScanHistory(Base):
     __tablename__ = "scan_history"
@@ -28,4 +31,5 @@ class ScanHistory(Base):
     risk_level = Column(String)
     created_at = Column(DateTime, default=datetime.utcnow)
 
+# Create tables
 Base.metadata.create_all(bind=engine)
