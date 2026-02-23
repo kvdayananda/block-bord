@@ -52,7 +52,7 @@ body {
 
 /* Scan Box */
 .scan-box {
-    background: #1f2937;
+    background: #384c68;
     padding: 40px;
     border-radius: 18px;
     width: 60%;
@@ -95,26 +95,28 @@ button:hover {
 }
 
 /* Result Card */
-.result-card {
-    margin-top: 50px;
+ .result-card {
+    margin: 50px auto;
     width: 60%;
-    margin-left: auto;
-    margin-right: auto;
     padding: 30px;
     border-radius: 18px;
     animation: fadeIn 0.4s ease-in-out;
+    text-align: center;
 }
 
 .safe {
     background-color: #16a34a;
+    box-shadow: 0 0 20px rgba(22,163,74,0.5);
 }
 
 .suspicious {
     background-color: #f59e0b;
+    box-shadow: 0 0 20px rgba(245,158,11,0.5);
 }
 
 .high {
     background-color: #dc2626;
+    box-shadow: 0 0 25px rgba(220,38,38,0.7);
 }
 
 @keyframes fadeIn {
@@ -128,6 +130,6 @@ footer {
     padding: 40px 20px;
     text-align: center;
     background: #0b1220;
-    color: #94a3b8;
+    color: #6888b5;
     font-size: 14px;
 }
