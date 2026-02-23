@@ -6,16 +6,29 @@
 </head>
 <body>
 
-<div class="container">
-    <h1>🛡 Block Bord AI</h1>
-    <p>AI Scam Detection Platform</p>
+<nav class="navbar">
+    <div class="logo">🛡 Block Bord AI</div>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/admin">Scan History</a>
+    </div>
+</nav>
 
-    <textarea id="inputText" placeholder="Paste suspicious message, email, or URL..."></textarea>
+<section class="hero">
+    <h1>AI Scam Detection Platform</h1>
+    <p>Protecting You From Digital Scams</p>
 
-    <button onclick="scanText()">Scan Now</button>
+    <div class="scan-box">
+        <textarea id="inputText" placeholder="Paste suspicious message, email, or URL..."></textarea>
+        <button onclick="scanText()">Scan Now</button>
+    </div>
 
-    <div id="result" class="hidden"></div>
-</div>
+    <div id="result" class="hidden result-card"></div>
+</section>
+
+<footer>
+    © 2026 Block Bord AI | Cyber Protection System
+</footer>
 
 <script src="/static/script.js"></script>
 </body>
