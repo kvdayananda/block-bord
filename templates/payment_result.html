@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Status - Block Bord AI{% endblock %}
+
+{% block extra_head %}
+  <link rel="stylesheet" href="/static/pricing.css">
+  <style>
+    .result-wrap{width:min(720px, calc(100% - 32px)); margin: 40px auto 70px;}
+    .result-card{border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); border-radius: 0; padding: 18px;}
+    .ok{border-color: rgba(34,197,94,.35); background: rgba(34,197,94,.12);}
+    .fail{border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.12);}
+    .title{margin:0 0 8px; font-size: 20px;}
+    .msg{margin:0; color: rgba(231,238,252,.9); font-weight: 750; line-height: 1.6;}
+    .actions{margin-top: 14px; display:flex; gap: 12px; flex-wrap: wrap;}
+  </style>
+{% endblock %}
+
+{% block content %}
+<div class="result-wrap">
+  <div class="result-card {% if ok %}ok{% else %}fail{% endif %}">
+    <h1 class="title">{% if ok %}✅ Payment Successful{% else %}❌ Payment Failed{% endif %}</h1>
+    <p class="msg">{{ message }}</p>
+    <div class="actions">
+      <a class="bb-btn-full bb-btn-primary" href="/app">Go to Dashboard</a>
+      <a class="bb-btn-full" href="/pricing">Back to Pricing</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

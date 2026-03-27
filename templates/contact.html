@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - Block Bord AI{% endblock %}
+
+{% block content %}
+<div class="main-content contact-page">
+    <div class="contact-head">
+        <div class="badge-premium" style="margin: 0 auto 24px;">GET IN TOUCH</div>
+        <h1>How can we <span class="text-gradient">help you</span> today?</h1>
+        <p class="subtitle">Our team typically responds to all inquiries within 24 hours. Whether you're interested in enterprise solutions or need technical help, we're here.</p>
+    </div>
+
+    <div style="max-width: 600px; margin: 0 auto; width: 100%;">
+        <!-- Centered Contact Form -->
+        <div class="card glass contact-form-card">
+            <h2 style="font-size: 1.75rem; font-weight: 850; margin-bottom: 8px;">Send a message</h2>
+            <p style="color: var(--text-muted); margin-bottom: 32px;">Fill out the form below and an expert will reach out shortly.</p>
+            
+            <form id="contactForm" class="premium-form" onsubmit="event.preventDefault(); alert('Message sent! Our team will contact you soon.'); this.reset();">
+                <div class="input-row-grid">
+                    <div class="input-group-premium">
+                        <label>First Name</label>
+                        <input type="text" placeholder="John" required>
+                    </div>
+                    <div class="input-group-premium">
+                        <label>Last Name</label>
+                        <input type="text" placeholder="Doe" required>
+                    </div>
+                </div>
+
+                <div class="input-group-premium">
+                    <label>Work Email</label>
+                    <input type="email" placeholder="john@company.com" required>
+                </div>
+
+                <div class="input-group-premium">
+                    <label>Subject</label>
+                    <select required>
+                        <option value="" disabled selected>Select an option</option>
+                        <option>General Inquiry</option>
+                        <option>Sales & Enterprise Plans</option>
+                        <option>Technical Support</option>
+                        <option>Partnership Opportunities</option>
+                    </select>
+                </div>
+
+                <div class="input-group-premium">
+                    <label>Message</label>
+                    <textarea rows="4" placeholder="How can we help?" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" style="padding: 16px; font-weight: 800; border-radius: 12px; margin-top: 12px;">
+                    Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

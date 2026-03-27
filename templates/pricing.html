@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing - Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/pricing.css">
+{% endblock %}
+
+{% block content %}
+<section class="bb-price-page">
+  <div class="bb-price-wrap">
+    <div class="bb-price-head">
+      <h1>Simple, Transparent Pricing</h1>
+      <p>
+        Currently on the <strong style="color: var(--primary);">{{ plan|upper }}</strong> plan.
+        Select a plan below to unlock advanced protection.
+      </p>
+    </div>
+
+    <div class="bb-price-grid4">
+
+      <!-- FREE -->
+      <div class="bb-plan {% if plan == 'free' %}glass{% endif %}">
+        <div class="bb-plan-top">
+          <h3>Community</h3>
+          <div class="bb-plan-price">
+            <strong>Free</strong>
+          </div>
+        </div>
+        <ul>
+          <li>6 scans per day</li>
+          <li>Basic threat detection</li>
+          <li>Community support</li>
+        </ul>
+        <div class="bb-action">
+          {% if plan == "free" %}
+          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          {% else %}
+          <a class="btn btn-secondary btn-full" href="/app">Dashboard</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- STARTER -->
+      <div class="bb-plan {% if plan == 'starter' %}glass{% endif %}">
+        <div class="bb-plan-top">
+          <h3>Starter</h3>
+          <div class="bb-plan-price">
+            <strong>₹99</strong>
+            <span>/ month</span>
+          </div>
+        </div>
+        <ul>
+          <li>50 scans per day</li>
+          <li>Better scan analytics</li>
+          <li>Priority threat updates</li>
+        </ul>
+        <div class="bb-action">
+          {% if plan == "starter" %}
+          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          {% else %}
+          <a class="btn btn-secondary btn-full" href="/checkout/starter">Upgrade</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- PRO -->
+      <div class="bb-plan bb-plan-pro">
+        <div class="bb-plan-top">
+          <h3>Pro Plus</h3>
+          <div class="bb-plan-price">
+            <strong>₹199</strong>
+            <span>/ month</span>
+          </div>
+        </div>
+        <ul>
+          <li>Unlimited scans</li>
+          <li>Auto-Guard protection</li>
+          <li>Deep link analysis</li>
+        </ul>
+        <div class="bb-action">
+          {% if plan == "pro" %}
+          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          {% else %}
+          <a class="btn btn-primary btn-full" href="/checkout/pro">Get Pro Now</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- BUSINESS -->
+      <div class="bb-plan {% if plan == 'business' %}glass{% endif %}">
+        <div class="bb-plan-top">
+          <h3>Team</h3>
+          <div class="bb-plan-price">
+            <strong>₹499</strong>
+            <span>/ month</span>
+          </div>
+        </div>
+        <ul>
+          <li>Unlimited scans</li>
+          <li>Multi-user dashboard</li>
+          <li>API access (Beta)</li>
+        </ul>
+        <div class="bb-action">
+          {% if plan == "business" %}
+          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          {% else %}
+          <a class="btn btn-secondary btn-full" href="/checkout/business">Contact Sales</a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bb-note glass" style="display: flex; align-items: center; gap: 10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      All payments are securely processed via Razorpay. Your plan will be updated instantly upon successful transaction.
+    </div>
+
+  </div>
+</section>
+{% endblock %}

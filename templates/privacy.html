@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - Block Bord AI{% endblock %}
+{% block body_class %}light-theme{% endblock %}
+
+{% block content %}
+<div class="main-content" style="padding: 160px 20px 120px;">
+    <div style="text-align: center; margin-bottom: 60px;">
+        <div class="badge-premium" style="margin: 0 auto 24px; display: inline-block;">PRIVACY</div>
+        <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 16px;">Privacy <span class="text-gradient">Policy</span></h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem;">Effective date: March 24, 2026 &nbsp;·&nbsp; Last updated: March 24, 2026</p>
+    </div>
+
+    <div style="max-width: 860px; margin: 0 auto; width: 100%;">
+        <!-- Table of Contents Card -->
+        <div class="card glass" style="padding: 32px; margin-bottom: 40px; border: 1px solid var(--border-light);">
+            <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; color: var(--text);">Contents</h3>
+            <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; color: var(--primary); font-weight: 600;">
+                <li><a href="#intro" style="color: var(--primary);">Introduction</a></li>
+                <li><a href="#data-collected" style="color: var(--primary);">Data We Collect</a></li>
+                <li><a href="#how-used" style="color: var(--primary);">How We Use Your Data</a></li>
+                <li><a href="#data-sharing" style="color: var(--primary);">Data Sharing & Third Parties</a></li>
+                <li><a href="#retention" style="color: var(--primary);">Data Retention</a></li>
+                <li><a href="#security" style="color: var(--primary);">Security Measures</a></li>
+                <li><a href="#rights" style="color: var(--primary);">Your Rights</a></li>
+                <li><a href="#children" style="color: var(--primary);">Children's Privacy</a></li>
+                <li><a href="#changes" style="color: var(--primary);">Changes to This Policy</a></li>
+                <li><a href="#contact" style="color: var(--primary);">Contact Us</a></li>
+            </ol>
+        </div>
+
+        <!-- Main Content Card -->
+        <div class="card glass" style="padding: 56px; line-height: 1.8;">
+            
+            <div id="intro" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    1. Introduction
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">Welcome to <strong>Block Bord AI</strong> ("we", "us", "our"). We operate <a href="/" style="color: var(--primary); font-weight: 600;">blockbord.ai</a> and the Block Bord AI browser extension (collectively, the "Service"). We are committed to protecting your personal information and your right to privacy.</p>
+                <p style="color: var(--text-muted);">This Privacy Policy explains what information we collect, why we collect it, how it is used, and what rights you have in relation to it. Please read it carefully — by using the Service you agree to the terms described below.</p>
+            </div>
+
+            <div id="data-collected" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    2. Data We Collect
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">We collect only what is necessary to provide the Service. This includes:</p>
+                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px;">
+                    <li><strong style="color: var(--text);">Account Information:</strong> When you register, we collect your username and email address. Passwords are stored as one-way cryptographic hashes (bcrypt) — we cannot recover them.</li>
+                    <li><strong style="color: var(--text);">Scan Content:</strong> URLs, text messages, or page content you submit for analysis via the dashboard or the browser extension.</li>
+                    <li><strong style="color: var(--text);">Browser Telemetry (Extension only):</strong> When the extension is active, it collects anonymised signals such as JavaScript obfuscation indicators. This data is not linked to your browsing history.</li>
+                    <li><strong style="color: var(--text);">Usage & Log Data:</strong> Standard server logs including IP addresses, browser type, and timestamps.</li>
+                    <li><strong style="color: var(--text);">Payment Information:</strong> Payments are processed via Razorpay. We store only the Razorpay order ID and payment status.</li>
+                    <li><strong style="color: var(--text);">Feedback Data:</strong> If you label a scan as "spam" or "safe", we store that label to improve our AI model.</li>
+                </ul>
+            </div>
+
+            <div id="how-used" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    3. How We Use Your Data
+                </h2>
+                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                    <li>To provide real-time phishing and threat detection services.</li>
+                    <li>To maintain your personal scan history and dashboard.</li>
+                    <li>To enforce daily scan limits based on your subscription plan.</li>
+                    <li>To retrain and improve our AI threat detection models using anonymised, aggregated feedback.</li>
+                    <li>To send transactional emails (e.g., high-risk detection alerts) if opted in.</li>
+                    <li>To detect and prevent fraud, abuse, and security incidents.</li>
+                </ul>
+                <p style="color: var(--text-muted);">We do <strong style="color: var(--text);">not</strong> sell, rent, or trade your personal information to any third party for commercial purposes.</p>
+            </div>
+
+            <div id="data-sharing" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    4. Data Sharing & Third Parties
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">We share your data with a limited number of trusted third-party services necessary to operate the platform:</p>
+                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                    <li><strong style="color: var(--text);">Razorpay</strong> — Payment processing. Subject to Razorpay's Privacy Policy.</li>
+                    <li><strong style="color: var(--text);">SMTP Email Provider</strong> — Used to send security alert emails.</li>
+                    <li><strong style="color: var(--text);">Hosting Infrastructure</strong> — Servers hosting the application.</li>
+                </ul>
+                <p style="color: var(--text-muted);">We may disclose your data if required by law, court order, or government authority.</p>
+            </div>
+
+            <div id="retention" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    5. Data Retention
+                </h2>
+                <p style="color: var(--text-muted);">We retain your account data for as long as your account is active. Scan history is retained for a rolling period of <strong style="color: var(--text);">12 months</strong> after which older entries may be purged. You can delete your account at any time by contacting us.</p>
+            </div>
+
+            <div id="security" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    6. Security Measures
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">We take security seriously and implement multiple layers of protection:</p>
+                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                    <li>All passwords are hashed using bcrypt.</li>
+                    <li>All data in transit is encrypted via HTTPS/TLS.</li>
+                    <li>CSRF tokens protect all state-changing HTTP requests.</li>
+                    <li>Rate limiting protects all authentication and scan endpoints against brute-force and abuse.</li>
+                </ul>
+                <p style="color: var(--text-muted);">No system is 100% secure. In the event of a data breach affecting your personal information, we will notify you in accordance with applicable law.</p>
+            </div>
+
+            <div id="rights" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    7. Your Rights
+                </h2>
+                <p style="color: var(--text-muted); margin-bottom: 16px;">Depending on your jurisdiction, you may have the following rights:</p>
+                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
+                    <li><strong style="color: var(--text);">Access:</strong> Request a copy of the personal data we hold about you.</li>
+                    <li><strong style="color: var(--text);">Correction:</strong> Request correction of inaccurate data.</li>
+                    <li><strong style="color: var(--text);">Deletion:</strong> Request deletion of your account and associated data.</li>
+                    <li><strong style="color: var(--text);">Portability:</strong> Request your scan history in a machine-readable format.</li>
+                </ul>
+                <p style="color: var(--text-muted);">To exercise any of these rights, please visit our <a href="/contact" style="color: var(--primary); font-weight: 600;">Contact page</a>.</p>
+            </div>
+
+            <div id="children" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    8. Children's Privacy
+                </h2>
+                <p style="color: var(--text-muted);">Block Bord AI is not directed at children under the age of 13. We do not knowingly collect personal information from children.</p>
+            </div>
+
+            <div id="changes" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    9. Changes to This Policy
+                </h2>
+                <p style="color: var(--text-muted);">We may update this Privacy Policy from time to time. We will notify registered users of material changes by email and will update the "Last updated" date at the top of this page.</p>
+            </div>
+
+            <div id="contact" style="margin-bottom: 16px;">
+                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
+                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
+                    10. Contact Us
+                </h2>
+                <p style="color: var(--text-muted);">If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us via our <a href="/contact" style="color: var(--primary); font-weight: 600;">Contact page</a>. We aim to respond to all privacy-related enquiries within <strong style="color: var(--text);">5 business days</strong>.</p>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

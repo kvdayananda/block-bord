@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Control Panel - Block Bord AI{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% include "sidebar.html" %}
+
+    <main class="main-content">
+        <div class="dashboard-topbar">
+            <div>
+                <h1>Admin Control Panel</h1>
+                <p class="subtitle">Content management, blacklists, and security oversight</p>
+            </div>
+        </div>
+
+        <!-- Tab Bar -->
+        <div class="admin-tab-bar">
+            <button class="tab-btn active" onclick="switchTab('scans', this)">Scan History</button>
+            <button class="tab-btn" onclick="switchTab('blacklist', this)">Blacklist</button>
+            <button class="tab-btn" onclick="switchTab('whitelist', this)">Whitelist</button>
+            <button class="tab-btn" onclick="switchTab('reports', this)">User Reports</button>
+        </div>
+
+        <!-- TAB: SCAN HISTORY -->
+        <div id="tab-scans" class="tab-panel active">
+            <div class="card glass analysis-card">
+                <div class="export-bar" style="display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 32px; align-items: center;">
+                    <a href="/api/export/scans" class="btn btn-secondary btn-sm" style="height: 46px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> 
+                        Export CSV
+                    </a>
+                    <div style="flex:1; min-width:240px; position:relative;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); opacity:0.6; pointer-events:none;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="scanSearch" placeholder="Filter history content..." class="input-field" style="padding-left: 44px; width:100%;">
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table id="scanTable">
+                        <thead>
+                            <tr>
+                                <th>Content / URL</th>
+                                <th style="width:130px;">Threat Level</th>
+                                <th style="width:100px;">Score</th>
+                                <th style="width:150px;">Date</th>
+                                <th style="width:100px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if scans %}{% for scan in scans %}
+                            <tr>
+                                <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight: 500;">{{ scan.content }}</td>
+                                <td>
+                                    <span class="pill {% if scan.risk_level == 'High' %}pill-danger{% elif scan.risk_level == 'Suspicious' %}pill-warn{% else %}pill-safe{% endif %}">
+                                        {{ scan.risk_level }}
+                                    </span>
+                                </td>
+                                <td style="font-weight:700;">{{ scan.risk_score }}%</td>
+                                <td style="color:var(--text-muted); font-size:0.85rem;">{{ scan.created_at.strftime('%Y-%m-%d %H:%M') if scan.created_at else 'N/A' }}</td>
+                                <td>
+                                    <button onclick="viewScan({{ scan.id }})" class="btn btn-outline btn-sm">Details</button>
+                                </td>
+                            </tr>
+                            {% endfor %}{% else %}
+                            <tr><td colspan="5">
+                                <div class="empty-state" style="text-align:center; padding:40px; opacity:0.6;">No scan history available.</div>
+                            </td></tr>{% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: BLACKLIST -->
+        <div id="tab-blacklist" class="tab-panel">
+            <div class="card glass analysis-card">
+                <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Blocklist Manager</h3>
+                <p style="color:var(--text-muted); font-size: 0.95rem; margin-bottom: 32px;">Automatically flag specific domains as "High Risk" for all users.</p>
+                <div class="input-row">
+                    <input type="text" id="bl-domain" class="input-field" placeholder="Domain name (e.g. evil-scam.com)">
+                    <input type="text" id="bl-reason" class="input-field" placeholder="Reason for blocking">
+                    <button class="btn btn-primary" onclick="addBlacklist()" style="white-space:nowrap;">+ Add Domain</button>
+                </div>
+                <div id="bl-message" style="margin-bottom:16px; font-weight:600;"></div>
+                <div class="domain-list" id="bl-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+        </div>
+
+        <!-- TAB: WHITELIST -->
+        <div id="tab-whitelist" class="tab-panel">
+            <div class="card glass analysis-card">
+                <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Whitelist Manager</h3>
+                <p style="color:var(--text-muted); font-size: 0.95rem; margin-bottom: 32px;">Mark trusted domains to skip AI analysis and ensure 100% delivery.</p>
+                <div class="input-row">
+                    <input type="text" id="wl-domain" class="input-field" placeholder="Domain name (e.g. blocksafety.org)">
+                    <input type="text" id="wl-reason" class="input-field" placeholder="Verification note">
+                    <button class="btn btn-primary" style="background: var(--safe); border-color: var(--safe); white-space:nowrap;" onclick="addWhitelist()">+ Add Trusted</button>
+                </div>
+                <div id="wl-message" style="margin-bottom:16px; font-weight:600;"></div>
+                <div class="domain-list" id="wl-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+        </div>
+
+        <!-- TAB: REPORTS -->
+        <div id="tab-reports" class="tab-panel">
+            <div class="card glass analysis-card">
+                <h3 style="font-size: 1.25rem; font-weight: 800; margin-bottom: 8px;">Community Reports</h3>
+                <p style="color:var(--text-muted); font-size: 0.95rem; margin-bottom: 32px;">Review and manage high-priority threat reports from users.</p>
+                <div id="reports-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+        </div>
+
+        <!-- Detail Overlay -->
+        <div id="scanDetail" class="hidden scan-overlay">
+            <div class="card glass overlay-card">
+                <button onclick="closeDetail()" style="position:absolute; top:20px; right:20px; background:none; border:none; font-size:2rem; cursor:pointer; color:var(--text-muted); line-height:1;">&times;</button>
+                <div id="scanDetailContent"></div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function switchTab(name, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    btn.classList.add('active');
+    if (name === 'blacklist') loadBlacklist();
+    if (name === 'whitelist') loadWhitelist();
+    if (name === 'reports') loadReports();
+}
+
+document.getElementById('scanSearch')?.addEventListener('input', function(e) {
+    const term = e.target.value.toLowerCase();
+    document.querySelectorAll('#scanTable tbody tr').forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
+    });
+});
+
+async function viewScan(id) {
+    const overlay = document.getElementById('scanDetail');
+    const content = document.getElementById('scanDetailContent');
+    overlay.classList.remove('hidden');
+    overlay.style.display = 'flex';
+    content.innerHTML = '<div style="text-align:center; padding:40px;">Fetching analysis data...</div>';
+    
+    try {
+        const r = await fetch(`/api/scan/${id}`);
+        const d = await r.json();
+        const color = d.risk_score > 70 ? '#ef4444' : (d.risk_score > 30 ? '#f59e0b' : '#10b981');
+        
+        content.innerHTML = `
+            <h2 style="margin-bottom:24px; font-weight:800;">Detailed Scan Report</h2>
+            <div class="overlay-grid" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; margin-bottom:24px;">
+                <div style="background:var(--bg-alt); padding:20px; border-radius:16px; text-align:center; border:1px solid var(--border);">
+                    <div style="font-size:2rem; font-weight:800; color:${color};">${d.risk_score}%</div>
+                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; opacity:0.6; letter-spacing:0.05em; margin-top:4px;">Risk Score</div>
+                </div>
+                <div style="background:var(--bg-alt); padding:20px; border-radius:16px; text-align:center; border:1px solid var(--border);">
+                    <div style="font-size:1.1rem; font-weight:800; color:${color}; line-height:1.2;">${d.risk_level}</div>
+                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; opacity:0.6; letter-spacing:0.05em; margin-top:4px;">Threat Level</div>
+                </div>
+                <div style="background:var(--bg-alt); padding:20px; border-radius:16px; text-align:center; border:1px solid var(--border);">
+                    <div style="font-size:1rem; font-weight:800;">${d.category || 'N/A'}</div>
+                    <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; opacity:0.6; letter-spacing:0.05em; margin-top:4px;">Category</div>
+                </div>
+            </div>
+            <div style="background:var(--bg-alt); border-left:4px solid ${color}; padding:20px; margin-bottom:20px; border-radius:0 12px 12px 0;">
+                <p style="font-size:0.95rem; opacity:0.9; margin-bottom:0; font-family:var(--font-mono); word-break:break-all;">${d.content}</p>
+            </div>
+            <div style="opacity:0.6; font-size:0.85rem; font-weight:600;">Scanned on ${new Date(d.created_at).toLocaleString()}</div>
+        `;
+    } catch(e) { content.innerHTML = '<div style="color:var(--danger);">Error loading scan details.</div>'; }
+}
+
+function closeDetail() { 
+    const overlay = document.getElementById('scanDetail');
+    overlay.classList.add('hidden'); 
+    overlay.style.display = 'none';
+}
+
+async function loadBlacklist() {
+    const list = document.getElementById('bl-list');
+    list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.5;">Updating domain records...</div>';
+    try {
+        const r = await fetch('/api/admin/blacklist');
+        const data = await r.json();
+        if (!data.length) { list.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; opacity:0.5;">No domain restrictions active.</div>'; return; }
+        list.innerHTML = data.map(item => `
+            <div class="domain-item">
+                <div style="flex:1;">
+                    <div class="domain-name" style="font-weight:700;">🚫 ${item.domain}</div>
+                    <div class="domain-reason" style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${item.reason || 'Auto-flagged account'}</div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="removeBlacklist(${item.id}, this)">Unblock</button>
+            </div>
+        `).join('');
+    } catch(e) { list.innerHTML = '<div style="color:var(--danger); text-align:center;">Resource temporarily unavailable.</div>'; }
+}
+
+async function addBlacklist() {
+    const domain = document.getElementById('bl-domain').value.trim();
+    const reason = document.getElementById('bl-reason').value.trim();
+    if (!domain) return;
+    try {
+        await fetch('/admin/blacklist', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ domain, reason })
+        });
+        document.getElementById('bl-domain').value = '';
+        document.getElementById('bl-reason').value = '';
+        loadBlacklist();
+    } catch(e) { alert('Operation failed.'); }
+}
+
+async function loadWhitelist() {
+    const list = document.getElementById('wl-list');
+    list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.5;">Loading trusted registry...</div>';
+    try {
+        const r = await fetch('/api/admin/whitelist');
+        const data = await r.json();
+        if (!data.length) { list.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; opacity:0.5;">Trusted domain registry is empty.</div>'; return; }
+        list.innerHTML = data.map(item => `
+            <div class="domain-item">
+                <div style="flex:1;">
+                    <div class="domain-name" style="font-weight:700;">✨ ${item.domain}</div>
+                    <div class="domain-reason" style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${item.reason || 'Verified trusted partner'}</div>
+                </div>
+                <button class="btn btn-outline btn-sm" onclick="removeWhitelist(${item.id}, this)">Revoke</button>
+            </div>
+        `).join('');
+    } catch(e) { list.innerHTML = '<div style="color:var(--danger); text-align:center;">Failed to connect to registry.</div>'; }
+}
+
+async function addWhitelist() {
+    const domain = document.getElementById('wl-domain').value.trim();
+    const reason = document.getElementById('wl-reason').value.trim();
+    if (!domain) return;
+    try {
+        await fetch('/admin/whitelist', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ domain, reason })
+        });
+        document.getElementById('wl-domain').value = '';
+        document.getElementById('wl-reason').value = '';
+        loadWhitelist();
+    } catch(e) { alert('Operation failed.'); }
+}
+
+async function removeWhitelist(id, btn) {
+    if (!confirm('Revoke trust for this domain?')) return;
+    try { await fetch(`/admin/whitelist/${id}`, { method: 'DELETE' }); loadWhitelist(); } catch(e) {}
+}
+
+async function loadReports() {
+    const list = document.getElementById('reports-list');
+    list.innerHTML = '<div style="text-align:center; padding:20px; opacity:0.5;">Streaming community reports...</div>';
+    try {
+        const r = await fetch('/api/admin/reports');
+        const data = await r.json();
+        if (!data.length) { list.innerHTML = '<div class="empty-state" style="text-align:center; padding:40px; opacity:0.5;">No pending community reports.</div>'; return; }
+        list.innerHTML = data.map(rep => `
+            <div class="domain-item">
+                <div style="flex:1; min-width:0;">
+                    <div class="domain-name" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-weight:700;">🚩 ${rep.url}</div>
+                    <div class="domain-reason" style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;">${rep.description || 'Verified threat report'}</div>
+                </div>
+                <span class="pill ${rep.status === 'confirmed' ? 'pill-danger' : (rep.status === 'dismissed' ? 'pill-safe' : 'pill-warn')}">
+                    ${rep.status}
+                </span>
+            </div>
+        `).join('');
+    } catch(e) { list.innerHTML = '<div style="color:var(--danger); text-align:center;">Report server unavailable.</div>'; }
+}
+</script>
+{% endblock %}

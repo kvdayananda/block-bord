@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/static/style.css?v=1.3"><!-- Typography (Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" href="/static/favicon.ico">
+    <meta name="csrf-token" content="{{ request.session.get('csrf_token') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+    <!-- ================= NAVBAR ================= -->
+    {% block navbar %}
+    <header class="main-navbar">
+        <div class="logo">
+            <img src="/static/logo.png" alt="Block Bord Logo"
+                class="brand-logo">
+            <a href="/" class="logo-link">Block <span class="bb-logo-blue">Bord</span> AI</a>
+        </div>
+
+        <nav class="nav-right">
+            <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Home</a>
+            <a href="/pricing" class="nav-link {% if request.url.path == '/pricing' %}active{% endif %}">Pricing</a>
+            <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">Contact</a>
+
+            {% if request.session.get("user_id") %}
+            <a href="/app" class="nav-link" style="font-weight: 600; color: var(--primary);">Dashboard</a>
+            <a href="/logout" class="btn btn-outline nav-btn-mobile" style="padding: 8px 16px;">Logout</a>
+            {% else %}
+            <a href="/login" class="nav-link {% if request.url.path == '/login' %}active{% endif %}">Login</a>
+            <a href="/register" class="btn btn-primary nav-btn-mobile">Try Free</a>
+            {% endif %}
+        </nav>
+
+        <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </header>
+
+    {% endblock %}
+
+    <!-- ================= PAGE CONTENT ================= -->
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ================= FOOTER ================= -->
+    {% block footer %}
+    <footer class="main-footer">
+        <div class="footer-container-premium">
+            <div class="footer-logo-centered">
+                <img src="/static/logo.png" alt="Block Bord Logo">
+                <span>Block <span class="bb-logo-blue">Bord</span> AI</span>
+            </div>
+
+            <nav class="footer-nav-premium">
+                <a href="/about" class="footer-nav-link">About Us</a>
+                <a href="/pricing" class="footer-nav-link">Pricing</a>
+                <a href="/contact" class="footer-nav-link">Contact</a>
+                <a href="/privacy" class="footer-nav-link">Privacy Policy</a>
+                <a href="/terms" class="footer-nav-link">Terms & Conditions</a>
+            </nav>
+
+            <div class="footer-divider-premium"></div>
+
+            <div class="footer-bottom-premium">
+                <p>© 2026 BlockBord AI. All rights reserved.</p>
+                <div class="footer-version-tag">v2.1.0 (Production)</div>
+            </div>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Core Scripts -->
+    <script src="/static/script.js?v=2.0"></script>
+
+    <!-- Optional Page Scripts -->
+    {% block extra_scripts %}{% endblock %}
+
+</body>
+
+</html>

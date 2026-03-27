@@ -1,0 +1,112 @@
+#bb-warning-overlay {
+    all: initial;
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2147483647;
+    background-color: #7f1d1d; /* Deep Red */
+    color: white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    animation: bb-fadeIn 0.5s ease-out;
+}
+
+@keyframes bb-fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.bb-warning-container {
+    max-width: 600px;
+    padding: 40px;
+}
+
+.bb-warning-icon {
+    font-size: 80px;
+    margin-bottom: 24px;
+    display: block;
+}
+
+.bb-warning-title {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    line-height: 1.2;
+}
+
+.bb-warning-sub {
+    font-size: 18px;
+    opacity: 0.9;
+    margin-bottom: 40px;
+    line-height: 1.5;
+}
+
+.bb-warning-details {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: left;
+    margin-bottom: 40px;
+}
+
+.bb-warning-details h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+    opacity: 0.7;
+}
+
+.bb-warning-details ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.bb-warning-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+}
+
+.bb-btn {
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.bb-btn-primary {
+    background-color: white;
+    color: #b91c1c;
+}
+
+.bb-btn-primary:hover {
+    background-color: #fef2f2;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.bb-btn-secondary {
+    background-color: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: white;
+}
+
+.bb-btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: white;
+}
+
+.hidden {
+    display: none !important;
+}

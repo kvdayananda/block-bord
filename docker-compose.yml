@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=production
+      - SESSION_SECRET=dev_only_change_me
+    volumes:
+      # Mount data and models folders to persist them across container restarts
+      - ./data:/app/data
+      - ./models:/app/models

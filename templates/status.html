@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}System Status - Block Bord AI{% endblock %}
+
+{% block content %}
+<div class="legal-page-header">
+    <div class="bb-container">
+        <span class="pill pill-safe" style="margin-bottom: 24px;">
+            <span class="status-dot"></span> LIVE
+        </span>
+        <h1>System <span class="bb-grad">Status</span></h1>
+        <p class="subtitle">Real-time status of Block Bord AI services.</p>
+    </div>
+</div>
+
+<div class="legal-wrapper">
+    <div class="card glass" style="padding: 48px;">
+        <div class="status-list">
+            <div class="status-item">
+                <div class="status-info">
+                    <h4 style="font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">API Services</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Core risk engine and scanning API</p>
+                </div>
+                <div class="status-indicator safe">
+                    <span class="status-dot"></span> Operational
+                </div>
+            </div>
+            
+            <div class="status-item">
+                <div class="status-info">
+                    <h4 style="font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">Web Dashboard</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">User account and analytics interface</p>
+                </div>
+                <div class="status-indicator safe">
+                    <span class="status-dot"></span> Operational
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-info">
+                    <h4 style="font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">AI Models</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Phishing and scam detection heuristics</p>
+                </div>
+                <div class="status-indicator safe">
+                    <span class="status-dot"></span> Operational
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-info">
+                    <h4 style="font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">Intelligence Datastore</h4>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">Global threat intelligence feeds</p>
+                </div>
+                <div class="status-indicator safe">
+                    <span class="status-dot"></span> Operational
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 48px; text-align: center; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; border-top: 1px solid var(--border); padding-top: 24px;">
+            <p>Everything is running smoothly. Last checked: March 17, 2026</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

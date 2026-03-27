@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block footer %}{% endblock %}
+
+{% block title %}Settings - Block Bord AI{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% include "sidebar.html" %}
+
+    <main class="main-content">
+        <div class="dashboard-topbar">
+            <div>
+                <h1>Account Settings</h1>
+                <p class="subtitle">System preferences, security, and API management</p>
+            </div>
+        </div>
+
+        <div class="settings-grid">
+            
+            <!-- LEFT COLUMN: Profile & Security -->
+            <div style="display: flex; flex-direction: column; gap: 32px;">
+                
+                <!-- PROFILE CARD -->
+                <div class="card glass settings-card">
+                    <h3 class="settings-section-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        Profile Overview
+                    </h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="input-field" value="{{ user.username }}" disabled style="opacity: 0.7; cursor: not-allowed;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="input-field" value="{{ user.email }}" disabled style="opacity: 0.7; cursor: not-allowed;">
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 32px;">
+                        <button class="btn btn-secondary btn-full" onclick="alert('Password reset link sent to your registered email.')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                            Reset Password
+                        </button>
+                        <a href="/logout" class="btn btn-danger btn-full" style="display: flex; justify-content: center; align-items: center; gap: 8px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                            Sign Out
+                        </a>
+                    </div>
+                </div>
+
+                <!-- SECURITY PREFERENCES -->
+                <div class="card glass settings-card">
+                    <h3 class="settings-section-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        Security & Privacy
+                    </h3>
+                    
+                    <div class="switch-group">
+                        <div class="switch-info">
+                            <h4>Two-Factor Authentication</h4>
+                            <p>Secure your account with 2FA</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="switch-group">
+                        <div class="switch-info">
+                            <h4>Strict Shield Mode</h4>
+                            <p>Enable extra-strict scan rules</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="switch-group">
+                        <div class="switch-info">
+                            <h4>Browser Extension Sync</h4>
+                            <p>Sync cloud history with extension</p>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Plan & API -->
+            <div style="display: flex; flex-direction: column; gap: 32px;">
+                
+                <!-- SUBSCRIPTION CARD -->
+                <div class="card glass settings-card">
+                    <h3 class="settings-section-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 2 7 12 22 22 7 12 2"></polygon><polyline points="2 7 12 7 22 7"></polyline><polyline points="12 22 12 7"></polyline></svg>
+                        Subscription Plan
+                    </h3>
+                    
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+                        <div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">Current Tier</div>
+                            <div style="font-size: 1.75rem; font-weight: 800; color: var(--primary); text-transform: capitalize;">{{ plan }}</div>
+                        </div>
+                        <a href="/pricing" class="pill pill-safe" style="padding: 10px 16px;">UPGRADE PLAN</a>
+                    </div>
+
+                    <div class="usage-bar-wrap">
+                        <div class="usage-stats">
+                            <span>Usage (Scans)</span>
+                            <span>{{ today_count }} / {{ plan_limit if plan_limit != '∞' else 'Unlimited' }}</span>
+                        </div>
+                        {% if plan_limit != '∞' %}
+                        <div class="usage-bar-container">
+                            <div class="usage-bar-fill" style="width: '{{ (today_count / plan_limit * 100) if plan_limit > 0 else 100 }}%';"></div>
+                        </div>
+                        {% endif %}
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; font-weight: 500;">Your daily limit resets in 6 hours.</p>
+                    </div>
+
+                </div>
+
+                <!-- API ACCESS (Pro Feature) -->
+                <div class="card glass settings-card {% if not user.is_pro %}locked-feature{% endif %}" style="{% if user.is_pro %}'border: 1px solid var(--primary);'{% endif %}">
+                    <h3 class="settings-section-title">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                        API Access Tokens
+                    </h3>
+                    
+                    {% if user.is_pro %}
+                    <div class="form-group">
+                        <label class="form-label">Active API Key</label>
+                        <div style="display: flex; gap: 12px;">
+                            <input type="text" class="input-field" id="apiKeyDisplay"
+                                   value="{{ api_key if api_key else 'No key yet — click Generate below' }}" readonly
+                                   style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; letter-spacing: 0.02em;">
+                            <button class="btn btn-secondary" onclick="copyApiKey()" title="Copy key" style="padding: 0 16px; flex-shrink:0;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:12px; margin-top:16px; align-items:center;">
+                        <button class="btn btn-primary" onclick="generateKey()" id="genKeyBtn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            {{ 'Rotate Key' if api_key else 'Generate API Key' }}
+                        </button>
+                        <span id="keyStatus" style="font-size:0.85rem; color: var(--text-muted);"></span>
+                    </div>
+                    <p style="font-size: 0.72rem; color: var(--text-muted); margin-top:12px; line-height: 1.5;">Use <code>Authorization: Bearer &lt;key&gt;</code> to call <code>POST /api/check-link</code> programmatically. Rotate keys regularly for security.</p>
+                    <script>
+                        function copyApiKey() {
+                            const v = document.getElementById('apiKeyDisplay').value;
+                            navigator.clipboard.writeText(v).then(() => {
+                                document.getElementById('keyStatus').textContent = '✓ Copied!';
+                                setTimeout(() => document.getElementById('keyStatus').textContent = '', 2000);
+                            });
+                        }
+                        async function generateKey() {
+                            const btn = document.getElementById('genKeyBtn');
+                            btn.disabled = true;
+                            btn.textContent = 'Generating...';
+                            const res = await fetch('/api/generate_key', { method: 'POST' });
+                            const data = await res.json();
+                            if (data.api_key) {
+                                document.getElementById('apiKeyDisplay').value = data.api_key;
+                                document.getElementById('keyStatus').textContent = '✓ New key ready!';
+                                btn.textContent = 'Rotate Key';
+                            } else {
+                                document.getElementById('keyStatus').textContent = data.error || 'Error';
+                            }
+                            btn.disabled = false;
+                        }
+                    </script>
+                    {% else %}
+                    <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(8px); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; padding: 32px; border: 1px solid rgba(255, 255, 255, 0.8);">
+                        <div style="width: 48px; height: 48px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 16px; color: var(--primary);">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                        </div>
+                        <h4 style="margin-bottom: 8px; font-weight: 800; font-size: 1.25rem;">Enterprise API Access</h4>
+                        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 24px; line-height: 1.6; max-width: 250px;">Integrate our rapid analysis engine into your own pipeline.</p>
+                        <a href="/pricing" class="btn btn-primary" style="box-shadow: 0 8px 16px rgba(99, 102, 241, 0.25);">Unlock Pro API</a>
+                    </div>
+                    <!-- Blurred background content to show standard card -->
+                    <div style="opacity: 0.4; filter: blur(3px); pointer-events: none; user-select: none;">
+                        <div class="form-group">
+                            <label class="form-label">Active API Key</label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="password" class="input-field" value="sk_test_..." readonly>
+                                <button class="btn btn-secondary" style="padding: 0 16px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.5;">Integration for enterprise scanning pipelines. Rotate keys regularly for security.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

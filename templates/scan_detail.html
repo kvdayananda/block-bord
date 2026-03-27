@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Scan Details - Block Bord AI{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% include "sidebar.html" %}
+
+    <main class="main-content">
+        <div class="dashboard-topbar">
+            <div>
+                <h1>Scan Result Insights</h1>
+                <p class="subtitle">Detailed forensic breakdown of analyzed content</p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                <div class="feedback-actions" style="display: flex; gap: 8px;">
+                    <button class="btn btn-danger btn-sm" id="markSpamBtn">🚫 Mark Spam</button>
+                    <button class="btn btn-secondary btn-sm" id="markHamBtn">✅ Not Spam</button>
+                </div>
+                <a href="/admin" class="btn btn-outline btn-sm">← Back to Scans</a>
+            </div>
+        </div>
+
+        {% if scan %}
+        <div class="card glass scan-detail-box">
+            <div class="detail-grid">
+                <div class="risk-circle" style="--progress: {{ (scan.risk_score or 0) * 3.6 }}deg;">
+                    <span>{{ scan.risk_score or 0 }}%</span>
+                </div>
+
+                <div class="detail-info">
+                    <h3 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;">Risk Assessment</h3>
+                    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px;">
+                        <span style="font-size: 2rem; font-weight: 800; line-height: 1;" class="{% if scan.risk_level == 'High' %}text-high{% elif scan.risk_level == 'Suspicious' %}text-warning{% else %}text-safe{% endif %}">
+                            {{ scan.risk_level }}
+                        </span>
+                        <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">Detection Level</span>
+                    </div>
+                    <p style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        Analyzed on {{ scan.created_at.strftime('%d %b %Y, %H:%M') if scan.created_at else '-' }}
+                    </p>
+                    <div style="margin-top: 12px;">
+                        <span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.2);">
+                            🛡️ Category: {{ scan.category or "General Analysis" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-box">
+                <h3 style="font-size: 0.9rem; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Scanned Content Payload</h3>
+                <p style="font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.6; word-break: break-all; color: var(--text);">
+                    {{ scan.content }}
+                </p>
+            </div>
+            
+            <div style="margin-top: 32px; padding: 24px; background: rgba(99, 102, 241, 0.03); border-radius: 16px; border: 1px dashed rgba(99, 102, 241, 0.2);">
+                <h3 style="font-size: 0.85rem; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    AI Forensics & Threat Vectors
+                </h3>
+                <ul style="list-style: none; padding: 0;">
+                    {% if reasons_list %}
+                        {% for reason in reasons_list %}
+                            <li style="font-size: 0.95rem; color: var(--text); margin-bottom: 10px; display: flex; gap: 12px; align-items: start;">
+                                <span style="color: var(--primary); font-weight: 900;">•</span>
+                                <span>{{ reason }}</span>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li style="font-size: 0.95rem; color: var(--text-muted); font-style: italic;">No specific anomalies detected beyond base heuristics.</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        {% else %}
+        <div class="card glass" style="padding: 60px; text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 20px;">🔍</div>
+            <h2 style="font-weight: 800; margin-bottom: 8px;">Scan Record Not Found</h2>
+            <p style="color: var(--text-muted); margin-bottom: 24px;">The scan ID you are looking for does not exist or has been purged.</p>
+            <a href="/admin" class="btn btn-primary">Return to History</a>
+        </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}
