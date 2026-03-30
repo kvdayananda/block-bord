@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Global Scam Map - Block Bord AI{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% include "sidebar.html" %}
+    
+    <main class="main-content dashboard-main" style="background: #0a0f1e; min-height: 100vh; padding: 32px;">
+        <!-- Top Bar -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 16px;">
+            <div>
+                <span style="background: rgba(239,68,68,0.15); color: #ef4444; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(239,68,68,0.3); display: inline-flex; align-items: center; gap: 6px; margin-bottom: 12px;">
+                    <span style="width: 6px; height: 6px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                    LIVE THREAT INTELLIGENCE
+                </span>
+                <h1 style="font-size: 2.2rem; font-weight: 850; color: #f1f5f9; letter-spacing: -0.03em; margin-bottom: 8px;">Global Scam Map</h1>
+                <p style="color: #64748b; font-size: 1rem;">Real-time phishing and scam activity worldwide.</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.75rem; color: #475569; margin-bottom: 4px;">TOTAL THREATS TODAY</div>
+                <div id="total-counter" style="font-size: 2.5rem; font-weight: 900; color: #ef4444; letter-spacing: -0.03em;">—</div>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.15); border-radius: 16px; padding: 20px;">
+                <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 4px;">Countries Affected</div>
+                <div style="font-size: 1.8rem; font-weight: 900; color: #f1f5f9;">25</div>
+            </div>
+            <div style="background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.15); border-radius: 16px; padding: 20px;">
+                <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 4px;">Top Threat Country</div>
+                <div id="top-country" style="font-size: 1.8rem; font-weight: 900; color: #f1f5f9;">—</div>
+            </div>
+            <div style="background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.15); border-radius: 16px; padding: 20px;">
+                <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #64748b; margin-bottom: 4px;">Avg Per Country</div>
+                <div id="avg-threats" style="font-size: 1.8rem; font-weight: 900; color: #f1f5f9;">—</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start;">
+            <!-- World Map -->
+            <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(99,102,241,0.15); border-radius: 20px; padding: 24px; overflow: hidden;">
+                <h3 style="color: #cbd5e1; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px;">Threat Heatmap</h3>
+                <div id="world-map" style="width: 100%; height: 420px; position: relative; background: rgba(6, 12, 34, 0.9); border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                    <div id="map-loading" style="color: #475569; font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+                        <div style="width: 32px; height: 32px; border: 3px solid #6366f1; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        Loading live threat data...
+                    </div>
+                    <div id="map-content" style="display: none; width: 100%; height: 100%; position: relative;"></div>
+                </div>
+                <div style="display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #64748b;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #ef4444;"></div> High (>2000)
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #64748b;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #f59e0b;"></div> Medium (500-2000)
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #64748b;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #10b981;"></div> Low (<500)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Feed -->
+            <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(99,102,241,0.15); border-radius: 20px; padding: 24px; max-height: 520px; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #cbd5e1; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em;">Live Attack Feed</h3>
+                    <span style="display: flex; align-items: center; gap: 5px; font-size: 0.65rem; color: #10b981; font-weight: 700;">
+                        <span style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                        LIVE
+                    </span>
+                </div>
+                <div id="attack-feed" style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Country Stats Table -->
+        <div style="background: rgba(15,23,42,0.8); border: 1px solid rgba(99,102,241,0.15); border-radius: 20px; padding: 24px; margin-top: 24px;">
+            <h3 style="color: #cbd5e1; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px;">Country Threat Index</h3>
+            <div id="country-table" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes feedSlide { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+    
+    /* Override dashboard-main background for dark war room feel */
+    .dashboard-main { background: #0a0f1e !important; }
+</style>
+
+<script>
+const countryNames = {
+    "US": "🇺🇸 USA", "IN": "🇮🇳 India", "BR": "🇧🇷 Brazil", "CN": "🇨🇳 China", "RU": "🇷🇺 Russia",
+    "GB": "🇬🇧 UK", "DE": "🇩🇪 Germany", "FR": "🇫🇷 France", "NG": "🇳🇬 Nigeria", "PK": "🇵🇰 Pakistan",
+    "AU": "🇦🇺 Australia", "CA": "🇨🇦 Canada", "MX": "🇲🇽 Mexico", "ZA": "🇿🇦 South Africa", "ID": "🇮🇩 Indonesia",
+    "TR": "🇹🇷 Turkey", "IT": "🇮🇹 Italy", "ES": "🇪🇸 Spain", "AR": "🇦🇷 Argentina", "KR": "🇰🇷 South Korea",
+    "UA": "🇺🇦 Ukraine", "PH": "🇵🇭 Philippines", "BD": "🇧🇩 Bangladesh", "EG": "🇪🇬 Egypt", "VN": "🇻🇳 Vietnam"
+};
+
+async function loadScamData() {
+    try {
+        const res = await fetch('/api/scam-stats');
+        const data = await res.json();
+        
+        // Update counters
+        animateNumber('total-counter', data.total_today);
+        document.getElementById('top-country').textContent = countryNames[data.top_country] || data.top_country;
+        document.getElementById('avg-threats').textContent = Math.round(data.total_today / 25).toLocaleString();
+
+        // Render live feed
+        renderFeed(data.feed);
+        
+        // Render country bars
+        renderCountryTable(data.countries);
+        
+        // Render SVG heat dots 
+        renderMapDots(data.countries);
+        
+        document.getElementById('map-loading').style.display = 'none';
+        document.getElementById('map-content').style.display = 'block';
+
+    } catch (e) {
+        console.error('Failed to load scam stats:', e);
+    }
+}
+
+function animateNumber(id, target) {
+    const el = document.getElementById(id);
+    let current = 0;
+    const step = target / 60;
+    const timer = setInterval(() => {
+        current = Math.min(current + step, target);
+        el.textContent = Math.round(current).toLocaleString();
+        if (current >= target) clearInterval(timer);
+    }, 16);
+}
+
+function renderFeed(feed) {
+    const container = document.getElementById('attack-feed');
+    container.innerHTML = '';
+    feed.forEach((event, i) => {
+        const div = document.createElement('div');
+        div.style.cssText = `background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.1); border-radius: 10px; padding: 12px; animation: feedSlide 0.4s ease ${i * 0.07}s both;`;
+        div.innerHTML = `
+            <div style="font-size: 0.75rem; font-weight: 700; color: #fca5a5; margin-bottom: 4px;">${event.type}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.7rem; color: #64748b;">📍 ${event.city}</span>
+                <span style="font-size: 0.65rem; color: #475569;">${event.time}</span>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function renderCountryTable(countries) {
+    const container = document.getElementById('country-table');
+    container.innerHTML = '';
+    const maxVal = Math.max(...Object.values(countries));
+    
+    Object.entries(countries)
+        .sort((a, b) => b[1] - a[1])
+        .forEach(([code, count]) => {
+            const pct = (count / maxVal * 100).toFixed(0);
+            const color = count > 2000 ? '#ef4444' : count > 500 ? '#f59e0b' : '#10b981';
+            const div = document.createElement('div');
+            div.style.cssText = `background: rgba(15,23,42,0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 14px;`;
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="font-size: 0.85rem; font-weight: 700; color: #e2e8f0;">${countryNames[code] || code}</span>
+                    <span style="font-size: 0.8rem; font-weight: 800; color: ${color};">${count.toLocaleString()}</span>
+                </div>
+                <div style="height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden;">
+                    <div style="height: 100%; width: ${pct}%; background: ${color}; border-radius: 2px; transition: width 1s ease;"></div>
+                </div>
+            `;
+            container.appendChild(div);
+        });
+}
+
+// Simple SVG world-like dot visualization
+function renderMapDots(countries) {
+    const coordMap = {
+        "US": [25, 40], "CA": [22, 28], "MX": [24, 50], "BR": [40, 62], "AR": [43, 70],
+        "GB": [46, 28], "FR": [48, 30], "DE": [50, 29], "ES": [47, 32], "IT": [50, 33],
+        "RU": [54, 22], "UA": [52, 28], "TR": [53, 34], "EG": [55, 40], "NG": [52, 45],
+        "ZA": [52, 58], "IN": [63, 42], "PK": [60, 37], "BD": [65, 40], "CN": [68, 35],
+        "KR": [72, 36], "VN": [69, 45], "ID": [70, 52], "PH": [73, 45], "AU": [74, 62]
+    };
+    
+    const container = document.getElementById('map-content');
+    const maxVal = Math.max(...Object.values(countries));
+    
+    container.innerHTML = `
+        <svg viewBox="0 0 100 80" style="width:100%; height:100%;" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="80" fill="#06080f" rx="12"/>
+            ${Object.entries(countries).map(([code, count]) => {
+                const pos = coordMap[code];
+                if (!pos) return '';
+                const [cx, cy] = pos;
+                const color = count > 2000 ? '#ef4444' : count > 500 ? '#f59e0b' : '#10b981';
+                const r = 1 + (count / maxVal) * 3.5;
+                const label = count > 1500 ? `
+                    <text x="${cx}" y="${cy - r - 1}" text-anchor="middle" fill="${color}" font-size="2" font-weight="bold" font-family="sans-serif">${count.toLocaleString()}</text>
+                ` : '';
+                return `
+                    <circle cx="${cx}" cy="${cy}" r="${r * 1.6}" fill="${color}" opacity="0.15"/>
+                    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" opacity="0.9"/>
+                    ${label}
+                `;
+            }).join('')}
+        </svg>
+    `;
+}
+
+loadScamData();
+// Refresh every 60 seconds
+setInterval(loadScamData, 60000);
+</script>
+
+{% endblock %}

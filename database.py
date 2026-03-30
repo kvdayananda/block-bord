@@ -83,6 +83,7 @@ class ScanHistory(Base):
     risk_level = Column(String(50), nullable=False)
     reasons = Column(Text, nullable=True)       # stored as JSON string
     category = Column(String(100), nullable=True)  # e.g. "UPI Scam", "Brand Impersonation"
+    scam_intent = Column(String(100), nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
@@ -216,6 +217,15 @@ def run_migrations():
             if "api_key" not in cols:
                 conn.execute(
                     text("ALTER TABLE users ADD COLUMN api_key VARCHAR(100) UNIQUE")
+                )
+                
+            scan_cols = [
+                r[1]
+                for r in conn.execute(text("PRAGMA table_info(scans)")).fetchall()
+            ]
+            if "scam_intent" not in scan_cols:
+                conn.execute(
+                    text("ALTER TABLE scans ADD COLUMN scam_intent VARCHAR(100)")
                 )
             conn.commit()
     except Exception:

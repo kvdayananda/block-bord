@@ -17,8 +17,10 @@
         <div class="dashboard-topbar" style="margin-bottom: 32px;">
             <div>
                 <span class="badge-premium" style="margin-bottom: 12px; display: inline-block;">OVERVIEW</span>
-                <h1 style="font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 8px;">Welcome back, {{ user.username }}</h1>
-                <p class="subtitle" style="font-size: 1.1rem; color: var(--text-muted); margin: 0;">Monitor your digital footprint and identify threats in real-time.</p>
+                <h1 style="font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 8px;">Welcome
+                    back, {{ user.username }}</h1>
+                <p class="subtitle" style="font-size: 1.1rem; color: var(--text-muted); margin: 0;">Monitor your digital
+                    footprint and identify threats in real-time.</p>
             </div>
         </div>
 
@@ -26,19 +28,26 @@
         <div class="stats-grid-premium">
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new primary-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+                    <div class="stat-icon-new primary-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                        </svg></div>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span class="stat-label-new">Total Scans</span>
+                        <span class="stat-label-new"> Total Scans</span>
                         <h2 class="stat-value-new">{{ total_scans or 0 }}</h2>
                     </div>
                 </div>
             </div>
-            
+
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new danger-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div>
+                    <div class="stat-icon-new danger-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path
+                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                        </svg></div>
                     <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span class="stat-label-new">High Risk</span>
+                        <span class="stat-label-new"> High Risk</span>
                         <h2 class="stat-value-new danger-text">{{ high_risk or 0 }}</h2>
                     </div>
                 </div>
@@ -46,12 +55,18 @@
 
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new warn-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+                    <div class="stat-icon-new warn-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="12" y1="8" x2="12" y2="12" />
+                            <line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg></div>
                     <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                        <span class="stat-label-new">Suspicious</span>
+                        <span class="stat-label-new"> Suspicious</span>
                         <div style="display: flex; align-items: baseline; gap: 12px;">
                             <h2 class="stat-value-new warn-text">{{ suspicious_count or 0 }}</h2>
-                            <span class="stat-trend" style="background: rgba(245, 158, 11, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; color: #d97706; font-weight: 800;">Stable</span>
+                            <span class="stat-trend"
+                                style="background: rgba(245, 158, 11, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; color: #d97706; font-weight: 800;">Stable</span>
                         </div>
                     </div>
                 </div>
@@ -59,12 +74,19 @@
 
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new safe-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg></div>
+                    <div class="stat-icon-new safe-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.5">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg></div>
                     <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                        <span class="stat-label-new">Risk Rate</span>
+                        <span class="stat-label-new"> Cyber Shield Score</span>
                         <div style="display: flex; align-items: baseline; gap: 12px;">
-                            <h2 class="stat-value-new" id="stat-rate-new">0%</h2>
-                            <span class="stat-trend trend-down" style="background: rgba(16, 185, 129, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; color: #059669; font-weight: 800;">↓ 0.5%</span>
+                            <h2 class="stat-value-new" style="color: var(--score-color);">
+                                {{ security_score }}/100</h2>
+                            <span class="stat-trend"
+                                style="background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; color: var(--primary); font-weight: 800;">{%
+                                if security_score >= 80 %}Excellent{% elif security_score >= 50 %}Fair{% else %}At
+                                Risk{% endif %}</span>
                         </div>
                     </div>
                 </div>
@@ -73,155 +95,180 @@
 
         <div class="dashboard-main-grid">
             <!-- ===== SCAN SECTION (Unified Console Redesign) ===== -->
-            <div class="scan-console-wrapper">
+            <div class="scan-console-wrapper" style="height: 420px;">
                 <div class="scan-console-header">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span class="scan-dot active-dot"></span>
-                        <h3 style="font-size: 1.05rem; font-weight: 750; color: #0f172a; margin: 0; letter-spacing: -0.01em; text-transform: uppercase;">Agentic Threat Analyzer</h3>
+                        <h3
+                            style="font-size: 1.05rem; font-weight: 750; color: #0f172a; margin: 0; letter-spacing: -0.01em; text-transform: uppercase;">
+                            Agentic Threat Analyzer</h3>
                     </div>
-                    <span style="font-family: var(--font-mono); font-size: 0.8rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        System Ready
-                    </span>
                 </div>
-                
-                <textarea id="content" class="console-textarea" placeholder="Enter a URL, smart contract address, or paste raw email headers to initiate deep analysis..."></textarea>
-                
+
+                <textarea id="content" class="console-textarea" style="min-height: 240px;"
+                    placeholder="Enter a URL, smart contract address, or paste raw email headers to initiate deep analysis..."></textarea>
+
                 <div class="scan-console-footer">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div class="usage-pill">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                            <span style="font-weight: 800;">{{ plan_limit - today_count if plan_limit != '∞' else 'Unlimited' }}</span> Scans Remaining
-                        </div>
+                    <div class="usage-pill">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                        </svg>
+                        <span style="font-weight: 800;">{{ plan_limit - today_count if plan_limit != '∞' else 'Unlimited' }}</span> Scans Remaining
                     </div>
                     <button id="scanBtn" class="btn-scan-action" onclick="scanContent()">
                         <span>Initiate Scan</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
                     </button>
                 </div>
                 <div id="result" style="padding: 0 4px; margin-top: 16px;"></div>
             </div>
 
-            <!-- ===== CHARTS SECTION (Separated) ===== -->
-            <div class="charts-column-group" style="display: flex; flex-direction: column; gap: 32px;">
-                <!-- Card 1: Risk Distribution -->
-                <div class="card premium-card">
-                    <div class="card-header-premium">
+            <!-- ===== CARDS COLUMN ===== -->
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- Card 1: Edge Protection Activation -->
+                <div class="card premium-card" style="height: 200px; flex-shrink: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.02)); border: 1px solid var(--primary-light);">
+                    <div class="card-header-premium" style="margin-bottom: 12px;">
                         <div class="card-title-group">
-                            <div class="card-icon-round" style="color: var(--primary);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l4.5 4.5"></path></svg></div>
-                            <h3>Risk Distribution</h3>
+                            <div class="card-icon-round" style="background: var(--primary-grad); color: white; width: 32px; height: 32px;"><svg width="16" height="16"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                </svg></div>
+                            <h3 style="font-size: 0.95rem;">Edge Shield</h3>
+                        </div>
+                        <span class="badge-premium" style="padding: 2px 8px; font-size: 0.7rem;">Active</span>
+                    </div>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Real-time URL heuristics and telemetry Audit.</p>
+                    <a href="/extension-setup" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; width: 100%;">Setup Extension</a>
+                </div>
+
+                <!-- Card 2: Risk Distribution (Restored) -->
+                <div class="card premium-card" style="flex: 1; min-height: 200px;">
+                    <div class="card-header-premium" style="margin-bottom: 15px;">
+                        <div class="card-title-group">
+                            <div class="card-icon-round" style="color: var(--primary); width: 32px; height: 32px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l4.5 4.5"></path></svg></div>
+                            <h3 style="font-size: 0.95rem;">Risk Profile</h3>
                         </div>
                     </div>
-                    <div class="doughnut-container-new" style="margin: 0 auto;">
+                    <div style="height: 120px; width: 100%; position: relative;">
                         <canvas id="riskChart"></canvas>
-                        <div class="doughnut-center-txt">
-                            <span class="txt-total">{{ total_scans or 0 }}</span>
-                            <span class="txt-sub">SCANS</span>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 2: Analysis Timeline (Full Width Layout) -->
+        <!-- Full-Width Timeline -->
         <div class="card premium-card" style="margin-top: 32px;">
             <div class="card-header-premium">
                 <div class="card-title-group">
-                    <div class="card-icon-round" style="color: var(--accent);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
+                    <div class="card-icon-round" style="color: var(--accent);"><svg width="20" height="20"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg></div>
                     <h3>Analysis Timeline</h3>
                 </div>
             </div>
-            <div class="timeline-container-new" style="height: 380px; width: 100%; position: relative; margin-top: 16px;">
+            <div class="timeline-container-new" style="height: 260px; width: 100%; position: relative; margin-top: 16px;">
                 <canvas id="timelineChart"></canvas>
             </div>
         </div>
+
     </main>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+<style>
+    /* Resolve linter complaints by using local CSS variable for dynamic score color */
+    :root {
+        --score-color: {% if security_score >= 80 %}#10b981{% elif security_score >= 50 %}#f59e0b{% else %}#ef4444{% endif %};
+    }
+</style>
 <script>
-    // Charts Initialization
+    // Robust Charts Initialization
     document.addEventListener('DOMContentLoaded', () => {
-        // 1. Risk Doughnut (Using server-side totals)
+        // 1. Risk Doughnut
         const countSafe = Number('{{ safe_count or 0 }}');
         const countSusp = Number('{{ suspicious_count or 0 }}');
         const countHigh = Number('{{ high_risk or 0 }}');
-        const total = countSafe + countSusp + countHigh;
-
-        // Update Risk Rate Card
-        const rateEl = document.getElementById('stat-rate-new');
-        if (rateEl) {
-            rateEl.textContent = total > 0 ? ((countHigh / total) * 100).toFixed(1) + '%' : '0%';
+        
+        const riskCtx = document.getElementById('riskChart');
+        if (riskCtx) {
+            new Chart(riskCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Safe', 'Suspicious', 'Malicious'],
+                    datasets: [{
+                        data: [countSafe, countSusp, countHigh],
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    cutout: '75%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
         }
 
-        new Chart(document.getElementById('riskChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Safe', 'Suspicious', 'Malicious'],
-                datasets: [{
-                    data: [countSafe, countSusp, countHigh],
-                    backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                    borderWidth: 4,
-                    borderColor: '#ffffff',
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                cutout: '82%',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
-
-        // 2. Timeline Line Chart (Using server-side timeline arrays)
-        new Chart(document.getElementById('timelineChart'), {
-            type: 'line',
-            data: {
-                labels: {{ timeline_labels | tojson | safe }},
-                datasets: [
-                    {
-                        label: 'High Risk',
-                        data: {{ timeline_high | tojson | safe }},
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.05)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 2
+        // 2. Timeline Line Chart
+        const timelineCtx = document.getElementById('timelineChart');
+        if (timelineCtx) {
+            new Chart(timelineCtx, {
+                type: 'line',
+                data: {
+                    labels: {{ timeline_labels | tojson | safe }},
+                    datasets: [
+                        {
+                            label: 'High Risk',
+                            data: {{ timeline_high | tojson | safe }},
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Suspicious',
+                            data: {{ timeline_susp | tojson | safe }},
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.05)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Safe',
+                            data: {{ timeline_safe | tojson | safe }},
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 20 } } 
                     },
-                    {
-                        label: 'Suspicious',
-                        data: {{ timeline_susp | tojson | safe }},
-                        borderColor: '#f59e0b',
-                        backgroundColor: 'rgba(245, 158, 11, 0.05)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 2
-                    },
-                    {
-                        label: 'Safe',
-                        data: {{ timeline_safe | tojson | safe }},
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.05)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 2
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false } },
+                        x: { grid: { display: false } }
                     }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: true, position: 'bottom' } },
-                scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false } },
-                    x: { grid: { display: false } }
                 }
-            }
-        });
+            });
+        }
     });
 </script>
 {% endblock %}

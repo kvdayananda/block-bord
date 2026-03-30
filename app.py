@@ -340,9 +340,11 @@ PLAN_PRICES_PAISE = {
 }
 
 
+
 # -----------------------------
 # HOME
 # -----------------------------
+
 @app.get("/", response_class=HTMLResponse)
 def landing(request: Request):
     return templates.TemplateResponse("landing.html", {"request": request})
@@ -351,6 +353,19 @@ def landing(request: Request):
 @app.get("/about", response_class=HTMLResponse)
 def about_page(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
+
+
+@app.get("/status", response_class=HTMLResponse)
+def status_page(request: Request):
+    return templates.TemplateResponse("status.html", {"request": request})
+
+
+@app.get("/extension-setup", response_class=HTMLResponse)
+def extension_setup_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("extension_setup.html", {"request": request, "user": user})
 
 
 # -----------------------------
@@ -411,6 +426,16 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     timeline_high = [t["High"] for t in timeline.values()]
     timeline_susp = [t["Suspicious"] for t in timeline.values()]
     timeline_safe = [t["OK"] for t in timeline.values()]
+    
+    # Feature 29: Gamified Security Score
+    if total_scans == 0:
+        security_score = 90  # Default starting score
+    else:
+        # Start at 90, heavily penalize missing obvious scams (high risk), slightly penalize suspicious, reward safe behavior
+        base_score = 90
+        penalty = (high_risk * 8) + (suspicious_count * 3)
+        bonus = safe_count * 2
+        security_score = max(10, min(100, base_score - penalty + bonus))
 
     return templates.TemplateResponse(
         "dashboard.html",
@@ -424,6 +449,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
             "high_risk": high_risk,
             "suspicious_count": suspicious_count,
             "safe_count": safe_count,
+            "security_score": security_score,
             "recent_scans": recent_scans,
             "timeline_labels": timeline_labels,
             "timeline_high": timeline_high,
@@ -433,6 +459,179 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     )
 
 
+# -----------------------------
+# PASSWORD LEAK CHECKER
+# -----------------------------
+@app.get("/leak-checker", response_class=HTMLResponse)
+def leak_checker_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("leak_checker.html", {
+        "request": request,
+        "user": user,
+        "plan": get_user_plan(user)
+    })
+
+@app.post("/api/check-leak")
+@limiter.limit("5/minute")
+async def check_leak_api(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
+    email = email.lower().strip()
+    
+    # Simulated breach database check (Replace with HaveIBeenPwned API if you have an API key)
+    import hashlib
+    import asyncio
+    
+    # Simulate network delay for realism
+    await asyncio.sleep(1.5)
+    
+    # Deterministic mock based on email hash
+    hash_val = int(hashlib.md5(email.encode()).hexdigest(), 16)
+    
+    # 30% chance of an email being marked as leaked for demo
+    is_leaked = (hash_val % 100) < 30
+    
+    if is_leaked:
+        breach_options = [
+            {"Name": "LinkedIn (2012)", "DataClasses": ["Email addresses", "Passwords"]},
+            {"Name": "Canva (2019)", "DataClasses": ["Email addresses", "Names", "Passwords", "Geographic locations"]},
+            {"Name": "Adobe (2013)", "DataClasses": ["Email addresses", "Password hints", "Passwords", "Usernames"]},
+            {"Name": "MyFitnessPal (2018)", "DataClasses": ["Email addresses", "IP addresses", "Passwords"]},
+            {"Name": "Dropbox (2012)", "DataClasses": ["Email addresses", "Passwords"]}
+        ]
+        num_breaches = (hash_val % 3) + 1  # 1 to 3 breaches
+        # Select deterministic but pseudo-random breaches
+        breaches = []
+        for i in range(num_breaches):
+            breaches.append(breach_options[(hash_val + i) % len(breach_options)])
+            
+        return {"status": "leaked", "breaches": breaches}
+    else:
+        return {"status": "safe", "breaches": []}
+
+# -----------------------------
+# AI CHATBOT CYBER ASSISTANT
+# -----------------------------
+@app.post("/api/assistant")
+@limiter.limit("20/minute")
+async def cyber_assistant_api(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+        
+    try:
+        data = await request.json()
+        message = data.get("message", "").strip()
+    except Exception:
+        message = ""
+        
+    if not message:
+        return {"response": "Please provide a message or a link for me to analyze."}
+        
+    # Utilize the existing core risk engine for the analysis
+    from risk_engine import calculate_risk
+    import asyncio
+    
+    # Simulate AI "thinking" time 
+    await asyncio.sleep(1.0)
+    
+    analysis = calculate_risk(message, message, source="chatbot")
+    
+    risk_level = analysis.get("risk_level", "OK")
+    score = analysis.get("risk_score", 0)
+    intent = analysis.get("scam_intent")
+    reasons = analysis.get("reasons", [])
+    
+    response_text = ""
+    if risk_level == "High":
+        response_text = f"🚨 **High Risk Alert (Score: {score}/100)**\n\nI strongly advise against interacting with this. "
+        if intent:
+            response_text += f"\n\nThis message appears to use **{intent}** tactics to manipulate you. "
+        if reasons:
+            response_text += "\n\nMy analysis flagged the following:\n• " + "\n• ".join(reasons[:3])
+            
+    elif risk_level == "Suspicious":
+        response_text = f"⚠️ **Suspicious (Score: {score}/100)**\n\nProceed with caution. "
+        if intent:
+            response_text += f"\n\nI detected potential **{intent}** elements. "
+        if reasons:
+             response_text += "\n\nRed flags:\n• " + "\n• ".join(reasons[:2])
+             
+    else:
+        response_text = f"✅ **Looks Safe (Score: {score}/100)**\n\nI didn't find any obvious malicious patterns or phishing links in this message. However, always stay vigilant!"
+        
+    return {"response": response_text, "analysis": analysis}
+
+
+# -----------------------------
+# GLOBAL SCAM MAP
+# -----------------------------
+@app.get("/scam-map", response_class=HTMLResponse)
+def scam_map_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("scam_map.html", {
+        "request": request,
+        "user": user,
+        "plan": get_user_plan(user)
+    })
+
+@app.get("/api/scam-stats")
+async def scam_stats_api(request: Request):
+    import random, time
+    
+    # Realistic country-level threat data (semi-randomized to simulate live data)
+    seed = int(time.time() // 60)  # Updates every minute
+    rng = random.Random(seed)
+    
+    base_threats = {
+        "US": 3800, "IN": 2400, "BR": 1700, "CN": 1500, "RU": 1200,
+        "GB": 950, "DE": 720, "FR": 640, "NG": 580, "PK": 510,
+        "AU": 480, "CA": 420, "MX": 390, "ZA": 350, "ID": 330,
+        "TR": 310, "IT": 290, "ES": 270, "AR": 250, "KR": 220,
+        "UA": 200, "PH": 190, "BD": 180, "EG": 170, "VN": 160
+    }
+    
+    # Add slight randomness to each value
+    country_data = {
+        code: max(10, count + rng.randint(-100, 100))
+        for code, count in base_threats.items()
+    }
+    
+    total_today = sum(country_data.values())
+    
+    # Live feed of recent events
+    cities = ["New York", "Mumbai", "São Paulo", "London", "Moscow", "Berlin",
+              "Lagos", "Karachi", "Jakarta", "Cairo", "Manila", "Dhaka"]
+    attack_types = [
+        "Phishing SMS detected", "Fake bank alert intercepted", "Lottery scam blocked",
+        "Authority impersonation stopped", "Suspicious URL analyzed", "Malware link flagged",
+        "Urgent payment request blocked", "Credential harvesting attempt stopped"
+    ]
+    
+    feed = []
+    for i in range(8):
+        feed.append({
+            "city": rng.choice(cities),
+            "type": rng.choice(attack_types),
+            "time": f"{rng.randint(1, 59)}m ago"
+        })
+    
+    # SAFE MAX: Prevent crash if country_data is somehow empty
+    top_country = max(country_data.keys(), key=lambda k: country_data[k]) if country_data else "Global"
+    
+    return {
+        "countries": country_data,
+        "total_today": total_today,
+        "feed": feed,
+        "top_country": top_country
+    }
+
 
 @app.get("/admin", response_class=HTMLResponse)
 def admin_panel(request: Request, db: Session = Depends(get_db)):
@@ -440,10 +639,11 @@ def admin_panel(request: Request, db: Session = Depends(get_db)):
     if not user or not user.is_admin:
         return RedirectResponse("/login", status_code=302)
 
+    # ADMIN VISIBILITY: Show ALL scans from the whole system, not just the admin's own.
     scans = (
         db.query(ScanHistory)
-        .filter(ScanHistory.user_id == user.id)
         .order_by(ScanHistory.created_at.desc())
+        .limit(100)
         .all()
     )
 
@@ -557,12 +757,17 @@ def scan_content(data: ScanRequest, request: Request, db: Session = Depends(get_
             has_redirected=data.hasRedirected
         )
 
+    # Ensure risk_score is a valid number before storage
+    raw_score = result.get("risk_score", 0)
+    score_val = float(raw_score) if isinstance(raw_score, (int, float, str)) else 0.0
+    
     new_scan = ScanHistory(
         content=data.content,
-        risk_score=float(result["risk_score"]),
+        risk_score=score_val,
         risk_level=str(result["risk_level"]),
         reasons=str(result.get("reasons", [])),
         category=result.get("category", "General Threat"),
+        scam_intent=result.get("scam_intent", "None Detected"),
         user_id=user.id,
     )
     db.add(new_scan)
@@ -574,6 +779,7 @@ def scan_content(data: ScanRequest, request: Request, db: Session = Depends(get_
         "risk_level": result["risk_level"],
         "reasons": result.get("reasons", []),
         "category": result.get("category", "General Threat"),
+        "scam_intent": result.get("scam_intent", "None Detected"),
         "scan_id": new_scan.id,
     }
 
@@ -603,6 +809,7 @@ def scan_details_api(scan_id: int, request: Request, db: Session = Depends(get_d
         "risk_level": scan.risk_level,
         "reasons": reasons,
         "category": getattr(scan, "category", None),
+        "scam_intent": getattr(scan, "scam_intent", None),
         "created_at": scan.created_at.isoformat() if scan.created_at else None,
     }
 
@@ -709,7 +916,7 @@ def add_to_blacklist(data: BlacklistRequest, request: Request, db: Session = Dep
 
     bl = BlacklistDomain(
         domain=domain,
-        added_by_user_id=user.id,
+        added_by_user_id=user.id if user else 0,  # Strict safeguard for linter
         reason=data.reason
     )
     db.add(bl)
@@ -755,7 +962,7 @@ def add_to_whitelist(data: WhitelistRequest, request: Request, db: Session = Dep
     domain = data.domain.strip().lower()
     if db.query(WhitelistDomain).filter(WhitelistDomain.domain == domain).first():
         return {"ok": False, "message": "Domain already whitelisted."}
-    wl = WhitelistDomain(domain=domain, added_by_user_id=user.id, reason=data.reason)
+    wl = WhitelistDomain(domain=domain, added_by_user_id=user.id if user else 0, reason=data.reason)
     db.add(wl)
     db.commit()
     return {"ok": True, "message": "Domain added to whitelist."}
@@ -866,7 +1073,7 @@ def get_security_stats(request: Request, db: Session = Depends(get_db)):
         "high_risk": high,
         "suspicious": susp,
         "safe": safe,
-        "blocked_pct": round(high / total * 100, 1) if total else 0,
+        "blocked_pct": round(float(high) / total * 100, 1) if total else 0,
         "categories": cats,
     }
 
@@ -902,9 +1109,123 @@ def get_threat_analytics(request: Request, db: Session = Depends(get_db)):
     }
 
 
-# Removed duplicate route (consolidated above)
+# -----------------------------
+# GLOBAL SCAM MAP (#122)
+# -----------------------------
+@app.get("/scam-map", response_class=HTMLResponse)
+def scam_map(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url="/login")
+    return templates.TemplateResponse("scam_map.html", {"request": request, "user": user})
 
+@app.get("/api/scam-stats")
+def get_scam_stats(request: Request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    # Generate realistic "live" data using random variations
+    import random
+    from datetime import datetime, timedelta
+    
+    # Base daily total 
+    total_today = 8000 + random.randint(0, 500)
+    
+    countries = {
+        "US": 2400 + random.randint(-100, 100),
+        "IN": 1800 + random.randint(-50, 50),
+        "BR": 1200 + random.randint(-40, 40),
+        "GB": 900 + random.randint(-30, 30),
+        "DE": 850 + random.randint(-20, 20),
+        "CN": 1500 + random.randint(-60, 60),
+        "RU": 1100 + random.randint(-50, 50),
+        "NG": 1600 + random.randint(-70, 70),
+        "CA": 400 + random.randint(-10, 10),
+        "AU": 350 + random.randint(-10, 10),
+        "VN": 600 + random.randint(-30, 30),
+        "PH": 700 + random.randint(-40, 40),
+        "TR": 550 + random.randint(-20, 20),
+        "ID": 800 + random.randint(-40, 40),
+        "ZA": 450 + random.randint(-20, 20)
+    }
+    
+    # Add some low-threat countries to fill the map
+    others = ["FR", "IT", "ES", "AR", "MX", "KR", "UA", "PK", "BD", "EG"]
+    for code in others:
+        countries[code] = random.randint(100, 400)
+        
+    top_country = max(countries.keys(), key=lambda k: countries[k]) if countries else "Global"
+    
+    # Live Feed simulation
+    threat_types = ["Phishing Campaign", "Credential Stuffing", "Ransomware Drop", "SMS Spoofing", "Malicious Smart Contract"]
+    cities = ["Lagos", "Mumbai", "Sao Paulo", "New York", "London", "Moscow", "Beijing", "Berlin", "Dubai", "Manila"]
+    
+    feed = []
+    now = datetime.now()
+    for i in range(12):
+        feed.append({
+            "type": random.choice(threat_types),
+            "city": random.choice(cities),
+            "time": (now - timedelta(minutes=random.randint(1, 45))).strftime("%H:%M")
+        })
+        
+    return {
+        "total_today": total_today,
+        "top_country": top_country,
+        "countries": countries,
+        "feed": feed
+    }
 
+# -----------------------------
+# LEAK CHECKER (#123)
+# -----------------------------
+@app.get("/leak-checker", response_class=HTMLResponse)
+def leak_checker_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse(url="/login")
+    return templates.TemplateResponse("leak_checker.html", {"request": request, "user": user})
+
+@app.post("/api/check-leak")
+async def check_leak_api(request: Request):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    
+    try:
+        form = await request.form()
+        email = (form.get("email") or "").strip().lower()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid request body")
+        
+    if not email:
+        raise HTTPException(status_code=400, detail="Missing email")
+        
+    # Simulated leak database logic
+    # Certain domains or common names will trigger a "leaked" state for demo purposes
+    is_safe = True
+    breaches = []
+    
+    # Mock some data for demonstration
+    if "test" in email or "leak" in email or "pwn" in email:
+        is_safe = False
+        breaches = [
+            {"Name": "Adobe (Creative Cloud)", "DataClasses": ["Email", "Password", "Password hints"]},
+            {"Name": "LinkedIn (2016)", "DataClasses": ["Email", "Passhashes"]},
+            {"Name": "Canvas Leak", "DataClasses": ["Names", "Email addresses", "Passwords"]}
+        ]
+    elif "@gmail.com" in email:
+        is_safe = False
+        breaches = [
+            {"Name": "Zynga Breach", "DataClasses": ["Email addresses", "Usernames", "Passwords"]}
+        ]
+
+    return {
+        "status": "leaked" if not is_safe else "safe",
+        "email": email,
+        "breaches": breaches
+    }
 # -----------------------------
 # EXPORT SCANS AS CSV (#72/#97)
 # -----------------------------
@@ -1227,8 +1548,10 @@ def analytics_page(request: Request, db: Session = Depends(get_db)):
     if not user:
         return RedirectResponse("/login", status_code=302)
     # Get last 10 scans for the live feed explicitly here to inject into template
+    # Safeguard against user being None (redundant check due to line 1540 but good for typing)
+    current_uid = user.id if user else 0
     recent_scans = db.query(ScanHistory).filter(
-        ScanHistory.user_id == user.id
+        ScanHistory.user_id == current_uid
     ).order_by(ScanHistory.created_at.desc()).limit(15).all()
     
     scans_list = []

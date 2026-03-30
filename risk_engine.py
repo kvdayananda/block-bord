@@ -633,7 +633,7 @@ def detect_manipulation_language(text: str):
 # ─────────────────────────────────────────
 # MASTER RISK CALCULATOR
 # ─────────────────────────────────────────
-def calculate_risk(text: str, url_context: str = None, telemetry: dict = None, form_data: dict = None, has_redirected: bool = False):
+def calculate_risk(text: str, url_context: str = None, telemetry: dict = None, form_data: dict = None, has_redirected: bool = False, source: str = None):
     """
     Master phishing/scam detector combining:
     - Rule-based NLP signals
@@ -892,12 +892,14 @@ def calculate_risk(text: str, url_context: str = None, telemetry: dict = None, f
 
     # ── Threat category tag ──
     category = _classify_threat_category(reasons)
+    intent = _determine_scam_intent(reasons, raw)
 
     return {
         "risk_score": score,
         "risk_level": level,
         "reasons": reasons,
         "category": category,
+        "scam_intent": intent,
     }
 
 
@@ -925,3 +927,19 @@ def _classify_threat_category(reasons: list) -> str:
     if "spam" in reason_text:
         return "Spam / Scam Message"
     return "General Phishing Threat"
+
+def _determine_scam_intent(reasons: list, text: str) -> str:
+    """Analyze reasons and text to determine psychological scam intent."""
+    reason_text = " ".join(reasons).lower()
+    low = text.lower()
+    
+    if "urgency" in reason_text or "action" in reason_text or "suspended" in low or "blocked" in low or "urgent" in low or "immediately" in low:
+        return "Fear / Urgency"
+    if "lure" in reason_text or "reward" in reason_text or "prize" in reason_text or "win" in low or "free" in low or "lottery" in low:
+        return "Greed / Reward"
+    if "impersonat" in reason_text or "brand" in reason_text or "bank" in low or "police" in low or "government" in low or "support" in low:
+        return "Authority Impersonation"
+    if "curiosity" in low or "look at this" in low or "is this you" in low or "video of you" in low:
+        return "Curiosity Trap"
+        
+    return "General Deception"

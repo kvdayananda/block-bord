@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
     "name": "Block Bord AI",
-    "version": "1.0",
-    "description": "Scan messages for scams and phishing links using Block Bord AI.",
+    "version": "2.5.0",
+    "description": "Real-time AI Shield and telemetry-driven phishing protection by Block Bord AI.",
     "permissions": [
         "contextMenus",
         "storage",

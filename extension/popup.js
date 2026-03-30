@@ -188,7 +188,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultLevel.textContent = label || "Unknown";
         resultCategory.textContent = category || "";
         resultCategory.style.display = category ? "inline-block" : "none";
+        
+        // Make "Upgrade your plan" act like a button
+        if (category && category.includes("Upgrade")) {
+            resultCategory.style.cursor = "pointer";
+            resultCategory.style.transition = "all 0.2s";
+            resultCategory.onmouseover = () => { resultCategory.style.backgroundColor = "var(--border)"; };
+            resultCategory.onmouseout = () => { resultCategory.style.backgroundColor = "var(--bg-alt)"; };
+        } else {
+            resultCategory.style.cursor = "default";
+            resultCategory.onmouseover = null;
+            resultCategory.onmouseout = null;
+        }
     }
+
+    resultCategory.addEventListener('click', () => {
+        if (resultCategory.textContent.includes("Upgrade")) {
+            chrome.tabs.create({ url: `${API_URL}/pricing` });
+        }
+    });
 
     async function loadCurrentPageResult(url) {
         if (!url || !url.startsWith("http")) {

@@ -42,10 +42,15 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                         Analyzed on {{ scan.created_at.strftime('%d %b %Y, %H:%M') if scan.created_at else '-' }}
                     </p>
-                    <div style="margin-top: 12px;">
+                    <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
                         <span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.2);">
                             🛡️ Category: {{ scan.category or "General Analysis" }}
                         </span>
+                        {% if scan.scam_intent and scan.scam_intent != 'None Detected' and scan.scam_intent != 'General Deception' %}
+                        <span class="badge" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; border: 1px solid rgba(239, 68, 68, 0.2);">
+                            🧠 Psychology AI: {{ scan.scam_intent }}
+                        </span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -86,4 +91,46 @@
         {% endif %}
     </main>
 </div>
+
+<!-- Voice Alert System script -->
+{% if scan and scan.risk_level == 'High' %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Feature 3: Voice Alert System
+        function playVoiceAlert() {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance("Warning! Block Bord AI has detected a high risk threat in this message.");
+                utterance.rate = 1.0;
+                utterance.pitch = 1.1;
+                utterance.volume = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Browsers require user interaction before autoplaying audio/voice.
+        // We will trigger it on the first click anywhere on the page if not already played.
+        let hasPlayed = false;
+        document.body.addEventListener('click', function() {
+            if (!hasPlayed) {
+                playVoiceAlert();
+                hasPlayed = true;
+            }
+        }, { once: true });
+        
+        // Also add a visual button to manually trigger it next to the risk score
+        const topbar = document.querySelector('.dashboard-topbar div:nth-child(2)');
+        if (topbar) {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-outline btn-sm';
+            btn.innerHTML = '🔊 Hear Warning';
+            btn.onclick = function(e) {
+                e.stopPropagation(); // prevent body click
+                playVoiceAlert();
+                hasPlayed = true;
+            };
+            topbar.appendChild(btn);
+        }
+    });
+</script>
+{% endif %}
 {% endblock %}

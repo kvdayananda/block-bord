@@ -376,3 +376,140 @@ function escapeHtml(str) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+// ===============================
+// AI CYBER ASSISTANT WIDGET
+// ===============================
+(function initCyberAssistant() {
+    const toggleBtn = document.getElementById('ai-widget-toggle');
+    const chatWindow = document.getElementById('ai-chat-window');
+    const closeBtn = document.getElementById('ai-chat-close');
+    const sendBtn = document.getElementById('ai-chat-send');
+    const inputArea = document.getElementById('ai-chat-input');
+    const messagesDiv = document.getElementById('ai-chat-messages');
+
+    if (!toggleBtn || !chatWindow) return; // Widget not present (logged out)
+
+    let isOpen = false;
+    chatWindow.style.display = 'none';
+
+    toggleBtn.addEventListener('click', () => {
+        if (!isOpen) {
+            chatWindow.style.display = 'flex';
+            chatWindow.classList.remove('closing');
+            isOpen = true;
+            inputArea.focus();
+        } else {
+            closeChat();
+        }
+    });
+
+    closeBtn.addEventListener('click', closeChat);
+
+    function closeChat() {
+        chatWindow.classList.add('closing');
+        setTimeout(() => {
+            chatWindow.style.display = 'none';
+            chatWindow.classList.remove('closing');
+            isOpen = false;
+        }, 200);
+    }
+
+    // Send on button click or Enter key (not Shift+Enter)
+    sendBtn.addEventListener('click', sendMessage);
+    inputArea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Auto-grow textarea
+    inputArea.addEventListener('input', () => {
+        inputArea.style.height = 'auto';
+        inputArea.style.height = Math.min(inputArea.scrollHeight, 120) + 'px';
+    });
+
+
+    function addMessage(text, type) {
+        const msg = document.createElement('div');
+        msg.className = `ai-msg ${type === 'user' ? 'user-msg' : 'bot-msg'}`;
+        // Simple markdown: **bold**
+        const formatted = escapeHtml(text)
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n/g, '<br>');
+        msg.innerHTML = formatted;
+        messagesDiv.appendChild(msg);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return msg;
+    }
+
+    function addTypingIndicator() {
+        const msg = document.createElement('div');
+        msg.className = 'ai-msg bot-msg';
+        msg.id = 'typing-indicator';
+        msg.innerHTML = '<span style="opacity:0.6;font-style:italic;display:flex;gap:4px;align-items:center;"><span>Analyzing</span><span style="animation:typing-dots 1.2s infinite">...</span></span>';
+        messagesDiv.appendChild(msg);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function removeTypingIndicator() {
+        const el = document.getElementById('typing-indicator');
+        if (el) el.remove();
+    }
+
+    async function sendMessage() {
+        const text = inputArea.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        inputArea.value = '';
+        inputArea.style.height = 'auto';
+        sendBtn.disabled = true;
+
+        addTypingIndicator();
+
+        try {
+            const res = await fetch('/api/assistant', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                },
+                credentials: 'include',
+                body: JSON.stringify({ message: text })
+            });
+
+            removeTypingIndicator();
+
+            if (res.status === 401) {
+                addMessage('Please log in to use the AI Assistant.', 'bot');
+                return;
+            }
+
+            const data = await res.json();
+            addMessage(data.response || 'Sorry, I could not analyze that.', 'bot');
+
+
+        } catch (err) {
+            removeTypingIndicator();
+            addMessage('Connection error. Please try again.', 'bot');
+        } finally {
+            sendBtn.disabled = false;
+        }
+    }
+
+    // Add typing dots animation if not already present
+    if (!document.querySelector('style[data-ai-widget]')) {
+        const style = document.createElement('style');
+        style.setAttribute('data-ai-widget', '1');
+        style.textContent = `
+            @keyframes typing-dots {
+                0%, 20% { content: '.'; }
+                40% { content: '..'; }
+                60%, 100% { content: '...'; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+})();

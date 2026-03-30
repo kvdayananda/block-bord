@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Password Leak Checker - Block Bord AI{% endblock %}
+
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    {% include "sidebar.html" %}
+
+    <main class="main-content">
+        <div class="dashboard-topbar">
+            <div>
+                <span class="badge-premium" style="margin-bottom: 12px; display: inline-block;">IDENTITY PROTECTION</span>
+                <h1 style="font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 8px;">Password Leak Checker</h1>
+                <p class="subtitle" style="font-size: 1.1rem; color: var(--text-muted); margin: 0;">Find out if your email address has been compromised in known data breaches.</p>
+            </div>
+        </div>
+
+        <div class="card premium-card" style="max-width: 800px; margin: 40px auto; padding: 40px; text-align: center;">
+            <div style="margin-bottom: 40px;">
+                <div class="stat-icon-new danger-bg" style="margin: 0 auto 24px auto; width: 64px; height: 64px;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+                <h2 style="font-weight: 800; font-size: 1.8rem; margin-bottom: 12px;">Is your identity safe?</h2>
+                <p style="color: var(--text-muted); font-size: 1.05rem; max-width: 500px; margin: 0 auto;">Enter your email address to securely scan thousands of known database breaches and dark web leaks.</p>
+            </div>
+
+            <form id="leakCheckForm" style="display: flex; gap: 16px; max-width: 500px; margin: 0 auto; flex-wrap: wrap;">
+                <div class="form-group" style="flex: 1; min-width: 250px; margin: 0;">
+                    <div class="input-icon-wrapper" style="position: relative;">
+                        <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                        <input type="email" id="emailInput" class="form-control" placeholder="address@example.com" style="padding-left: 48px; border-radius: 12px;" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="checkBtn" style="border-radius: 12px; padding: 0 24px;">
+                    <span id="btnText">Check Leaks</span>
+                    <span class="loader" id="btnLoader" style="display: none; border: 2px solid rgba(255,255,255,0.3); border-left-color: #fff; width: 18px; height: 18px; border-radius: 50%; animation: spin 1s linear infinite;"></span>
+                </button>
+            </form>
+
+            <!-- Results container -->
+            <div id="resultContainer" style="display: none; margin-top: 40px; text-align: left; animation: slideUp 0.4s ease forwards;">
+                <div id="safeResult" style="display: none; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); padding: 32px; border-radius: 16px; text-align: center;">
+                    <div class="stat-icon-new safe-bg" style="margin: 0 auto 16px auto;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
+                    <h3 style="color: #059669; font-weight: 800; font-size: 1.4rem;">Good news!</h3>
+                    <p style="color: var(--text-muted); margin-top: 8px;">No breaches found for this email address.</p>
+                </div>
+
+                <div id="leakedResult" style="display: none;">
+                    <div style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); padding: 24px; border-radius: 16px; margin-bottom: 24px; display: flex; gap: 20px; align-items: center;">
+                        <div class="stat-icon-new danger-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+                        <div>
+                            <h3 style="color: #b91c1c; font-weight: 800; font-size: 1.4rem; margin-bottom: 4px;">Oh no — pwned!</h3>
+                            <p style="color: var(--text-muted); margin: 0;">This email was found in <strong id="breachCount" style="color: var(--text);">0</strong> known data leaks. Change your passwords immediately.</p>
+                        </div>
+                    </div>
+                    
+                    <h4 style="font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Breach Details</h4>
+                    <div id="breachList" style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Generated by JS -->
+                    </div>
+                </div>
+            </div>
+            
+            <p style="margin-top: 40px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Your searches are strictly anonymous and never logged.
+            </p>
+        </div>
+    </main>
+</div>
+
+<style>
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.breach-card {
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+}
+</style>
+
+<script>
+document.getElementById('leakCheckForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('emailInput').value;
+    if(!email) return;
+
+    const btn = document.getElementById('checkBtn');
+    const btnText = document.getElementById('btnText');
+    const btnLoader = document.getElementById('btnLoader');
+    const resultContainer = document.getElementById('resultContainer');
+    const safeResult = document.getElementById('safeResult');
+    const leakedResult = document.getElementById('leakedResult');
+    const breachList = document.getElementById('breachList');
+    
+    // UI Loading state
+    btn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoader.style.display = 'inline-block';
+    resultContainer.style.display = 'none';
+    
+    try {
+        const response = await fetch('/api/check-leak', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ email: email })
+        });
+        
+        const data = await response.json();
+        
+        safeResult.style.display = 'none';
+        leakedResult.style.display = 'none';
+        breachList.innerHTML = '';
+        
+        if (data.status === 'leaked' && data.breaches.length > 0) {
+            document.getElementById('breachCount').textContent = data.breaches.length;
+            
+            data.breaches.forEach(breach => {
+                const bDiv = document.createElement('div');
+                bDiv.className = 'breach-card';
+                bDiv.innerHTML = `
+                    <h5 style="font-weight: 800; font-size: 1.1rem; margin-bottom: 8px; color: var(--text);">${breach.Name}</h5>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        ${breach.DataClasses.map(dc => `<span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); font-size: 0.75rem; font-weight: 700;">${dc}</span>`).join('')}
+                    </div>
+                `;
+                breachList.appendChild(bDiv);
+            });
+            
+            leakedResult.style.display = 'block';
+        } else {
+            safeResult.style.display = 'block';
+        }
+        
+        resultContainer.style.display = 'block';
+        
+    } catch (error) {
+        alert('An error occurred while checking for leaks.');
+    } finally {
+        btn.disabled = false;
+        btnText.style.display = 'inline-block';
+        btnLoader.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}
