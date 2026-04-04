@@ -10,9 +10,29 @@
             <p class="subtitle">Complete your upgrade to <strong>{{ plan|title }}</strong></p>
         </div>
 
-        {% if error %}
-        <div class="error-box" style="margin-bottom: 24px;">{{ error }}</div>
+        {% if test_mode %}
+        <div class="test-notice glass" style="margin-bottom: 24px; padding: 16px; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; background: rgba(99, 102, 241, 0.05);">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                <span class="pulse-dot" style="background: var(--primary);"></span>
+                <strong style="color: var(--primary);">Developer Test Mode Active</strong>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
+                Razorpay keys are not configured or <code>PAYMENT_TEST_MODE</code> is enabled in <code>.env</code>. 
+                You can simulate a successful transaction below.
+            </p>
+            <a href="/upgrade-beta/{{ plan }}" class="btn btn-primary btn-full" style="background: var(--primary); border: none;">
+                Simulate Successful Upgrade
+            </a>
+        </div>
+        <a class="btn btn-outline btn-full" href="/pricing">Cancel & Back</a>
+        
+        {% elif error %}
+        <div class="error-box" style="margin-bottom: 24px; padding: 16px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; color: #ef4444;">
+            <strong style="display: block; margin-bottom: 4px;">Configuration Needed</strong>
+            {{ error }}
+        </div>
         <a class="btn btn-outline btn-full" href="/pricing">Back to Pricing</a>
+        
         {% else %}
         
         <div class="plan-summary">

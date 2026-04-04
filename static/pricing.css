@@ -1,5 +1,5 @@
 /* =========================================================
-   Block Bord — Premium SaaS Pricing Page (Sharp / Zero Radius)
+   Block Bord AI — Premium SaaS Pricing Page (Redesigned)
    ========================================================= */
 
 :root {
@@ -10,19 +10,47 @@
   --p-card2: var(--surface2);
   --p-border: var(--border);
   --p-primary: var(--primary);
-  --p-primary2: var(--primary2);
-  --p-shadow: var(--shadow2);
-  --p-radius: var(--radius);
+  --p-primary2: #8b5cf6;
+  --p-shadow: rgba(99, 102, 241, 0.15);
+  --p-radius: 24px;
 }
 
 .bb-price-page {
-  padding: 100px 0;
-  background: #ffffff;
+  padding: 80px 0 100px;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* Atmospheric Background Gradients */
+.bb-price-page::before {
+  content: '';
+  position: absolute;
+  top: -20%; left: -10%; 
+  width: 50vw; height: 50vw;
+  background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.bb-price-page::after {
+  content: '';
+  position: absolute;
+  bottom: -20%; right: -10%; 
+  width: 60vw; height: 60vw;
+  background: radial-gradient(circle, rgba(139,92,246,0.06) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
 }
 
 .bb-price-wrap {
   width: min(1200px, calc(100% - 40px));
   margin: 0 auto;
+  position: relative;
+  z-index: 2;
 }
 
 .bb-price-head {
@@ -31,13 +59,21 @@
 }
 
 .bb-price-head h1 {
-  font-size: 3rem;
+  font-size: 3.5rem;
+  letter-spacing: -1px;
   margin-bottom: 16px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .bb-price-head p {
-  font-size: 1.125rem;
+  font-size: 1.15rem;
   color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 /* ---------- Plan Grid ---------- */
@@ -45,56 +81,72 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
-  margin-bottom: 48px;
+  margin-bottom: 60px;
+  align-items: flex-start;
 }
 
 .bb-plan {
   padding: 40px 32px;
-  background: #ffffff;
-  border: 1px solid rgba(15, 23, 42, 0.05);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: var(--p-radius);
   display: flex;
   flex-direction: column;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  min-height: 480px;
 }
 
 .bb-plan:hover {
   transform: translateY(-8px);
-  border-color: var(--primary);
-  box-shadow: var(--shadow-lg);
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
 }
 
 .bb-plan-top {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .bb-plan h3 {
-  font-size: 1.5rem;
-  margin-bottom: 12px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+  letter-spacing: -0.5px;
 }
 
 .bb-plan-price {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
+  margin-top: 12px;
 }
 
 .bb-plan-price strong {
-  font-size: 2.5rem;
+  font-size: 3rem;
+  font-weight: 800;
   color: var(--text);
+  background: linear-gradient(135deg, #0f172a, #334155);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1;
 }
 
 .bb-plan-price span {
   color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 500;
 }
 
 .bb-plan ul {
   list-style: none;
   padding: 0;
-  margin-bottom: 40px;
+  margin: 20px 0 40px 0;
   flex: 1;
 }
 
@@ -102,14 +154,23 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
   font-size: 0.95rem;
-  color: var(--text-muted);
+  color: #475569;
+  font-weight: 500;
 }
 
 .bb-plan li::before {
   content: '✓';
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: rgba(99, 102, 241, 0.1);
   color: var(--primary);
+  border-radius: 50%;
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
@@ -117,43 +178,89 @@
   margin-top: auto;
 }
 
-.bb-btn-full {
-  width: 100%;
+.bb-action .btn {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 12px 24px;
 }
 
-/* Featured Plan */
+
+/* Featured Plan (Pro Plus) */
 .bb-plan-pro {
   border: 2px solid var(--primary);
-  background: rgba(99, 102, 241, 0.02);
+  background: #ffffff;
+  box-shadow: 0 15px 35px -5px var(--p-shadow), 0 0 0 1px rgba(255, 255, 255, 1) inset;
+  z-index: 15;
+  padding: 48px 32px;
+  margin: -8px 0;
+}
+
+.bb-plan-pro:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.25), 0 0 0 2px rgba(99, 102, 241, 0.1) inset;
+}
+
+.bb-plan-pro::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 6px;
+  background: linear-gradient(90deg, var(--primary), var(--p-primary2));
+  z-index: -1;
 }
 
 .bb-plan-pro::after {
   content: 'BEST VALUE';
   position: absolute;
-  top: 12px;
-  right: -30px;
-  background: var(--primary);
-  color: white;
-  padding: 4px 40px;
+  top: 24px;
+  right: -32px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--p-primary2) 100%);
+  color: #ffffff;
+  padding: 6px 40px;
   font-size: 0.7rem;
   font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
   transform: rotate(45deg);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
+.bb-plan-pro .bb-plan-price strong {
+  background: linear-gradient(135deg, var(--primary), var(--p-primary2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Safe/Note Area */
 .bb-note {
-  text-align: center;
-  padding: 24px;
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
+  text-align: left;
+  padding: 24px 32px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(15, 23, 42, 0.05);
   border-radius: 16px;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   color: var(--text-muted);
   max-width: 800px;
   margin: 0 auto;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+@media (max-width: 1024px) {
+  .bb-plan-pro {
+    margin: 0;
+    padding: 40px 32px;
+  }
 }
 
 @media (max-width: 768px) {
   .bb-price-grid4 {
     grid-template-columns: 1fr;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .bb-price-head h1 {
+    font-size: 2.5rem;
   }
 }

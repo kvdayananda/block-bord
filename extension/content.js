@@ -287,7 +287,10 @@ function reportCurrentSite() {
     if (description !== null) { 
         fetch(`${BB_REPORT_URL}/report`, {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
+            headers: {
+                'Content-Type': 'application/json',
+                'X-BlockBord-Source': 'extension'
+            },
             credentials: 'include',
             body: JSON.stringify({ url: currentURL, description: description || "" })
         }).then(r => r.json()).then(data => {

@@ -95,7 +95,7 @@
 
         <div class="dashboard-main-grid">
             <!-- ===== SCAN SECTION (Unified Console Redesign) ===== -->
-            <div class="scan-console-wrapper" style="height: 420px;">
+            <div class="scan-console-wrapper">
                 <div class="scan-console-header">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span class="scan-dot active-dot"></span>
@@ -129,7 +129,7 @@
             <!-- ===== CARDS COLUMN ===== -->
             <div style="display: flex; flex-direction: column; gap: 20px;">
                 <!-- Card 1: Edge Protection Activation -->
-                <div class="card premium-card" style="height: 200px; flex-shrink: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.02)); border: 1px solid var(--primary-light);">
+                <div class="card premium-card" style="min-height: 200px; flex-shrink: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.02)); border: 1px solid var(--primary-light);">
                     <div class="card-header-premium" style="margin-bottom: 12px;">
                         <div class="card-title-group">
                             <div class="card-icon-round" style="background: var(--primary-grad); color: white; width: 32px; height: 32px;"><svg width="16" height="16"
@@ -145,14 +145,14 @@
                 </div>
 
                 <!-- Card 2: Risk Distribution (Restored) -->
-                <div class="card premium-card" style="flex: 1; min-height: 200px;">
+                <div class="card premium-card" style="flex: 1; min-height: 220px;">
                     <div class="card-header-premium" style="margin-bottom: 15px;">
                         <div class="card-title-group">
                             <div class="card-icon-round" style="color: var(--primary); width: 32px; height: 32px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l4.5 4.5"></path></svg></div>
                             <h3 style="font-size: 0.95rem;">Risk Profile</h3>
                         </div>
                     </div>
-                    <div style="height: 120px; width: 100%; position: relative;">
+                    <div class="dashboard-chart-inner">
                         <canvas id="riskChart"></canvas>
                     </div>
                 </div>
@@ -170,7 +170,7 @@
                     <h3>Analysis Timeline</h3>
                 </div>
             </div>
-            <div class="timeline-container-new" style="height: 260px; width: 100%; position: relative; margin-top: 16px;">
+            <div class="timeline-container-new" style="width: 100%; position: relative; margin-top: 16px;">
                 <canvas id="timelineChart"></canvas>
             </div>
         </div>

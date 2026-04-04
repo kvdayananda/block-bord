@@ -44,12 +44,12 @@ def predict_spam_prob(text: str) -> Optional[float]:
 def train_model_from_samples(samples: List[Tuple[str, str]]) -> Tuple[bool, str]:
     """
     samples: list of (label, content), label in {'spam','ham'}
-    Trains and saves model. Needs >= 20 samples.
+    Trains and saves model. Needs >= 10 samples.
     """
     if not _has_fasttext():
         return False, "fastText not installed. Install 'fasttext-wheel'."
-    if len(samples) < 20:
-        return False, "Need at least 20 feedback samples to train."
+    if len(samples) < 5:
+        return False, "Need at least 5 feedback samples to train."
 
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
 

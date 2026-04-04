@@ -2,6 +2,7 @@
     "manifest_version": 3,
     "name": "Block Bord AI",
     "version": "2.5.0",
+    "author": "Block Bord AI Team",
     "description": "Real-time AI Shield and telemetry-driven phishing protection by Block Bord AI.",
     "permissions": [
         "contextMenus",
