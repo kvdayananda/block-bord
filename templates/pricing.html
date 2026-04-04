@@ -3,6 +3,8 @@
 {% block title %}Pricing - Block Bord AI{% endblock %}
 
 {% block extra_head %}
+<!-- Typography & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/static/pricing.css">
 {% endblock %}
 
@@ -10,31 +12,32 @@
 <section class="bb-price-page">
   <div class="bb-price-wrap">
     <div class="bb-price-head">
-      <h1>Simple, Transparent Pricing</h1>
+      <span class="footer-version-tag" style="margin: 0 auto 16px; display: inline-block;">TIERS_&_ACCESS</span>
+      <h1>Elite Protection Tiers</h1>
       <p>
         Currently on the <strong style="color: var(--primary);">{{ plan|upper }}</strong> plan.
-        Select a plan below to unlock advanced protection.
+        Upgrade your node capacity below.
       </p>
     </div>
 
     <div class="bb-price-grid4">
 
       <!-- FREE -->
-      <div class="bb-plan {% if plan == 'free' %}glass{% endif %}">
+      <div class="bb-plan {% if plan == 'free' %}active-border{% endif %}">
         <div class="bb-plan-top">
-          <h3>Community</h3>
+          <h3>Community Node</h3>
           <div class="bb-plan-price">
             <strong>Free</strong>
           </div>
         </div>
         <ul>
           <li>10 scans per day</li>
-          <li>Basic threat detection</li>
-          <li>Community support</li>
+          <li>Basic heuristics</li>
+          <li>Standard Support</li>
         </ul>
         <div class="bb-action">
           {% if plan == "free" %}
-          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          <button class="btn btn-secondary btn-full" disabled style="opacity: 0.5;">Active Tier</button>
           {% else %}
           <a class="btn btn-secondary btn-full" href="/app">Dashboard</a>
           {% endif %}
@@ -42,24 +45,24 @@
       </div>
 
       <!-- STARTER -->
-      <div class="bb-plan {% if plan == 'starter' %}glass{% endif %}">
+      <div class="bb-plan {% if plan == 'starter' %}active-border{% endif %}">
         <div class="bb-plan-top">
-          <h3>Starter</h3>
+          <h3>Sentry Node</h3>
           <div class="bb-plan-price">
             <strong>₹99</strong>
-            <span>/ month</span>
+            <span>/month</span>
           </div>
         </div>
         <ul>
           <li>50 scans per day</li>
-          <li>Better scan analytics</li>
-          <li>Priority threat updates</li>
+          <li>Enhanced Analytics</li>
+          <li>Priority Telemetry</li>
         </ul>
         <div class="bb-action">
           {% if plan == "starter" %}
-          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          <button class="btn btn-secondary btn-full" disabled style="opacity: 0.5;">Active Tier</button>
           {% else %}
-          <a class="btn btn-secondary btn-full" href="/checkout/starter">Upgrade</a>
+          <a class="btn btn-secondary btn-full" href="/checkout/starter">Initialize Tier</a>
           {% endif %}
         </div>
       </div>
@@ -67,43 +70,44 @@
       <!-- PRO -->
       <div class="bb-plan bb-plan-pro">
         <div class="bb-plan-top">
-          <h3>Pro Plus</h3>
+          <h3>Intelligence Core</h3>
           <div class="bb-plan-price">
             <strong>₹199</strong>
-            <span>/ month</span>
+            <span>/month</span>
           </div>
         </div>
         <ul>
-          <li>Unlimited scans</li>
-          <li>Auto-Guard protection</li>
-          <li>Deep link analysis</li>
+          <li>Unlimited Neural Scans</li>
+          <li>Auto-Guard Real-time</li>
+          <li>Deep Link Intelligence</li>
+          <li>24/7 Priority Ops</li>
         </ul>
         <div class="bb-action">
           {% if plan == "pro" %}
-          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          <button class="btn btn-primary btn-full" disabled style="box-shadow: none;">Active Protocol</button>
           {% else %}
-          <a class="btn btn-primary btn-full" href="/checkout/pro">Get Pro Now</a>
-{% endif %}
+          <a class="btn btn-primary btn-full" href="/checkout/pro">ACTIVATE_PRO</a>
+          {% endif %}
         </div>
       </div>
 
       <!-- BUSINESS -->
-      <div class="bb-plan {% if plan == 'business' %}glass{% endif %}">
+      <div class="bb-plan {% if plan == 'business' %}active-border{% endif %}">
         <div class="bb-plan-top">
-          <h3>Team</h3>
+          <h3>Command Node</h3>
           <div class="bb-plan-price">
             <strong>₹499</strong>
-            <span>/ month</span>
+            <span>/month</span>
           </div>
         </div>
         <ul>
-          <li>Unlimited scans</li>
-          <li>Multi-user dashboard</li>
-          <li>API access (Beta)</li>
+          <li>Enterprise Capacity</li>
+          <li>Multi-Agent Dashboard</li>
+          <li>API Intelligence Access</li>
         </ul>
         <div class="bb-action">
           {% if plan == "business" %}
-          <button class="btn btn-primary btn-full" disabled>Active Plan</button>
+          <button class="btn btn-secondary btn-full" disabled style="opacity: 0.5;">Active Tier</button>
           {% else %}
           <a class="btn btn-secondary btn-full" href="/checkout/business">Contact Sales</a>
           {% endif %}
@@ -112,9 +116,10 @@
 
     </div>
 
-    <div class="bb-note glass" style="display: flex; align-items: center; gap: 10px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-      All payments are securely processed via Razorpay. Your plan will be updated instantly upon successful transaction.
+    <div class="bb-note">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      Secure cryptographic processing via Razorpay. Node upgrades are instantaneous. 
+      <span style="margin-left: auto; font-family: var(--font-mono); font-size: 0.7rem; opacity: 0.5;">TX_ENCRYPTED_AES256</span>
     </div>
 
   </div>

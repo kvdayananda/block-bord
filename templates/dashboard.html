@@ -5,35 +5,46 @@
 {% block navbar %}{% endblock %}
 
 {% block extra_head %}
+<!-- Typography & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
+<div class="dashboard-container" style="background: var(--bg);">
     {% include "sidebar.html" %}
 
     <main class="main-content dashboard-main">
         <!-- ===== TOPBAR ===== -->
-        <div class="dashboard-topbar" style="margin-bottom: 32px;">
-            <div>
-                <span class="badge-premium" style="margin-bottom: 12px; display: inline-block;">OVERVIEW</span>
-                <h1 style="font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 8px;">Welcome
-                    back, {{ user.username }}</h1>
-                <p class="subtitle" style="font-size: 1.1rem; color: var(--text-muted); margin: 0;">Monitor your digital
-                    footprint and identify threats in real-time.</p>
+        <div class="dashboard-topbar" style="margin-bottom: 40px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <span class="footer-version-tag" style="margin: 0 0 12px 0;">SYSTEM_ONLINE</span>
+                    <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 4px; color: var(--text);">
+                        Intelligence Console
+                    </h1>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin: 0;">
+                        Welcome back, <span style="color: var(--primary); font-weight: 700;">{{ user.username }}</span>. System telemetry is nominal.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <div class="bb-card" style="padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-radius: 12px;">
+                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--status-safe); box-shadow: 0 0 10px var(--status-safe);"></div>
+                        <span style="font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; color: var(--text-dim);">EDGE_SHIELD_ACTIVE</span>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- ===== STATS GRID (Premium Redesign) ===== -->
+        <!-- ===== STATS GRID ===== -->
         <div class="stats-grid-premium">
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new primary-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
-                            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                        </svg></div>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span class="stat-label-new"> Total Scans</span>
+                    <div class="stat-icon-new primary-bg">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label-new">Analyses</span>
                         <h2 class="stat-value-new">{{ total_scans or 0 }}</h2>
                     </div>
                 </div>
@@ -41,136 +52,106 @@
 
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new danger-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
-                            <path
-                                d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        </svg></div>
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span class="stat-label-new"> High Risk</span>
-                        <h2 class="stat-value-new danger-text">{{ high_risk or 0 }}</h2>
+                    <div class="stat-icon-new danger-bg">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label-new">Threats Blocking</span>
+                        <h2 class="stat-value-new" style="color: var(--status-danger);">{{ high_risk or 0 }}</h2>
                     </div>
                 </div>
             </div>
 
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new warn-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
-                            <circle cx="12" cy="12" r="10" />
-                            <line x1="12" y1="8" x2="12" y2="12" />
-                            <line x1="12" y1="16" x2="12.01" y2="16" />
-                        </svg></div>
-                    <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                        <span class="stat-label-new"> Suspicious</span>
-                        <div style="display: flex; align-items: baseline; gap: 12px;">
-                            <h2 class="stat-value-new warn-text">{{ suspicious_count or 0 }}</h2>
-                            <span class="stat-trend"
-                                style="background: rgba(245, 158, 11, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; color: #d97706; font-weight: 800;">Stable</span>
-                        </div>
+                    <div class="stat-icon-new warn-bg">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label-new">Suspicious</span>
+                        <h2 class="stat-value-new" style="color: var(--status-warning);">{{ suspicious_count or 0 }}</h2>
                     </div>
                 </div>
             </div>
 
             <div class="stat-card-premium">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new safe-bg"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.5">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        </svg></div>
-                    <div style="display: flex; flex-direction: column; gap: 4px; flex: 1;">
-                        <span class="stat-label-new"> Cyber Shield Score</span>
-                        <div style="display: flex; align-items: baseline; gap: 12px;">
-                            <h2 class="stat-value-new" style="color: var(--score-color);">
-                                {{ security_score }}/100</h2>
-                            <span class="stat-trend"
-                                style="background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; color: var(--primary); font-weight: 800;">{%
-                                if security_score >= 80 %}Excellent{% elif security_score >= 50 %}Fair{% else %}At
-                                Risk{% endif %}</span>
-                        </div>
+                    <div class="stat-icon-new safe-bg">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    </div>
+                    <div>
+                        <span class="stat-label-new">Security Score</span>
+                        <h2 class="stat-value-new" style="color: var(--score-color);">{{ security_score }}</h2>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="dashboard-main-grid">
-            <!-- ===== SCAN SECTION (Unified Console Redesign) ===== -->
+            <!-- ===== SCAN CONSOLE ===== -->
             <div class="scan-console-wrapper">
                 <div class="scan-console-header">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span class="scan-dot active-dot"></span>
-                        <h3
-                            style="font-size: 1.05rem; font-weight: 750; color: #0f172a; margin: 0; letter-spacing: -0.01em; text-transform: uppercase;">
-                            Agentic Threat Analyzer</h3>
+                        <h3 style="font-size: 0.85rem; font-weight: 850; color: var(--text); margin: 0; letter-spacing: 0.05em; text-transform: uppercase;">
+                            Threat Analyzer v4.0
+                        </h3>
                     </div>
+                    <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim);">CORE_SANDBOX_READY</div>
                 </div>
 
-                <textarea id="content" class="console-textarea" style="min-height: 240px;"
-                    placeholder="Enter a URL, smart contract address, or paste raw email headers to initiate deep analysis..."></textarea>
+                <textarea id="content" class="console-textarea" style="min-height: 280px; font-family: var(--font-mono);"
+                    placeholder="Enter URL, Documentation, or Raw Data for deep neural analysis..."></textarea>
 
                 <div class="scan-console-footer">
                     <div class="usage-pill">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                        </svg>
-                        <span style="font-weight: 800;">{{ plan_limit - today_count if plan_limit != '∞' else 'Unlimited' }}</span> Scans Remaining
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        <span style="font-weight: 800;">{{ plan_limit - today_count if plan_limit != '∞' else '∞' }}</span> Scans Left
                     </div>
-                    <button id="scanBtn" class="btn-scan-action" onclick="scanContent()">
-                        <span>Initiate Scan</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <line x1="22" y1="2" x2="11" y2="13"></line>
-                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                        </svg>
+                    <button id="scanBtn" class="btn btn-primary" onclick="scanContent()" style="padding: 12px 32px; border-radius: 12px;">
+                        <span>Initiate Analysis</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                     </button>
                 </div>
                 <div id="result" style="padding: 0 4px; margin-top: 16px;"></div>
             </div>
 
-            <!-- ===== CARDS COLUMN ===== -->
+            <!-- ===== SECONDARY COLUMN ===== -->
             <div style="display: flex; flex-direction: column; gap: 20px;">
-                <!-- Card 1: Edge Protection Activation -->
-                <div class="card premium-card" style="min-height: 200px; flex-shrink: 0; background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(168, 85, 247, 0.02)); border: 1px solid var(--primary-light);">
-                    <div class="card-header-premium" style="margin-bottom: 12px;">
-                        <div class="card-title-group">
-                            <div class="card-icon-round" style="background: var(--primary-grad); color: white; width: 32px; height: 32px;"><svg width="16" height="16"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                                </svg></div>
-                            <h3 style="font-size: 0.95rem;">Edge Shield</h3>
-                        </div>
-                        <span class="badge-premium" style="padding: 2px 8px; font-size: 0.7rem;">Active</span>
+                <!-- Risk Distribution -->
+                <div class="bb-card" style="flex: 1; min-height: 300px; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
+                        <h3 style="font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Risk Distribution</h3>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary);"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l4.5 4.5"></path></svg>
                     </div>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px;">Real-time URL heuristics and telemetry Audit.</p>
-                    <a href="/extension-setup" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; width: 100%;">Setup Extension</a>
-                </div>
-
-                <!-- Card 2: Risk Distribution (Restored) -->
-                <div class="card premium-card" style="flex: 1; min-height: 220px;">
-                    <div class="card-header-premium" style="margin-bottom: 15px;">
-                        <div class="card-title-group">
-                            <div class="card-icon-round" style="color: var(--primary); width: 32px; height: 32px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l4.5 4.5"></path></svg></div>
-                            <h3 style="font-size: 0.95rem;">Risk Profile</h3>
-                        </div>
-                    </div>
-                    <div class="dashboard-chart-inner">
+                    <div style="flex: 1; position: relative;">
                         <canvas id="riskChart"></canvas>
                     </div>
+                </div>
+
+                <!-- Edge Shield Status -->
+                <div class="bb-card" style="padding: 24px; background: var(--primary-grad); border: none;">
+                    <div style="display: flex; gap: 16px; align-items: center; color: white;">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 1rem; font-weight: 850;">Edge Shield</h4>
+                            <p style="margin: 4px 0 0; opacity: 0.8; font-size: 0.85rem;">Real-time URL protection is active.</p>
+                        </div>
+                    </div>
+                    <a href="/extension-setup" class="btn" style="width:100%; margin-top: 16px; background: white; color: var(--primary); font-weight: 800;">Configure Nodes</a>
                 </div>
             </div>
         </div>
 
         <!-- Full-Width Timeline -->
-        <div class="card premium-card" style="margin-top: 32px;">
-            <div class="card-header-premium">
-                <div class="card-title-group">
-                    <div class="card-icon-round" style="color: var(--accent);"><svg width="20" height="20"
-                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                        </svg></div>
-                    <h3>Analysis Timeline</h3>
-                </div>
+        <div class="bb-card" style="margin-top: 32px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 32px;">
+                <h3 style="font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Threat Intelligence Timeline</h3>
+                <div class="usage-pill" style="font-size: 0.7rem; font-weight: 800;">LIVE_FEED</div>
             </div>
-            <div class="timeline-container-new" style="width: 100%; position: relative; margin-top: 16px;">
+            <div style="height: 300px; width: 100%;">
                 <canvas id="timelineChart"></canvas>
             </div>
         </div>
@@ -181,19 +162,17 @@
 
 {% block extra_scripts %}
 <style>
-    /* Resolve linter complaints by using local CSS variable for dynamic score color */
     :root {
-        --score-color: {% if security_score >= 80 %}#10b981{% elif security_score >= 50 %}#f59e0b{% else %}#ef4444{% endif %};
+        --score-color: {% if security_score >= 80 %}var(--status-safe){% elif security_score >= 50 %}var(--status-warning){% else %}var(--status-danger){% endif %};
     }
 </style>
 <script>
-    // Robust Charts Initialization
     document.addEventListener('DOMContentLoaded', () => {
-        // 1. Risk Doughnut
-        const countSafe = Number('{{ safe_count or 0 }}');
-        const countSusp = Number('{{ suspicious_count or 0 }}');
-        const countHigh = Number('{{ high_risk or 0 }}');
-        
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const textColor = isDark ? '#94a3b8' : '#64748b';
+        const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+
+        // 1. Risk Chart
         const riskCtx = document.getElementById('riskChart');
         if (riskCtx) {
             new Chart(riskCtx, {
@@ -201,25 +180,22 @@
                 data: {
                     labels: ['Safe', 'Suspicious', 'Malicious'],
                     datasets: [{
-                        data: [countSafe, countSusp, countHigh],
+                        data: [{{ safe_count or 0 }}, {{ suspicious_count or 0 }}, {{ high_risk or 0 }}],
                         backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff',
-                        hoverOffset: 4
+                        borderWidth: 0,
+                        hoverOffset: 10
                     }]
                 },
                 options: {
-                    cutout: '75%',
+                    cutout: '80%',
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    }
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        // 2. Timeline Line Chart
+        // 2. Timeline Chart
         const timelineCtx = document.getElementById('timelineChart');
         if (timelineCtx) {
             new Chart(timelineCtx, {
@@ -228,31 +204,22 @@
                     labels: {{ timeline_labels | tojson | safe }},
                     datasets: [
                         {
-                            label: 'High Risk',
+                            label: 'Risk Signals',
                             data: {{ timeline_high | tojson | safe }},
                             borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.05)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
                             fill: true,
                             tension: 0.4,
-                            pointRadius: 3
+                            pointRadius: 0
                         },
                         {
-                            label: 'Suspicious',
-                            data: {{ timeline_susp | tojson | safe }},
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.05)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 3
-                        },
-                        {
-                            label: 'Safe',
+                            label: 'Safe Signals',
                             data: {{ timeline_safe | tojson | safe }},
                             borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
                             fill: true,
                             tension: 0.4,
-                            pointRadius: 3
+                            pointRadius: 0
                         }
                     ]
                 },
@@ -260,11 +227,18 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { 
-                        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, padding: 20 } } 
+                        legend: { display: false } 
                     },
                     scales: {
-                        y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.03)', drawBorder: false } },
-                        x: { grid: { display: false } }
+                        y: { 
+                            beginAtZero: true, 
+                            grid: { color: gridColor },
+                            ticks: { color: textColor, font: { size: 10 } }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: textColor, font: { size: 10 } }
+                        }
                     }
                 }
             });

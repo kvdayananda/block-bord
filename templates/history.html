@@ -4,20 +4,33 @@
 
 {% block navbar %}{% endblock %}
 
+{% block extra_head %}
+<!-- Typography & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<div class="dashboard-container">
+<div class="dashboard-container" style="background: var(--bg);">
     {% include "sidebar.html" %}
 
-    <main class="main-content">
-        <div class="dashboard-topbar">
-            <div>
-                <span class="badge-premium" style="margin-bottom: 12px; display: inline-block;">RECORDS</span>
-                <h1 style="font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em;">Scan History</h1>
-                <p class="subtitle" style="font-size: 1.1rem; color: var(--text-muted);">Review all your past analyses and identified threats.</p>
+    <main class="main-content dashboard-main">
+        <!-- ===== TOPBAR ===== -->
+        <div class="dashboard-topbar" style="margin-bottom: 40px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div>
+                    <span class="footer-version-tag" style="margin: 0 0 12px 0;">ARCHIVE_RECORDS</span>
+                    <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 4px; color: var(--text);">
+                        Scan Intelligence
+                    </h1>
+                    <p style="font-size: 1rem; color: var(--text-muted); margin: 0;">
+                        Review historical telemetry and identified threat patterns.
+                    </p>
+                </div>
+                <div class="usage-pill" style="font-family: var(--font-mono); font-size: 0.75rem;">TOTAL_RECORDS: {{ scans|length }}</div>
             </div>
         </div>
 
-        <div class="card premium-card" style="margin-top: 32px;">
+        <div class="bb-card" style="margin-top: 32px; padding: 0; overflow: hidden;">
             {% if scans %}
             <div class="history-table-container">
                 <table class="premium-table">
@@ -25,10 +38,10 @@
                         <tr>
                             <th>Status</th>
                             <th>Category</th>
-                            <th>Content Snippet</th>
-                            <th>Score</th>
-                            <th>Date</th>
-                            <th>Action</th>
+                            <th>Intelligence Snippet</th>
+                            <th>Risk Score</th>
+                            <th>Timestamp</th>
+                            <th style="padding-right: 32px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -36,15 +49,19 @@
                         <tr>
                             <td>
                                 <span class="status-pill {{ 'pill-danger' if scan.risk_level == 'High' else ('pill-warn' if scan.risk_level == 'Suspicious' else 'pill-safe') }}">
-                                    {{ scan.risk_level }}
+                                    {{ scan.risk_level|upper }}
                                 </span>
                             </td>
-                            <td style="font-weight: 600;">{{ scan.category or 'General' }}</td>
-                            <td class="content-cell">{{ scan.content[:60] }}{% if scan.content|length > 60 %}...{% endif %}</td>
-                            <td style="font-weight: 700;">{{ scan.risk_score|int }}%</td>
-                            <td style="color: var(--text-muted);">{{ scan.created_at.strftime('%b %d, %H:%M') }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-ghost" onclick="viewScan({{ scan.id }})">Details</button>
+                            <td style="font-weight: 600; color: var(--text);">{{ scan.category or 'General' }}</td>
+                            <td class="content-cell" style="font-family: var(--font-mono); color: var(--text-dim); font-size: 0.8rem;">
+                                {{ scan.content[:60] }}{% if scan.content|length > 60 %}...{% endif %}
+                            </td>
+                            <td style="font-weight: 800; color: var(--text);">{{ scan.risk_score|int }}%</td>
+                            <td style="color: var(--text-muted); font-size: 0.85rem;">{{ scan.created_at.strftime('%b %d, %H:%M') }}</td>
+                            <td style="padding-right: 32px;">
+                                <button class="btn btn-sm" onclick="viewScan({{ scan.id }})" style="background: var(--surface-alt); color: var(--primary); font-weight: 800; border: 1px solid var(--border);">
+                                    OPEN_LOG
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -52,22 +69,22 @@
                 </table>
             </div>
             {% else %}
-            <div style="text-align: center; padding: 60px 20px;">
-                <div style="font-size: 3rem; margin-bottom: 20px;">🔍</div>
-                <h3>No scans found</h3>
-                <p style="color: var(--text-muted);">Start your first analysis from the dashboard.</p>
-                <a href="/app" class="btn btn-primary" style="margin-top: 24px;">Go to Dashboard</a>
+            <div style="text-align: center; padding: 100px 20px;">
+                <div style="font-size: 4rem; opacity: 0.15; margin-bottom: 24px;">📭</div>
+                <h3 style="font-weight: 850;">NO_DATA_FOUND</h3>
+                <p style="color: var(--text-muted); max-width: 400px; margin: 12px auto 24px;">Initialize your first neural scan from the dashboard to populate this archive.</p>
+                <a href="/app" class="btn btn-primary">RETURN_TO_CONSOLE</a>
             </div>
             {% endif %}
         </div>
 
         <!-- Detail Modal/Slide-over Area -->
-        <div id="scanDetail" class="card premium-card hidden" style="margin-top: 32px; scroll-margin-top: 32px;">
-            <div class="card-header-premium">
-                <h3>Scan Details</h3>
-                <button onclick="closeScanDetail()" class="btn btn-sm btn-ghost">Close</button>
+        <div id="scanDetail" class="bb-card hidden" style="margin-top: 32px; scroll-margin-top: 32px; border: 2px solid var(--primary);">
+            <div class="card-header-premium" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h3 style="font-weight: 850; letter-spacing: 0.1em; text-transform: uppercase;">LOG_DETAILED_VIEW</h3>
+                <button onclick="closeScanDetail()" class="btn btn-sm" style="background: var(--surface-alt); color: var(--status-danger);">CLOSE</button>
             </div>
-            <div id="scanDetailContent"></div>
+            <div id="scanDetailContent" style="font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; color: var(--text);"></div>
         </div>
     </main>
 </div>
@@ -75,12 +92,55 @@
 <style>
 .history-table-container { overflow-x: auto; }
 .premium-table { width: 100%; border-collapse: collapse; text-align: left; }
-.premium-table th { padding: 16px; border-bottom: 2px solid var(--border); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
-.premium-table td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
-.content-cell { max-width: 300px; color: var(--text-muted); }
-.status-pill { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; }
-.pill-danger { background: #fee2e2; color: #ef4444; }
-.pill-warn { background: #fffbeb; color: #f59e0b; }
-.pill-safe { background: #f0fdf4; color: #10b981; }
+.premium-table th { 
+    padding: 24px 16px; 
+    border-bottom: 2px solid var(--border); 
+    font-size: 0.75rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.1em; 
+    color: var(--text-dim); 
+    background: var(--surface-alt);
+    font-weight: 800;
+}
+.premium-table td { 
+    padding: 20px 16px; 
+    border-bottom: 1px solid var(--border); 
+    font-size: 0.95rem; 
+    background: var(--surface);
+    transition: var(--transition);
+}
+.premium-table tr:hover td {
+    background: var(--surface-alt);
+}
+.content-cell { 
+    max-width: 320px; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.status-pill { 
+    padding: 6px 14px; 
+    border-radius: 8px; 
+    font-size: 0.7rem; 
+    font-weight: 900; 
+    letter-spacing: 0.05em;
+}
+.pill-danger { background: rgba(239, 68, 68, 0.1); color: var(--status-danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+.pill-warn { background: rgba(245, 158, 11, 0.1); color: var(--status-warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+.pill-safe { background: rgba(16, 185, 129, 0.1); color: var(--status-safe); border: 1px solid rgba(16, 185, 129, 0.2); }
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+}
+.btn-sm:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+.hidden { display: none; }
 </style>
 {% endblock %}

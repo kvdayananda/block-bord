@@ -1,6 +1,33 @@
 // ===============================
 // THEME (Dark / Light)
 // ===============================
+(function initTheme() {
+    const savedTheme = localStorage.getItem('bb-theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (systemDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+})();
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('bb-theme', newTheme);
+    
+    // Optional: Add a subtle feedback animation if a toggle exists
+    const btn = document.querySelector('.theme-toggle-btn');
+    if (btn) {
+        btn.classList.add('switching');
+        setTimeout(() => btn.classList.remove('switching'), 500);
+    }
+}
 
 // ===============================
 // STATE

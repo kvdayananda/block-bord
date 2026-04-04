@@ -1,119 +1,157 @@
 {% extends "base.html" %}
 
-{% block title %}Block Bord AI - Cyber Intelligence{% endblock %}
+{% block title %}Block Bord AI — Cyber Intelligence for the Next Billion{% endblock %}
 
 {% block extra_head %}
+<!-- Page Specific CSS -->
 <link rel="stylesheet" href="/static/landing.css">
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<!-- Typography -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
-{% block body_class %}dark-theme{% endblock %}
-
 {% block content %}
+<!-- HERO SECTION -->
 <section class="bb-hero">
-  <div class="bb-container bb-hero-grid">
-    <!-- CENTERED HERO -->
-    <div class="bb-hero-content">
-      <h1 class="bb-title">
-        Protecting the <span class="bb-logo-blue">Next Billion</span> Users
-      </h1>
+  <div class="bb-container bb-hero-content">
+    <h1 class="bb-title">
+      Protecting the <br><span>Next Billion</span> Users
+    </h1>
 
-      <p class="bb-subtitle">
-        The fastest, most transparent security scan engine for digital assets. Identify threats with context, not just flags.
-      </p>
+    <p class="bb-subtitle">
+      The elite security engine for digital assets. Identify threats with contextual intelligence, not just flags. High performance, zero friction.
+    </p>
 
-      <div class="bb-cta-row">
-        {% if request.session.get("user_id") %}
-        <a class="btn btn-primary btn-lg" href="/app">Get Started Free</a>
-        {% else %}
-        <a class="btn btn-primary btn-hero" href="/register">Get Started Free</a>
-        {% endif %}
-        <a class="btn btn-demo btn-hero">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Watch Demo
-        </a>
-      </div>
+    <div class="bb-cta-row">
+      {% if request.session.get("user_id") %}
+      <a class="btn btn-primary btn-hero" href="/app">Enter Dashboard</a>
+      {% else %}
+      <a class="btn btn-primary btn-hero" href="/register">Get Started — It's Free</a>
+      {% endif %}
+      <a class="btn btn-outline btn-hero" href="#workflow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Watch Demo
+      </a>
+    </div>
+
+    <!-- Visual Mockup (Floating Dashboard Excerpt) -->
+    <div class="hero-mockup-container" style="margin-top: 80px; position: relative;">
+        <div class="bb-card" style="max-width: 800px; margin: 0 auto; background: var(--surface); text-align: left; border: 1px solid var(--border-bright);">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 24px;">
+                <div style="display: flex; gap: 8px;">
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f56;"></div>
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></div>
+                    <div style="width: 12px; height: 12px; border-radius: 50%; background: #27c93f;"></div>
+                </div>
+                <div style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-dim);">analysis_v3.0_lts</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-weight: 800; font-size: 1.1rem;">Scan Analytics</div>
+                    <div style="color: var(--status-safe); font-weight: 800; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                        <span style="width:8px; height:8px; border-radius:50%; background: currentColor; box-shadow: 0 0 8px currentColor;"></span> SECURE
+                    </div>
+                </div>
+                <div style="height: 4px; background: var(--bg-alt); border-radius: 2px; overflow: hidden;">
+                    <div style="width: 100%; height: 100%; background: var(--primary-grad); animation: scan-progress 3s ease-in-out infinite;"></div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                    <div style="background: var(--bg-alt); padding: 16px; border-radius: 12px;">
+                        <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Heuristics</div>
+                        <div style="font-size: 1.25rem; font-weight: 800;">99.4%</div>
+                    </div>
+                    <div style="background: var(--bg-alt); padding: 16px; border-radius: 12px;">
+                        <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Latencey</div>
+                        <div style="font-size: 1.25rem; font-weight: 800;">142ms</div>
+                    </div>
+                    <div style="background: var(--bg-alt); padding: 16px; border-radius: 12px;">
+                        <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: 800; margin-bottom: 4px;">Risk Level</div>
+                        <div style="font-size: 1.25rem; font-weight: 800; color: var(--status-safe);">NONE</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
   </div>
 </section>
 
-<!-- WORKFLOW -->
+<!-- WORKFLOW SECTION -->
 <section id="workflow" class="bb-section bb-section-alt">
   <div class="bb-container">
     <div class="bb-section-head">
-      <h2 class="bb-overline">Simple, Secure Workflow</h2>
+      <span class="bb-overline">Advanced Detection Flow</span>
+      <h2 class="bb-section-title">Simple. Secure. Automated.</h2>
     </div>
 
     <div class="bb-workflow-grid">
-      <div class="workflow-card">
-        <div class="workflow-card-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
-        <h3>1. Paste & Analyze</h3>
-        <p>Input text contents, documentation, or digital assets directly into our secure sandbox for immediate ingestion.</p>
+      <div class="workflow-card bb-card">
+        <div class="workflow-card-ico">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        </div>
+        <h3>1. Ingest Assets</h3>
+        <p>Drop documentation, links, or text contents into our secure sandbox. Immediate ingestion via safe protocols.</p>
       </div>
-      <div class="workflow-card">
-        <div class="workflow-card-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
-        <h3>2. Verify Patterns</h3>
-        <p>Our heuristic AI checks against millions of known patterns and zero-day signatures in real-time.</p>
+      
+      <div class="workflow-card bb-card">
+        <div class="workflow-card-ico">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <h3>2. AI-Forensics</h3>
+        <p>Our heuristic engine performs multi-layered checks against signatures, patterns, and zero-day threats.</p>
       </div>
-      <div class="workflow-card">
-        <div class="workflow-card-ico"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-        <h3>3. Stay Protected</h3>
-        <p>Receive a detailed breakdown and human-readable reasons for every flag raised. Fast and transparent.</p>
+
+      <div class="workflow-card bb-card">
+        <div class="workflow-card-ico">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+        </div>
+        <h3>3. Resolve Risks</h3>
+        <p>Receive detailed, explainable intelligence on every flag. Make informed decisions in under 3 seconds.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- BENEFITS -->
+<!-- BENEFITS SECTION -->
 <section id="features" class="bb-section">
   <div class="bb-container bb-benefits-grid">
     <div class="bb-benefits-left">
-      <h2 class="bb-section-title">Built for Modern <br> Security Teams</h2>
+      <h2 class="bb-section-title">Built for High-Level <br>Security Teams.</h2>
       
-      <div class="bb-benefit-list">
+      <div class="bb-benefit-list" style="margin-top: 60px;">
         <div class="bb-benefit-item">
-          <div class="bb-benefit-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
+          <div class="bb-benefit-ico"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg></div>
           <div class="bb-benefit-text">
-            <h4>Explainable Intelligence</h4>
-            <p>No more black-box detections. Our AI provides the 'Why' behind every security alert found during the scan.</p>
+            <h4>Explainable Results</h4>
+            <p>No black boxes. Our AI explains the reasoning behind every alert, empowering your team.</p>
           </div>
         </div>
         <div class="bb-benefit-item">
-          <div class="bb-benefit-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div>
+          <div class="bb-benefit-ico"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3-3.5 3.5z"></path></svg></div>
           <div class="bb-benefit-text">
-            <h4>Dynamic Shield</h4>
-            <p>Proactive protection that learns from global threat telemetry, keeping you ahead of evolving digital risks.</p>
-          </div>
-        </div>
-        <div class="bb-benefit-item">
-          <div class="bb-benefit-ico"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div>
-          <div class="bb-benefit-text">
-            <h4>3-Second Scan Speed</h4>
-            <p>Industry-leading performance. Get full-depth analysis in seconds, not minutes, ensuring zero friction in your workflow.</p>
+            <h4>Proactive Defense</h4>
+            <p>We don't just detect threats; we learn from them. Global telemetry keeps you ahead of malicious actors.</p>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="bb-testimonial-box">
+    <div class="bb-testimonial-box bb-card">
       <p class="bb-testimonial-text">
-        "The explainability feature changed how our SOC team handles alerts. We went from guessing to fixing in under 5 minutes."
+        "The level of transparency in Block Bord's analysis is unparalleled. It's the only tool that explains the 'Why' behind the alerts."
       </p>
       <div class="bb-testimonial-author">
         <div class="bb-testimonial-avatar">JB</div>
-        <div class="bb-testimonial-info">
-          <div class="bb-author-name">John Doe</div>
-          <div class="bb-author-role">Security Lead, CloudCorp</div>
+        <div>
+          <span class="bb-author-name">James Brennan</span>
+          <span class="bb-author-role">Head of Cyber Sec, Vector Financial</span>
         </div>
       </div>
     </div>
   </div>
 </section>
-
 
 <style>
 @keyframes scan-progress {
   0% { transform: translateX(-100%); }
+  50% { transform: translateX(0%); }
   100% { transform: translateX(100%); }
 }
 </style>

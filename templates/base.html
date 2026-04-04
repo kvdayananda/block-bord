@@ -25,9 +25,10 @@
     {% block navbar %}
     <header class="main-navbar">
         <div class="logo">
-            <img src="/static/logo.png" alt="Block Bord Logo"
-                class="brand-logo">
-            <a href="/" class="logo-link">Block <span class="bb-logo-blue">Bord</span> AI</a>
+            <a href="/" class="logo-link">
+                <img src="/static/logo.png" alt="Block Bord Logo" class="brand-logo">
+                <span>Block <span style="color: var(--primary);">Bord</span> AI</span>
+            </a>
         </div>
 
         <nav class="nav-right">
@@ -36,12 +37,18 @@
             <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">Contact</a>
 
             {% if request.session.get("user_id") %}
-            <a href="/app" class="nav-link" style="font-weight: 600; color: var(--primary);">Dashboard</a>
-            <a href="/logout" class="btn btn-outline nav-btn-mobile" style="padding: 8px 16px;">Logout</a>
+            <a href="/app" class="btn btn-primary btn-sm">Dashboard</a>
+            <a href="/logout" class="btn btn-ghost btn-sm">Logout</a>
             {% else %}
             <a href="/login" class="nav-link {% if request.url.path == '/login' %}active{% endif %}">Login</a>
-            <a href="/register" class="btn btn-primary nav-btn-mobile">Try Free</a>
+            <a href="/register" class="btn btn-primary btn-sm">Try Free</a>
             {% endif %}
+
+            <!-- Theme Toggle -->
+            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            </button>
         </nav>
 
         <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
@@ -55,7 +62,7 @@
 
     <!-- ================= PAGE CONTENT ================= -->
 
-    <main>
+    <main class="page-main-container" style="padding-top: 120px;">
         {% block content %}{% endblock %}
     </main>
 
@@ -64,8 +71,8 @@
     <footer class="main-footer">
         <div class="footer-container-premium">
             <div class="footer-logo-centered">
-                <img src="/static/logo.png" alt="Block Bord Logo">
-                <span>Block <span class="bb-logo-blue">Bord</span> AI</span>
+                <img src="/static/logo.png" alt="Block Bord Logo" style="width: 40px; height: 40px;">
+                <span style="font-size: 1.2rem; font-weight: 800;">Block <span style="color: var(--primary);">Bord</span> AI</span>
             </div>
 
             <nav class="footer-nav-premium">
@@ -73,15 +80,15 @@
                 <a href="/pricing" class="footer-nav-link">Pricing</a>
                 <a href="/contact" class="footer-nav-link">Contact</a>
                 <a href="/status" class="footer-nav-link">Status</a>
-                <a href="/privacy" class="footer-nav-link">Privacy Policy</a>
-                <a href="/terms" class="footer-nav-link">Terms &amp; Conditions</a>
+                <a href="/privacy" class="footer-nav-link">Privacy</a>
+                <a href="/terms" class="footer-nav-link">Terms</a>
             </nav>
 
             <div class="footer-divider-premium"></div>
 
             <div class="footer-bottom-premium">
-                <p>© 2026 BlockBord AI. All rights reserved.</p>
-                <div class="footer-version-tag">v2.1.0 (Production)</div>
+                <p style="opacity: 0.6; font-size: 0.85rem;">© 2026 BlockBord AI — Enterprise Grade Security</p>
+                <div class="footer-version-tag">v3.0.0 (LTS)</div>
             </div>
         </div>
     </footer>
@@ -90,36 +97,40 @@
     <!-- ================= AI CYBER ASSISTANT WIDGET ================= -->
     {% if request.session.get("user_id") %}
     <div id="ai-assistant-widget" class="ai-widget-container">
-        <button id="ai-widget-toggle" class="ai-widget-btn" aria-label="Open AI Assistant">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><path d="M9 10h.01"></path><path d="M15 10h.01"></path><path d="M12 10h.01"></path></svg>
+        <button id="ai-widget-toggle" class="ai-widget-btn" aria-label="Open AI Assistant" style="background: var(--primary); color: white; border-radius: 20px; width: 60px; height: 60px; box-shadow: 0 8px 24px var(--primary-glow);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
         </button>
-        <div id="ai-chat-window" class="ai-chat-window">
-            <div class="ai-chat-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div class="ai-avatar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
-                    <div>
-                        <h4 style="margin: 0; font-size: 0.95rem; font-weight: 700; color: white;">🤖 Cyber Assistant</h4>
-                        <span style="font-size: 0.65rem; color: rgba(255,255,255,0.8);"><span style="display:inline-block; width:6px; height:6px; background:#10b981; border-radius:50%; margin-right:4px;"></span>Online</span>
-                    </div>
-                </div>
-                <button id="ai-chat-close" style="background:none; border:none; color:white; cursor:pointer;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        <div id="ai-chat-window" class="ai-chat-window bb-card" style="bottom: 90px; right: 0; width: 350px; height: 500px; display: none; flex-direction: column; overflow: hidden; padding: 0;">
+            <div class="ai-chat-header" style="background: var(--primary-grad); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h4 style="margin: 0; font-size: 1rem; font-weight: 800;">🛡️ Cyber Assistant</h4>
+                <button id="ai-chat-close" style="color: white; opacity: 0.8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
             </div>
-            <div id="ai-chat-messages" class="ai-chat-messages">
-                <div class="ai-msg bot-msg">
-                    Hi! I'm your AI Cyber Assistant. Paste an SMS, email, or a link, and I'll analyze if it's safe to open.
+            <div id="ai-chat-messages" class="ai-chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-alt);">
+                <div class="ai-msg bot-msg" style="background: var(--surface); padding: 12px 16px; border-radius: 16px; border: 1px solid var(--border); font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px; max-width: 85%;">
+                    Hello! Secure your digital workspace with AI. How can I help today?
                 </div>
             </div>
-            <div class="ai-chat-input-area">
-                <textarea id="ai-chat-input" placeholder="Is this link safe?..." rows="1"></textarea>
-                <button id="ai-chat-send" aria-label="Send Message"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
+            <div class="ai-chat-input-area" style="padding: 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px;">
+                <textarea id="ai-chat-input" placeholder="Type a message..." rows="1" style="flex: 1; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 12px; padding: 10px; color: var(--text); font-family: inherit; resize: none;"></textarea>
+                <button id="ai-chat-send" style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
             </div>
-
         </div>
     </div>
     {% endif %}
 
     <!-- Core Scripts -->
-    <script src="/static/script.js?v=3.3"></script>
+    <script src="/static/script.js?v=4.0"></script>
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.main-navbar');
+            if (window.scrollY > 40) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+    </script>
 
     <!-- Optional Page Scripts -->
     {% block extra_scripts %}{% endblock %}
