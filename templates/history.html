@@ -1,146 +1,120 @@
 {% extends "base.html" %}
-
-{% block title %}Scan History - Block Bord AI{% endblock %}
-
+{% block title %}Scan History — Block Bord AI{% endblock %}
 {% block navbar %}{% endblock %}
 
-{% block extra_head %}
-<!-- Typography & Icons -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
-{% endblock %}
-
 {% block content %}
-<div class="dashboard-container" style="background: var(--bg);">
-    {% include "sidebar.html" %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
 
-    <main class="main-content dashboard-main">
-        <!-- ===== TOPBAR ===== -->
-        <div class="dashboard-topbar" style="margin-bottom: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                <div>
-                    <span class="footer-version-tag" style="margin: 0 0 12px 0;">ARCHIVE_RECORDS</span>
-                    <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 4px; color: var(--text);">
-                        Scan Intelligence
-                    </h1>
-                    <p style="font-size: 1rem; color: var(--text-muted); margin: 0;">
-                        Review historical telemetry and identified threat patterns.
-                    </p>
-                </div>
-                <div class="usage-pill" style="font-family: var(--font-mono); font-size: 0.75rem;">TOTAL_RECORDS: {{ scans|length }}</div>
-            </div>
+  <main class="app-main-content">
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">FORENSICS</span>
+        <h1 class="app-page-title">Scan History</h1>
+        <p class="app-page-subtitle">Review your recently analyzed URLs, domains, and text.</p>
+      </div>
+      <div class="app-page-header-right">
+        <div class="app-status-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          {{ scans|length }} Records
         </div>
+        <a href="/app" class="btn btn-outline" style="padding:8px 18px;font-size:0.8125rem;">New Scan</a>
+      </div>
+    </div>
 
-        <div class="bb-card" style="margin-top: 32px; padding: 0; overflow: hidden;">
-            {% if scans %}
-            <div class="history-table-container">
-                <table class="premium-table">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Category</th>
-                            <th>Intelligence Snippet</th>
-                            <th>Risk Score</th>
-                            <th>Timestamp</th>
-                            <th style="padding-right: 32px;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for scan in scans %}
-                        <tr>
-                            <td>
-                                <span class="status-pill {{ 'pill-danger' if scan.risk_level == 'High' else ('pill-warn' if scan.risk_level == 'Suspicious' else 'pill-safe') }}">
-                                    {{ scan.risk_level|upper }}
-                                </span>
-                            </td>
-                            <td style="font-weight: 600; color: var(--text);">{{ scan.category or 'General' }}</td>
-                            <td class="content-cell" style="font-family: var(--font-mono); color: var(--text-dim); font-size: 0.8rem;">
-                                {{ scan.content[:60] }}{% if scan.content|length > 60 %}...{% endif %}
-                            </td>
-                            <td style="font-weight: 800; color: var(--text);">{{ scan.risk_score|int }}%</td>
-                            <td style="color: var(--text-muted); font-size: 0.85rem;">{{ scan.created_at.strftime('%b %d, %H:%M') }}</td>
-                            <td style="padding-right: 32px;">
-                                <button class="btn btn-sm" onclick="viewScan({{ scan.id }})" style="background: var(--surface-alt); color: var(--primary); font-weight: 800; border: 1px solid var(--border);">
-                                    OPEN_LOG
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% else %}
-            <div style="text-align: center; padding: 100px 20px;">
-                <div style="font-size: 4rem; opacity: 0.15; margin-bottom: 24px;">📭</div>
-                <h3 style="font-weight: 850;">NO_DATA_FOUND</h3>
-                <p style="color: var(--text-muted); max-width: 400px; margin: 12px auto 24px;">Initialize your first neural scan from the dashboard to populate this archive.</p>
-                <a href="/app" class="btn btn-primary">RETURN_TO_CONSOLE</a>
-            </div>
-            {% endif %}
-        </div>
+    <!-- Search row -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <div style="position:relative;flex:1;min-width:220px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="historySearch" placeholder="Search history…" oninput="filterHistory()" style="width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--border-bright);border-radius:var(--radius-sm);background:#fff;font-size:0.875rem;outline:none;transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-bright)'">
+      </div>
+      <select id="riskFilter" onchange="filterHistory()" style="padding:10px 14px;border:1.5px solid var(--border-bright);border-radius:var(--radius-sm);background:#fff;font-size:0.875rem;color:var(--text);outline:none;cursor:pointer;">
+        <option value="">All risk levels</option>
+        <option value="High">High risk</option>
+        <option value="Suspicious">Suspicious</option>
+        <option value="Safe">Safe</option>
+      </select>
+    </div>
 
-        <!-- Detail Modal/Slide-over Area -->
-        <div id="scanDetail" class="bb-card hidden" style="margin-top: 32px; scroll-margin-top: 32px; border: 2px solid var(--primary);">
-            <div class="card-header-premium" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-                <h3 style="font-weight: 850; letter-spacing: 0.1em; text-transform: uppercase;">LOG_DETAILED_VIEW</h3>
-                <button onclick="closeScanDetail()" class="btn btn-sm" style="background: var(--surface-alt); color: var(--status-danger);">CLOSE</button>
-            </div>
-            <div id="scanDetailContent" style="font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.6; color: var(--text);"></div>
+    <!-- Table card -->
+    <div class="bb-card" style="padding:0;overflow:hidden;" id="historyCard">
+      {% if scans %}
+      <div class="history-table-container">
+        <table class="premium-table" id="historyTable">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Category</th>
+              <th>Content Preview</th>
+              <th>Risk Score</th>
+              <th>Time</th>
+              <th style="padding-right:24px;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for scan in scans %}
+            <tr class="history-row"
+                data-content="{{ scan.content|lower }}"
+                data-risk="{{ scan.risk_level }}">
+              <td>
+                <span class="status-pill {{ 'pill-danger' if scan.risk_level == 'High' else ('pill-warn' if scan.risk_level == 'Suspicious' else 'pill-safe') }}">
+                  {{ scan.risk_level|upper }}
+                </span>
+              </td>
+              <td style="font-weight:600;">{{ scan.category or 'General' }}</td>
+              <td class="content-cell" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                {{ scan.content[:70] }}{% if scan.content|length > 70 %}…{% endif %}
+              </td>
+              <td>
+                <span style="font-weight:800;color:{% if scan.risk_score >= 70 %}var(--status-danger){% elif scan.risk_score >= 40 %}var(--status-warn){% else %}var(--status-safe){% endif %};">
+                  {{ scan.risk_score|int }}%
+                </span>
+              </td>
+              <td style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;">
+                {{ scan.created_at.strftime('%b %d, %H:%M') }}
+              </td>
+              <td style="padding-right:24px;">
+                <button class="btn btn-sm btn-outline" onclick="viewScan({{ scan.id }})">Details</button>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+      <!-- Empty state -->
+      <div style="text-align:center;padding:96px 24px;">
+        <div style="width:72px;height:72px;background:var(--bg-alt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
         </div>
-    </main>
+        <h3 style="font-size:1.125rem;font-weight:700;margin-bottom:8px;">No scans yet</h3>
+        <p style="color:var(--text-muted);font-size:0.9375rem;max-width:360px;margin:0 auto 28px;">Run your first analysis from the dashboard to see your threat history here.</p>
+        <a href="/app" class="btn btn-primary">Go to Dashboard</a>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Detail panel -->
+    <div id="scanDetail" class="bb-card hidden" style="margin-top:24px;border:2px solid var(--primary);scroll-margin-top:32px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+        <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Scan Details</h3>
+        <button onclick="closeScanDetail()" class="btn btn-sm" style="background:var(--status-danger-bg);color:var(--status-danger);border:1px solid rgba(220,38,38,0.2);">Close</button>
+      </div>
+      <div id="scanDetailContent" style="font-family:var(--font-mono);font-size:0.875rem;line-height:1.7;color:var(--text);"></div>
+    </div>
+  </main>
 </div>
 
-<style>
-.history-table-container { overflow-x: auto; }
-.premium-table { width: 100%; border-collapse: collapse; text-align: left; }
-.premium-table th { 
-    padding: 24px 16px; 
-    border-bottom: 2px solid var(--border); 
-    font-size: 0.75rem; 
-    text-transform: uppercase; 
-    letter-spacing: 0.1em; 
-    color: var(--text-dim); 
-    background: var(--surface-alt);
-    font-weight: 800;
+<script>
+function filterHistory() {
+  const q = document.getElementById('historySearch').value.toLowerCase();
+  const risk = document.getElementById('riskFilter').value;
+  document.querySelectorAll('.history-row').forEach(row => {
+    const matchQ = !q || row.dataset.content.includes(q);
+    const matchR = !risk || row.dataset.risk === risk;
+    row.style.display = matchQ && matchR ? '' : 'none';
+  });
 }
-.premium-table td { 
-    padding: 20px 16px; 
-    border-bottom: 1px solid var(--border); 
-    font-size: 0.95rem; 
-    background: var(--surface);
-    transition: var(--transition);
-}
-.premium-table tr:hover td {
-    background: var(--surface-alt);
-}
-.content-cell { 
-    max-width: 320px; 
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.status-pill { 
-    padding: 6px 14px; 
-    border-radius: 8px; 
-    font-size: 0.7rem; 
-    font-weight: 900; 
-    letter-spacing: 0.05em;
-}
-.pill-danger { background: rgba(239, 68, 68, 0.1); color: var(--status-danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-.pill-warn { background: rgba(245, 158, 11, 0.1); color: var(--status-warning); border: 1px solid rgba(245, 158, 11, 0.2); }
-.pill-safe { background: rgba(16, 185, 129, 0.1); color: var(--status-safe); border: 1px solid rgba(16, 185, 129, 0.2); }
-
-.btn-sm {
-    padding: 8px 16px;
-    font-size: 0.75rem;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: var(--transition);
-    border: none;
-}
-.btn-sm:hover {
-    transform: translateY(-2px);
-    filter: brightness(1.1);
-}
-.hidden { display: none; }
-</style>
+</script>
 {% endblock %}

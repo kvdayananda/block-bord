@@ -1,125 +1,146 @@
-<aside class="sidebar bb-card" id="sidebar" style="border-radius: 0 24px 24px 0; height: calc(100vh - 48px); margin: 24px 0; border-left: none; width: 280px; padding: 40px 24px;">
-    <div class="sidebar-top" style="margin-bottom: 48px;">
-        <div class="sidebar-header-premium">
-            <div class="sidebar-logo">
-                <a href="/" class="logo-link" style="font-size: 1.4rem;">
-                    <img src="/static/logo.png" alt="Block Bord Logo" style="width: 32px; filter: drop-shadow(0 0 8px var(--primary-glow));">
-                    <span>Block <span style="color: var(--primary);">Bord</span></span>
-                </a>
-            </div>
-            
-            {% if user %}
-            <div class="plan-badge-premium {{ 'pro' if user.is_pro else 'free' }}" style="margin-top: 16px; width: 100%; justify-content: center; background: var(--surface-alt); border: 1px solid var(--border); padding: 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; color: var(--text);">
-                {{ '💎 PRO TERMINAL' if user.is_pro else '🛡️ FREE NODE' }}
-            </div>
-            {% endif %}
-        </div>
+<!-- ============================================================
+     BLOCK BORD — Modern SaaS Sidebar (Light Only)
+     ============================================================ -->
+<aside class="app-glass-sidebar" id="appSidebar">
+
+  <!-- Top gradient accent line -->
+  <div style="height:3px; background:var(--primary-grad); flex-shrink:0;"></div>
+
+  <!-- Logo -->
+  <div class="sidebar-logo-container">
+    <a href="/app" class="sidebar-logo-link">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color:var(--primary);">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Block <span class="sidebar-brand-highlight">Bord</span>
+    </a>
+  </div>
+
+  <!-- User Profile -->
+  {% if user %}
+  <div class="sidebar-user-card">
+    <div class="sidebar-user-avatar">
+      {{ user.username[0]|upper if user.username else 'U' }}
     </div>
+    <div class="sidebar-user-details">
+      <span class="sidebar-user-name">{{ user.username }}</span>
+      <div class="sidebar-user-plan {{ 'plan-pro' if user.is_pro else 'plan-free' }}">
+        {{ '💎 Pro Tier' if user.is_pro else '🛡️ Free' }}
+      </div>
+    </div>
+  </div>
+  {% endif %}
 
-    <nav class="sidebar-nav" style="display: flex; flex-direction: column; gap: 6px;">
-        <a href="/app" class="sidebar-link {% if request.url.path == '/app' %}active{% endif %}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-            Analyzer
-        </a>
-        <a href="/history" class="sidebar-link {% if request.url.path == '/history' %}active{% endif %}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-            Forensics
-        </a>
-        <a href="/block-list" class="sidebar-link {% if request.url.path == '/block-list' %}active{% endif %}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            Block List
-        </a>
-        
-        <div style="margin: 24px 0 12px; padding: 0 16px; font-size: 0.7rem; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.1em;">Tools</div>
-        
-        <a href="/leak-checker" class="sidebar-link {% if request.url.path == '/leak-checker' %}active{% endif %}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            Leak Scan
-        </a>
-        <a href="/scam-map" class="sidebar-link {% if request.url.path == '/scam-map' %}active{% endif %}">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path><path d="M2 12h20"></path></svg>
-            Threat Map
-        </a>
+  <!-- Main Nav -->
+  <nav class="sidebar-nav-container">
+    <span class="sidebar-nav-label">Main Menu</span>
 
-        <div style="margin-top: auto; padding-top: 24px; border-top: 1px solid var(--border);">
-            <a href="/settings" class="sidebar-link {% if request.url.path == '/settings' %}active{% endif %}">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                Settings
-            </a>
-            <a href="/logout" class="sidebar-link" style="color: var(--status-danger);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                Logout
-            </a>
-        </div>
-    </nav>
+    <a href="/" class="sidebar-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Home
+    </a>
+
+    <a href="/app" class="sidebar-nav-item {% if request.url.path == '/app' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      Dashboard
+    </a>
+
+    <a href="/history" class="sidebar-nav-item {% if request.url.path == '/history' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      Forensics
+    </a>
+
+    <a href="/block-list" class="sidebar-nav-item {% if request.url.path == '/block-list' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Block List
+    </a>
+
+    <a href="/leak-checker" class="sidebar-nav-item {% if request.url.path == '/leak-checker' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+      Leak Scan
+    </a>
+
+    <a href="/scam-map" class="sidebar-nav-item {% if request.url.path == '/scam-map' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+        <path d="M2 12h20"/>
+      </svg>
+      Threat Map
+    </a>
+
+    <span class="sidebar-nav-label" style="margin-top:8px;">Account</span>
+
+    <a href="/settings" class="sidebar-nav-item {% if request.url.path == '/settings' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      Settings
+    </a>
+
+    <a href="/pricing" class="sidebar-nav-item {% if request.url.path == '/pricing' %}active{% endif %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+        <polyline points="17 6 23 6 23 12"/>
+      </svg>
+      Upgrade Plan
+    </a>
+  </nav>
+
+  <!-- Bottom Actions -->
+  <div class="sidebar-bottom-actions">
+    <a href="/logout" class="sidebar-action-btn logout-btn">
+      <div class="icon-wrapper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </div>
+      <span class="action-text">Log Out</span>
+    </a>
+  </div>
 </aside>
 
-<style>
-.sidebar-link {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    color: var(--text-muted);
-    font-weight: 700;
-    transition: var(--transition);
-    font-size: 0.9rem;
-}
+<!-- ── Overlay (mobile) ── -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-.sidebar-link svg {
-    opacity: 0.7;
-    transition: var(--transition);
-}
-
-.sidebar-link:hover {
-    background: var(--surface-alt);
-    color: var(--text);
-}
-
-.sidebar-link:hover svg {
-    opacity: 1;
-    color: var(--primary);
-}
-
-.sidebar-link.active {
-    background: var(--primary-grad);
-    color: white;
-    box-shadow: 0 4px 12px var(--primary-glow);
-}
-
-.sidebar-link.active svg {
-    opacity: 1;
-    color: white;
-}
-</style>
+<!-- ── Mobile top bar ── -->
+<header class="app-mobile-top">
+  <div class="app-mobile-logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:var(--primary);">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    </svg>
+    Block <span style="color:var(--primary);">Bord</span>
+  </div>
+  <button class="app-mobile-hamburger" onclick="openSidebar()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
 
 <script>
-(function() {
-    const toggle = document.getElementById('sidebarToggle');
-    const nav = document.getElementById('sidebarNav');
-    const overlay = document.getElementById('mobileOverlay');
-    
-    function checkMobile() {
-        if (window.innerWidth <= 1024) {
-            toggle.style.display = 'flex';
-        } else {
-            toggle.style.display = 'none';
-            nav.classList.remove('mobile-open');
-            overlay.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    }
-
-    window.toggleMobileNav = function() {
-        console.log('[BlockBord] Toggling Mobile Nav');
-        const isOpen = nav.classList.toggle('mobile-open');
-        overlay.classList.toggle('active');
-        document.body.style.overflow = isOpen ? 'hidden' : '';
-    };
-
-    window.addEventListener('resize', checkMobile);
-    document.addEventListener('DOMContentLoaded', checkMobile);
-    checkMobile();
-})();
+function openSidebar() {
+  document.getElementById('appSidebar').classList.add('mobile-open');
+  document.getElementById('sidebarOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('appSidebar').classList.remove('mobile-open');
+  document.getElementById('sidebarOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
 </script>

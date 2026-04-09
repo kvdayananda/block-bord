@@ -1,21 +1,14 @@
 // ===============================
-// THEME (Dark / Light)
+// THEME (Light / Dark)
 // ===============================
 (function initTheme() {
     const savedTheme = localStorage.getItem('bb-theme');
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    
-    if (savedTheme) {
-        document.documentElement.setAttribute('data-theme', savedTheme);
-    } else if (systemDark) {
-        document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-        document.documentElement.setAttribute('data-theme', 'light');
-    }
+    // Default to light (white) theme; user can switch via toggle
+    document.documentElement.setAttribute('data-theme', savedTheme || 'light');
 })();
 
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
     const newTheme = currentTheme === 'light' ? 'dark' : 'light';
     
     document.documentElement.setAttribute('data-theme', newTheme);

@@ -315,30 +315,8 @@ async def validate_csrf(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=403, detail="Invalid or missing CSRF token")
 
 
-# Static + templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
-
-
 # Password hashing (Production)
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
-
-
-# -----------------------------
-# PLANS + LIMITS
-# -----------------------------
-PLAN_LIMITS = {
-    "free": 10,
-    "starter": 50,
-    "pro": None,       # unlimited
-    "business": None,  # unlimited
-}
-
-PLAN_PRICES_PAISE = {
-    "starter": 9900,    # ₹99
-    "pro": 19900,       # ₹199
-    "business": 49900,  # ₹499
-}
 
 
 
@@ -456,6 +434,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
             "timeline_high": timeline_high,
             "timeline_susp": timeline_susp,
             "timeline_safe": timeline_safe,
+            "remaining_scans": max(0, limit - today_count) if limit is not None else "∞",
         },
     )
 
@@ -847,31 +826,6 @@ def scan_content(data: ScanRequest, request: Request, db: Session = Depends(get_
     }
 
 
-# ✅ User Report Endpoint
-@app.post("/report")
-@limiter.limit("5/minute")
-def submit_report(data: ReportRequest, request: Request, db: Session = Depends(get_db), _csrf: None = Depends(validate_csrf)):
-    user = get_current_user(request, db)
-    
-    from urllib.parse import urlparse
-    domain = ""
-    try:
-        domain = urlparse(data.url).hostname or ""
-    except Exception:
-        pass
-
-    new_report = UserReport(
-        reported_url=data.url,
-        reported_domain=domain,
-        description=data.description,
-        user_id=user.id if user else None
-    )
-    db.add(new_report)
-    db.commit()
-    
-    return {"message": "Report submitted successfully! Thank you for keeping us safe."}
-
-
 # ✅ JSON endpoint for scan details (Enhanced v2)
 @app.get("/api/scan/{scan_id}")
 def scan_details_api(scan_id: int, request: Request, db: Session = Depends(get_db)):
@@ -1220,16 +1174,6 @@ def get_threat_analytics(request: Request, db: Session = Depends(get_db)):
     }
 
 
-# -----------------------------
-# GLOBAL SCAM MAP (#122)
-# -----------------------------
-@app.get("/scam-map", response_class=HTMLResponse)
-def scam_map(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
-    if not user:
-        return RedirectResponse(url="/login")
-    return templates.TemplateResponse("scam_map.html", {"request": request, "user": user})
-
 @app.get("/api/scam-stats")
 async def get_scam_stats(request: Request, db: Session = Depends(get_db)):
     """Data-Driven Global Scam Stats (Real platform intelligence)"""
@@ -1238,7 +1182,7 @@ async def get_scam_stats(request: Request, db: Session = Depends(get_db)):
     
     # 1. Real Database Aggregation
     total_scans = db.query(ScanHistory).count()
-    recent_records = db.query(ScanHistory).order_by(ScanHistory.desc()).limit(15).all()
+    recent_records = db.query(ScanHistory).order_by(ScanHistory.created_at.desc()).limit(15).all()
     
     # 2. Daily Total (Actual + Calibration for demo feel)
     # If the app is new, we 'calibrate' it to seem busy, but then it follows real usage.
@@ -1513,7 +1457,7 @@ def forgot_password(
 
     # Always show success message to prevent user enumeration
     msg = "If an account exists with that email, a reset link has been sent."
-    if not IS_PROD:
+    if not IS_PROD and user:
         reset_link = f"{request.base_url}reset-password/{token}"
         msg += f" (Dev Mode - Link: {reset_link})"
 
@@ -1623,33 +1567,7 @@ def upgrade_beta(plan: str, request: Request, db: Session = Depends(get_db)):
 
 @app.get("/analytics", response_class=HTMLResponse)
 def analytics_page(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
-    if not user:
-        return RedirectResponse("/login", status_code=302)
-    # Get last 10 scans for the live feed explicitly here to inject into template
-    # Safeguard against user being None (redundant check due to line 1540 but good for typing)
-    current_uid = user.id if user else 0
-    recent_scans = db.query(ScanHistory).filter(
-        ScanHistory.user_id == current_uid
-    ).order_by(ScanHistory.created_at.desc()).limit(15).all()
-    
-    scans_list = []
-    for s in recent_scans:
-        scans_list.append({
-            "risk_score": s.risk_score,
-            "risk_level": s.risk_level,
-            "content": s.content
-        })
-        
-    return templates.TemplateResponse(
-        "analytics.html", 
-        {
-            "request": request, 
-            "user": user, 
-            "plan": get_user_plan(user),
-            "recent_scans": scans_list
-        }
-    )
+    return RedirectResponse("/history", status_code=302)
 
 
 @app.get("/downgrade")
@@ -1687,9 +1605,6 @@ def privacy_page(request: Request):
 def terms_page(request: Request):
     return templates.TemplateResponse("terms.html", {"request": request})
 
-@app.get("/status", response_class=HTMLResponse)
-def status_page(request: Request):
-    return templates.TemplateResponse("status.html", {"request": request})
 
 @app.get("/cookie", response_class=HTMLResponse)
 def cookie_page(request: Request):

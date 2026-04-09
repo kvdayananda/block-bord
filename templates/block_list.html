@@ -1,201 +1,140 @@
 {% extends "base.html" %}
 
-{% block title %}Community Block List - Block Bord AI{% endblock %}
-
+{% block title %}Community Block List — Block Bord AI{% endblock %}
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    {% include "sidebar.html" %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
 
-    <main class="main-content">
-        <div class="dashboard-topbar">
-            <div>
-                <h1>Community Block List</h1>
-                <p class="subtitle">Real-time threat intelligence from our global protection network</p>
-            </div>
-            
-            <div class="topbar-actions">
-                <div class="live-status-badge">
-                    <span class="pulse-dot green"></span>
-                    <span>Live Network Protection Active</span>
-                </div>
-            </div>
+  <main class="app-main-content">
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">Live Threat Intelligence</span>
+        <h1 class="app-page-title">Community Block List</h1>
+        <p class="app-page-subtitle">Real-time database of malicious domains verified by our global threat network.</p>
+      </div>
+      <div class="app-page-header-right">
+        <div class="app-status-badge">
+          <div class="app-status-dot" style="background:var(--status-safe); animation:pulse 2s infinite;"></div>
+          Live Network Monitoring
         </div>
+      </div>
+    </div>
 
-        <!-- QUICK REPORT CARD -->
-        <div class="card glass report-card-mini" style="margin-bottom: 32px; border-left: 4px solid var(--primary);">
-            <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 300px;">
-                    <h3 style="margin-bottom: 4px; font-weight: 800;">Spotted a new threat?</h3>
-                    <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">Help protect the community by reporting a suspicious link below.</p>
-                </div>
-                <div style="flex: 2; display: flex; gap: 12px; min-width: 300px;">
-                    <input type="text" id="reportUrl" class="input-field" placeholder="Paste suspicious URL here..." style="margin: 0;">
-                    <button class="btn btn-primary" onclick="submitBlockListReport()" id="reportBtn">Report Threat</button>
-                </div>
-            </div>
-            <div id="reportMsg" style="margin-top: 12px; font-size: 0.9rem; font-weight: 600; display: none;"></div>
+    <!-- Quick Report Banner -->
+    <div class="bb-card" style="margin-top:32px; border-left:4px solid var(--primary); padding:32px;">
+      <div style="display:flex; align-items:center; gap:32px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:300px;">
+          <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:6px;">Spotted a new threat?</h3>
+          <p style="margin:0; font-size:0.9rem; color:var(--text-muted);">Protect the community by reporting suspicious domains for AI verification.</p>
         </div>
-
-        <!-- BLOCK LIST TABLE -->
-        <div class="card glass analysis-card">
-            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-                <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800;">🛡️ Blacklisted Domains</h2>
-                <div style="position: relative; width: 100%; max-width: 320px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); opacity: 0.6;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="blacklistSearch" placeholder="Search blocked domains..." class="input-field" style="padding-left: 44px; margin: 0; width: 100%;">
-                </div>
-            </div>
-
-            <div class="table-container">
-                <table id="publicBlacklistTable">
-                    <thead>
-                        <tr>
-                            <th style="width: 300px;">Domain</th>
-                            <th style="width: 250px;">Primary Reason</th>
-                            <th style="width: 150px; text-align: center;">Risk Level</th>
-                            <th style="width: 120px; text-align: right;">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="publicBlacklistBody">
-                        <!-- Loaded via JS -->
-                        <tr>
-                            <td colspan="4" style="text-align: center; padding: 40px; opacity: 0.6;">
-                                Streaming database records...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-            <div style="margin-top: 24px; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                Showing the most recent 100 verified threats. To report more, use the field above.
-            </div>
+        <div style="flex:1.5; display:flex; gap:12px; min-width:300px;">
+          <input type="text" id="reportUrl" placeholder="Enter suspicious domain or URL..." style="flex:1; padding:12px 16px; border:1.5px solid var(--border-bright); border-radius:10px; outline:none; font-size:0.9rem;">
+          <button class="btn btn-primary" onclick="submitReport()" id="reportBtn" style="padding:12px 24px;">Report Threat</button>
         </div>
-    </main>
+      </div>
+      <div id="reportMsg" style="margin-top:16px; font-size:0.85rem; font-weight:700; display:none;"></div>
+    </div>
+
+    <!-- Blacklist Table -->
+    <div class="bb-card" style="margin-top:24px; padding:0; overflow:hidden;">
+      <div style="padding:24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <h3 style="font-size:0.95rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em;">🛡️ Verified Threats</h3>
+        <div style="position:relative; width:100%; max-width:300px;">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-dim);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+           <input type="text" id="listSearch" placeholder="Search blocked domains..." style="width:100%; padding:10px 14px 10px 40px; border:1.5px solid var(--border-bright); border-radius:30px; font-size:0.875rem; outline:none;" oninput="filterList()">
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table class="premium-table" id="blockTable">
+          <thead>
+            <tr>
+              <th>Blocked Domain</th>
+              <th>Primary Threat Reason</th>
+              <th>Intelligence Level</th>
+              <th style="padding-right:24px; text-align:right;">Status</th>
+            </tr>
+          </thead>
+          <tbody id="blocklistBody">
+            <tr>
+              <td colspan="4" style="text-align:center; padding:60px; color:var(--text-dim);">
+                <span class="loader" style="width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--primary); border-radius:50%; display:inline-block; animation:spin 1s linear infinite;"></span>
+                <div style="margin-top:12px; font-weight:600;">Accessing Threat Intel...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="padding:20px 24px; border-top:1px solid var(--border); font-size:0.8rem; color:var(--text-dim); display:flex; align-items:center; gap:8px; font-weight:600;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Showing the most recent 100 high-risk verified threats globally.
+      </div>
+    </div>
+  </main>
 </div>
 
-<style>
-/* Page-Specific Styles */
-.report-card-mini {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
-    padding: 24px 32px;
-}
-
-.domain-text {
-    font-family: var(--font-mono);
-    font-weight: 700;
-    color: var(--text);
-    font-size: 1rem;
-}
-
-.reason-text {
-    font-size: 0.9rem;
-    color: var(--text-muted);
-}
-
-.pill-active {
-    background: rgba(16, 185, 129, 0.1);
-    color: #10b981;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-.pulse-dot.green {
-    width: 10px;
-    height: 10px;
-    background: #10b981;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 1);
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-    70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
-}
-</style>
-
-{% endblock %}
-
-{% block extra_scripts %}
 <script>
-async function loadPublicBlacklist() {
-    const body = document.getElementById('publicBlacklistBody');
-    try {
-        const r = await fetch('/api/public/blacklist');
-        const data = await r.json();
-        
-        if (!data || data.length === 0) {
-            body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; opacity:0.6;">No domains currently on the public block list.</td></tr>';
-            return;
-        }
-
-        body.innerHTML = data.map(item => `
-            <tr>
-                <td class="domain-text">🚫 ${item.domain}</td>
-                <td class="reason-text">${item.reason}</td>
-                <td style="text-align: center;"><span class="pill pill-danger">High Risk</span></td>
-                <td style="text-align: right;"><span class="pill pill-active">Blocked</span></td>
-            </tr>
-        `).join('');
-    } catch (e) {
-        body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--danger);">Error loading block list data.</td></tr>';
+async function loadList() {
+  const body = document.getElementById('blocklistBody');
+  try {
+    const r = await fetch('/api/public/blacklist');
+    const data = await r.json();
+    if (!data.length) {
+      body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px;">No threats currently active.</td></tr>';
+      return;
     }
+    body.innerHTML = data.map(item => `
+      <tr class="block-row">
+        <td style="font-family:var(--font-mono); font-weight:700; color:var(--text);">🚫 ${item.domain}</td>
+        <td style="font-size:0.9rem; color:var(--text-muted);">${item.reason}</td>
+        <td><span class="status-pill pill-danger">High Risk</span></td>
+        <td style="padding-right:24px; text-align:right;"><span class="status-pill pill-safe">Blocked</span></td>
+      </tr>
+    `).join('');
+  } catch (e) {
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--status-danger);">Network Intel Unavailable.</td></tr>';
+  }
 }
 
-async function submitBlockListReport() {
-    const url = document.getElementById('reportUrl').value.trim();
-    const btn = document.getElementById('reportBtn');
-    const msg = document.getElementById('reportMsg');
-
-    if (!url) {
-        msg.textContent = 'Please enter a valid URL or domain.';
-        msg.style.color = '#ef4444';
-        msg.style.display = 'block';
-        return;
-    }
-
-    btn.disabled = true;
-    btn.textContent = 'Submitting...';
-
-    try {
-        const r = await fetch('/report', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ url: url, description: 'User-reported via Block List dashboard.' })
-        });
-        const d = await r.json();
-        
-        msg.textContent = 'Report received! Our AI engine is now investigating this domain.';
-        msg.style.color = '#10b981';
-        msg.style.display = 'block';
-        document.getElementById('reportUrl').value = '';
-    } catch (e) {
-        msg.textContent = 'Operation failed. Please try again.';
-        msg.style.color = '#ef4444';
-        msg.style.display = 'block';
-    } finally {
-        btn.disabled = false;
-        btn.textContent = 'Report Threat';
-    }
+function filterList() {
+  const q = document.getElementById('listSearch').value.toLowerCase();
+  document.querySelectorAll('.block-row').forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(q) ? '' : 'none';
+  });
 }
 
-// Search filtering
-document.getElementById('blacklistSearch').addEventListener('input', function(e) {
-    const term = e.target.value.toLowerCase();
-    const rows = document.querySelectorAll('#publicBlacklistTable tbody tr');
-    rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
+async function submitReport() {
+  const url = document.getElementById('reportUrl').value.trim();
+  const btn = document.getElementById('reportBtn');
+  const msg = document.getElementById('reportMsg');
+  if(!url) return;
+  
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  
+  try {
+    await fetch('/report', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ url: url, description: 'Community dashboard report' })
     });
-});
+    msg.textContent = '✓ Report received. Our AI engine is now investigating.';
+    msg.style.color = 'var(--status-safe)';
+    msg.style.display = 'block';
+    document.getElementById('reportUrl').value = '';
+  } catch (e) {
+    msg.textContent = 'Submission failed. Try again.';
+    msg.style.color = 'var(--status-danger)';
+    msg.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Report Threat';
+  }
+}
 
-// Init
-document.addEventListener('DOMContentLoaded', loadPublicBlacklist);
+document.addEventListener('DOMContentLoaded', loadList);
 </script>
 {% endblock %}

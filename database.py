@@ -1,15 +1,6 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import DateTime
-
-
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-
-
-
-created_at = Column(DateTime, default=datetime.utcnow)
-
 from sqlalchemy import (
     create_engine,
     Column,

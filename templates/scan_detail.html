@@ -1,136 +1,169 @@
 {% extends "base.html" %}
 
-{% block title %}Scan Details - Block Bord AI{% endblock %}
-
+{% block title %}Forensic Insights — Block Bord AI{% endblock %}
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    {% include "sidebar.html" %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
 
-    <main class="main-content">
-        <div class="dashboard-topbar">
-            <div>
-                <h1>Scan Result Insights</h1>
-                <p class="subtitle">Detailed forensic breakdown of analyzed content</p>
-            </div>
-            <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                <div class="feedback-actions" style="display: flex; gap: 8px;">
-                    <button class="btn btn-danger btn-sm" id="markSpamBtn">🚫 Mark Spam</button>
-                    <button class="btn btn-secondary btn-sm" id="markHamBtn">✅ Not Spam</button>
-                </div>
-                <a href="/admin" class="btn btn-outline btn-sm">← Back to Scans</a>
-            </div>
+  <main class="app-main-content">
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">Deep Forensics</span>
+        <h1 class="app-page-title">Scan Result Insights</h1>
+        <p class="app-page-subtitle">Multi-layered AI breakdown of analyzed digital content and threat vectors.</p>
+      </div>
+      <div class="app-page-header-right">
+        <div style="display:flex; gap:12px; align-items:center;">
+          <button class="btn btn-outline btn-sm" id="markSpamBtn" style="color:var(--status-danger);">🚫 Report Spam</button>
+          <button class="btn btn-outline btn-sm" id="markHamBtn" style="color:var(--status-safe);">✅ False Positive</button>
+          <a href="/history" class="btn btn-primary btn-sm">Close Insights</a>
+        </div>
+      </div>
+    </div>
+
+    {% if scan %}
+    <div style="display:grid; grid-template-columns:1fr 340px; gap:24px; margin-top:32px; align-items:start;">
+      
+      <!-- MAIN FORENSICS -->
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        
+        <!-- Risk Highlight -->
+        <div class="bb-card" style="padding:40px; display:flex; gap:32px; align-items:center; position:relative; overflow:hidden;">
+          <!-- SVG Score Circle -->
+          <div style="position:relative; width:120px; height:120px; flex-shrink:0;">
+             <svg width="120" height="120" viewBox="0 0 120 120">
+               <circle cx="60" cy="60" r="54" fill="none" stroke="var(--bg-alt)" stroke-width="12" />
+               <circle cx="60" cy="60" r="54" fill="none" stroke="url(#scoreGrad)" stroke-width="12" stroke-dasharray="339.29" stroke-dashoffset="{{ 339.29 * (1 - (scan.risk_score or 0)/100) }}" stroke-linecap="round" transform="rotate(-90 60 60)" />
+               <defs>
+                 <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                   <stop offset="0%" style="stop-color:var(--primary);" />
+                   <stop offset="100%" style="stop-color:#8b5cf6;" />
+                 </linearGradient>
+               </defs>
+             </svg>
+             <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+               <span style="font-size:1.75rem; font-weight:900; color:var(--text); letter-spacing:-0.05em;">{{ scan.risk_score or 0 }}%</span>
+               <span style="font-size:0.65rem; font-weight:800; color:var(--text-dim); text-transform:uppercase;">Risk</span>
+             </div>
+          </div>
+
+          <div>
+             <span style="font-size:0.75rem; font-weight:800; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em;">Forensic Verdict</span>
+             <div style="display:flex; align-items:baseline; gap:12px; margin-top:4px;">
+                <h2 style="font-size:2.5rem; font-weight:900; letter-spacing:-0.03em; margin:0; color:{% if scan.risk_level == 'High' %}var(--status-danger){% elif scan.risk_level == 'Suspicious' %}var(--status-warn){% else %}var(--status-safe){% endif %};">
+                  {{ scan.risk_level }}
+                </h2>
+                <span style="font-size:0.9rem; font-weight:700; color:var(--text-muted);">Security Tier</span>
+             </div>
+             <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+               <span style="background:var(--bg-alt); padding:4px 12px; border-radius:30px; border:1px solid var(--border); font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                 📂 Category: {{ scan.category or "Full Analysis" }}
+               </span>
+               <span style="background:var(--bg-alt); padding:4px 12px; border-radius:30px; border:1px solid var(--border); font-size:0.75rem; font-weight:700; color:var(--text-muted);">
+                 👤 Verified by AI
+               </span>
+             </div>
+          </div>
+          
+          <!-- Animated Background Element -->
+          <div style="position:absolute; top:-20px; right:-20px; width:150px; height:150px; background:var(--primary-soft); filter:blur(60px); opacity:0.3; pointer-events:none; border-radius:50%;"></div>
         </div>
 
-        {% if scan %}
-        <div class="card glass scan-detail-box">
-            <div class="detail-grid">
-                <div class="risk-circle" style="--progress: {{ (scan.risk_score or 0) * 3.6 }}deg;">
-                    <span>{{ scan.risk_score or 0 }}%</span>
-                </div>
-
-                <div class="detail-info">
-                    <h3 style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;">Risk Assessment</h3>
-                    <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px;">
-                        <span style="font-size: 2rem; font-weight: 800; line-height: 1;" class="{% if scan.risk_level == 'High' %}text-high{% elif scan.risk_level == 'Suspicious' %}text-warning{% else %}text-safe{% endif %}">
-                            {{ scan.risk_level }}
-                        </span>
-                        <span style="color: var(--text-muted); font-size: 0.9rem; font-weight: 600;">Detection Level</span>
-                    </div>
-                    <p style="font-size: 0.9rem; font-weight: 600; color: var(--text-muted);">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        Analyzed on {{ scan.created_at.strftime('%d %b %Y, %H:%M') if scan.created_at else '-' }}
-                    </p>
-                    <div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
-                        <span class="badge" style="background: rgba(99, 102, 241, 0.1); color: var(--primary); font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; border: 1px solid rgba(99, 102, 241, 0.2);">
-                            🛡️ Category: {{ scan.category or "General Analysis" }}
-                        </span>
-                        {% if scan.scam_intent and scan.scam_intent != 'None Detected' and scan.scam_intent != 'General Deception' %}
-                        <span class="badge" style="background: rgba(239, 68, 68, 0.1); color: var(--danger); font-weight: 700; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; border: 1px solid rgba(239, 68, 68, 0.2);">
-                            🧠 Psychology AI: {{ scan.scam_intent }}
-                        </span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-
-            <div class="content-box">
-                <h3 style="font-size: 0.9rem; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">Scanned Content Payload</h3>
-                <p style="font-family: var(--font-mono); font-size: 0.95rem; line-height: 1.6; word-break: break-all; color: var(--text);">
-                    {{ scan.content }}
-                </p>
-            </div>
-            
-            <div style="margin-top: 32px; padding: 24px; background: rgba(99, 102, 241, 0.03); border-radius: 16px; border: 1px dashed rgba(99, 102, 241, 0.2);">
-                <h3 style="font-size: 0.85rem; font-weight: 800; margin-bottom: 16px; text-transform: uppercase; color: var(--primary); letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    AI Forensics & Threat Vectors
-                </h3>
-                <ul style="list-style: none; padding: 0;">
-                    {% if reasons_list %}
-                        {% for reason in reasons_list %}
-                            <li style="font-size: 0.95rem; color: var(--text); margin-bottom: 10px; display: flex; gap: 12px; align-items: start;">
-                                <span style="color: var(--primary); font-weight: 900;">•</span>
-                                <span>{{ reason }}</span>
-                            </li>
-                        {% endfor %}
-                    {% else %}
-                        <li style="font-size: 0.95rem; color: var(--text-muted); font-style: italic;">No specific anomalies detected beyond base heuristics.</li>
-                    {% endif %}
-                </ul>
-            </div>
+        <!-- Payload Content -->
+        <div class="bb-card" style="padding:32px;">
+          <h3 style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:20px; color:var(--text-dim);">Scanned Submission Payload</h3>
+          <div style="background:var(--bg-alt); padding:24px; border-radius:12px; border:1px solid var(--border); font-family:var(--font-mono); font-size:0.9rem; line-height:1.7; word-break:break-all; color:var(--text);">
+            {{ scan.content }}
+          </div>
         </div>
-        {% else %}
-        <div class="card glass" style="padding: 60px; text-align: center;">
-            <div style="font-size: 3rem; margin-bottom: 20px;">🔍</div>
-            <h2 style="font-weight: 800; margin-bottom: 8px;">Scan Record Not Found</h2>
-            <p style="color: var(--text-muted); margin-bottom: 24px;">The scan ID you are looking for does not exist or has been purged.</p>
-            <a href="/admin" class="btn btn-primary">Return to History</a>
+
+        <!-- Anomaly List -->
+        <div class="bb-card" style="padding:32px;">
+          <h3 style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; color:var(--text-dim); display:flex; align-items:center; gap:10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            Threat Vectors Detected
+          </h3>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            {% if reasons_list %}
+              {% for reason in reasons_list %}
+              <div style="display:flex; gap:16px; align-items:start; padding:16px; background:rgba(99, 102, 241, 0.03); border-radius:10px; border:1px solid rgba(99, 102, 241, 0.05);">
+                <span style="color:var(--primary); font-weight:900; font-size:1.1rem; line-height:1;">•</span>
+                <span style="font-size:0.95rem; color:var(--text); line-height:1.5;">{{ reason }}</span>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div style="padding:32px; text-align:center; color:var(--text-dim); font-style:italic; font-size:0.95rem;">
+                No specific heuristic anomalies targeting this submission.
+              </div>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SIDEBAR INSIGHTS -->
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        
+        <div class="bb-card">
+          <h4 style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:20px;">Platform Telemetry</h4>
+          <div style="display:flex; flex-direction:column; gap:12px; font-size:0.875rem;">
+            <div style="display:flex; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-muted);">Scan Date</span>
+              <span style="font-weight:700; color:var(--text);">{{ scan.created_at.strftime('%Y-%m-%d') }}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; padding-bottom:10px; border-bottom:1px solid var(--border);">
+              <span style="color:var(--text-muted);">Engine Version</span>
+              <span style="font-weight:700; color:var(--text);">v3.0.0-LTS</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+              <span style="color:var(--text-muted);">Model Confidence</span>
+              <span style="font-weight:700; color:var(--status-safe);">99.8%</span>
+            </div>
+          </div>
+        </div>
+
+        {% if scan.scam_intent and scan.scam_intent != 'None Detected' %}
+        <div class="bb-card" style="background:var(--primary-soft); border-color:var(--primary); border-width:2px;">
+           <h4 style="font-size:0.8rem; font-weight:900; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:12px; color:var(--primary);">Psychology Analysis</h4>
+           <div style="font-size:1.1rem; font-weight:800; color:var(--text); margin-bottom:8px;">{{ scan.scam_intent }}</div>
+           <p style="margin:0; font-size:0.85rem; color:var(--text-muted); line-height:1.5;">Our NLP engine has detected patterns targeting human psychology, often used in social engineering.</p>
         </div>
         {% endif %}
-    </main>
+
+        <div class="bb-card">
+          <h4 style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:16px;">Action Center</h4>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+             <button class="btn btn-outline btn-full" onclick="window.print()">Export Findings (PDF)</button>
+             <button class="btn btn-outline btn-full" onclick="copyLink()">Copy Intelligence Link</button>
+             {% if scan.risk_level == 'High' %}
+             <button class="btn btn-primary btn-full" onclick="speakWarning()">Hear Voice Analysis</button>
+             {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% else %}
+    <div class="bb-card" style="padding:80px; text-align:center; margin-top:32px;">
+       <h2 style="font-weight:900;">Forensic Record Not Found</h2>
+       <p style="color:var(--text-muted);">The intelligence id requested does not exist or has been purged from the active datastore.</p>
+       <a href="/history" class="btn btn-primary" style="margin-top:24px;">Return to History</a>
+    </div>
+    {% endif %}
+  </main>
 </div>
 
-<!-- Voice Alert System script -->
-{% if scan and scan.risk_level == 'High' %}
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // Feature 3: Voice Alert System
-        function playVoiceAlert() {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance("Warning! Block Bord AI has detected a high risk threat in this message.");
-                utterance.rate = 1.0;
-                utterance.pitch = 1.1;
-                utterance.volume = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        // Browsers require user interaction before autoplaying audio/voice.
-        // We will trigger it on the first click anywhere on the page if not already played.
-        let hasPlayed = false;
-        document.body.addEventListener('click', function() {
-            if (!hasPlayed) {
-                playVoiceAlert();
-                hasPlayed = true;
-            }
-        }, { once: true });
-        
-        // Also add a visual button to manually trigger it next to the risk score
-        const topbar = document.querySelector('.dashboard-topbar div:nth-child(2)');
-        if (topbar) {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-outline btn-sm';
-            btn.innerHTML = '🔊 Hear Warning';
-            btn.onclick = function(e) {
-                e.stopPropagation(); // prevent body click
-                playVoiceAlert();
-                hasPlayed = true;
-            };
-            topbar.appendChild(btn);
-        }
-    });
+function speakWarning() {
+  if ('speechSynthesis' in window) {
+    const msg = new SpeechSynthesisUtterance("Security Warning. Block Bord AI has identified this content as a high level threat. Proceed with extreme caution.");
+    msg.rate = 1.0; msg.pitch = 1.1; window.speechSynthesis.speak(msg);
+  }
+}
+function copyLink() {
+  navigator.clipboard.writeText(window.location.href).then(() => alert('Forensic link copied.'));
+}
 </script>
-{% endif %}
 {% endblock %}

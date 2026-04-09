@@ -1,103 +1,164 @@
 {% extends "base.html" %}
 
-{% block title %}Checkout - Block Bord AI{% endblock %}
+{% block title %}Complete Purchase — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .checkout-container {
+    max-width: 1000px;
+    margin: 120px auto 80px;
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 40px;
+    align-items: start;
+  }
+  .checkout-summary {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    position: sticky;
+    top: 100px;
+  }
+  .plan-feature-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+  }
+  .plan-feature-row:last-child { border-bottom: none; }
+  
+  @media (max-width: 900px) {
+    .checkout-container { grid-template-columns: 1fr; }
+    .checkout-summary { position: static; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="checkout-page">
-    <div class="card glass checkout-card">
-        <div class="checkout-header">
-            <h1>Checkout</h1>
-            <p class="subtitle">Complete your upgrade to <strong>{{ plan|title }}</strong></p>
-        </div>
-
-        {% if test_mode %}
-        <div class="test-notice glass" style="margin-bottom: 24px; padding: 16px; border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; background: rgba(99, 102, 241, 0.05);">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-                <span class="pulse-dot" style="background: var(--primary);"></span>
-                <strong style="color: var(--primary);">Developer Test Mode Active</strong>
-            </div>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">
-                Razorpay keys are not configured or <code>PAYMENT_TEST_MODE</code> is enabled in <code>.env</code>. 
-                You can simulate a successful transaction below.
-            </p>
-            <a href="/upgrade-beta/{{ plan }}" class="btn btn-primary btn-full" style="background: var(--primary); border: none;">
-                Simulate Successful Upgrade
-            </a>
-        </div>
-        <a class="btn btn-outline btn-full" href="/pricing">Cancel & Back</a>
+<div class="bb-container">
+  <div class="checkout-container">
+    
+    <!-- Left: Payment Details -->
+    <div>
+      <h1 style="font-size:2.25rem; font-weight:900; margin-bottom:12px;">Finalize your <span class="text-gradient">subscription</span></h1>
+      <p style="color:var(--text-muted); margin-bottom:48px;">You're just one step away from premium infrastructure-level threat protection.</p>
+      
+      <div class="bb-card" style="padding:48px;">
+        <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:32px;">Contact Information</h3>
         
-        {% elif error %}
-        <div class="error-box" style="margin-bottom: 24px; padding: 16px; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px; color: #ef4444;">
-            <strong style="display: block; margin-bottom: 4px;">Configuration Needed</strong>
-            {{ error }}
-        </div>
-        <a class="btn btn-outline btn-full" href="/pricing">Back to Pricing</a>
-        
-        {% else %}
-        
-        <div class="plan-summary">
-            <div class="plan-summary-row">
-                <span>Selected Plan</span>
-                <span style="font-weight: 700;">{{ plan|title }}</span>
-            </div>
-            <div class="plan-summary-row">
-                <span>Billing Cycle</span>
-                <span style="color: var(--text-muted);">Monthly</span>
-            </div>
-            <div class="plan-summary-row">
-                <span class="total-label">Total Amount</span>
-                <span class="total-amount">₹{{ (amount/100)|round(2) }}</span>
-            </div>
-        </div>
+        <form id="checkoutForm" style="display:flex; flex-direction:column; gap:24px;">
+           <div class="input-group">
+             <label>Full Name</label>
+             <input type="text" id="cust-name" value="{{ user.username }}" placeholder="Your full name" required>
+           </div>
+           <div class="input-group">
+             <label>Email Address</label>
+             <input type="email" id="cust-email" value="{{ user.email }}" placeholder="address@example.com" required>
+           </div>
+           
+           <div style="margin-top:16px;">
+             <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:24px;">Security Verification</h3>
+             <div style="background:var(--bg-alt); padding:20px; border-radius:12px; border:1px solid var(--border); display:flex; align-items:center; gap:16px;">
+               <div style="width:40px; height:40px; border-radius:50%; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+               </div>
+               <p style="margin:0; font-size:0.85rem; color:var(--text-muted); line-height:1.5;">Payment is handled via <strong>Razorpay Secure</strong>. Block Bord AI never stores or sees your sensitive card information.</p>
+             </div>
+           </div>
 
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-            <button class="btn btn-primary btn-full" id="payBtn" type="button" style="padding: 18px; font-weight: 800;">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 8px;"><path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="1" y1="10" x2="23" y2="10"></line></svg>
-                Pay with Razorpay
-            </button>
-            <a class="btn btn-outline btn-full" href="/pricing">Cancel Transaction</a>
-        </div>
-
-        <p class="note" style="text-align: center; margin-top: 32px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.5;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-            Secure, encrypted payment powered by Razorpay.
-        </p>
-
-        <form id="verifyForm" method="post" action="/payment/verify" style="display:none;">
-            <input type="hidden" name="csrf_token" value="{{ request.session.get('csrf_token') }}">
-            <input type="hidden" name="razorpay_payment_id" id="rp_payment_id">
-            <input type="hidden" name="razorpay_order_id" id="rp_order_id">
-            <input type="hidden" name="razorpay_signature" id="rp_signature">
+           <button type="button" id="payBtn" class="btn btn-primary btn-full" style="margin-top:24px; padding:18px; font-weight:800; font-size:1rem;">
+             Proceed to Payment
+           </button>
         </form>
-
-        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-        <script>
-            (function(){
-                const payBtn = document.getElementById("payBtn");
-                const options = {
-                    key: "{{ key_id }}",
-                    amount: "{{ amount }}",
-                    currency: "INR",
-                    name: "Block Bord AI",
-                    description: "Upgrade plan: {{ plan|title }}",
-                    order_id: "{{ order_id }}",
-                    prefill: {
-                        name: "{{ prefill_name }}",
-                        email: "{{ prefill_email }}"
-                    },
-                    theme: { color: "#6366f1" },
-                    handler: function (response){
-                        document.getElementById("rp_payment_id").value = response.razorpay_payment_id || "";
-                        document.getElementById("rp_order_id").value = response.razorpay_order_id || "";
-                        document.getElementById("rp_signature").value = response.razorpay_signature || "";
-                        document.getElementById("verifyForm").submit();
-                    }
-                };
-                const rzp = new Razorpay(options);
-                payBtn.addEventListener("click", function(){ rzp.open(); });
-            })();
-        </script>
-        {% endif %}
+      </div>
+      
+      <div style="margin-top:32px; display:flex; justify-content:center; gap:32px; opacity:0.6;">
+        <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" style="height:20px;">
+        <div style="display:flex; align-items:center; gap:8px; font-weight:700; font-size:0.75rem; color:var(--text-dim);">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+          SSL SECURED
+        </div>
+      </div>
     </div>
+
+    <!-- Right: Summary Sidebar -->
+    <aside class="checkout-summary">
+       <div style="font-size:0.75rem; font-weight:800; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px;">Order Summary</div>
+       <h2 style="font-size:1.5rem; font-weight:900; margin-bottom:24px;">{{ plan_name }}</h2>
+       
+       <div class="plan-feature-row">
+         <span>Platform Access</span>
+         <span style="font-weight:700;">Included</span>
+       </div>
+       <div class="plan-feature-row">
+         <span>Daily Scans</span>
+         <span style="font-weight:700;">{{ "Unlimited" if plan_name == "Pro Plus" else "1,000 / day" }}</span>
+       </div>
+       <div class="plan-feature-row">
+         <span>API Access Tokens</span>
+         <span style="font-weight:700;">Full Access</span>
+       </div>
+       <div class="plan-feature-row">
+         <span>Threat Intel Overrides</span>
+         <span style="font-weight:700;">Priority</span>
+       </div>
+
+       <div style="margin-top:32px; padding-top:24px; border-top:2px solid var(--border);">
+         <div style="display:flex; justify-content:space-between; align-items:center;">
+           <span style="font-weight:800; color:var(--text);">Total Amount</span>
+           <span style="font-size:1.75rem; font-weight:900; color:var(--primary);">₹{{ price }}<span style="font-size:0.9rem; opacity:0.6; font-weight:500;">/mo</span></span>
+         </div>
+       </div>
+       
+       <div style="margin-top:24px; padding:16px; background:rgba(99, 102, 241, 0.05); border-radius:10px; border:1px solid rgba(99, 102, 241, 0.1); font-size:0.8rem; color:var(--primary); font-weight:600; text-align:center;">
+          Automated renewal enabled. Cancel anytime in Settings.
+       </div>
+    </aside>
+
+  </div>
 </div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.getElementById('payBtn').onclick = async function(e) {
+    const btn = e.target;
+    btn.disabled = true;
+    btn.textContent = 'Initializing Secure Checkout...';
+
+    try {
+        const response = await fetch('/api/create_order', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ plan: "{{ plan_name }}" })
+        });
+        const order = await response.json();
+
+        const options = {
+            "key": order.key_id,
+            "amount": order.amount,
+            "currency": order.currency,
+            "name": "Block Bord AI",
+            "description": "{{ plan_name }} Subscription",
+            "order_id": order.id,
+            "prefill": {
+                "name": document.getElementById('cust-name').value,
+                "email": document.getElementById('cust-email').value
+            },
+            "theme": { "color": "#6366f1" },
+            "handler": function (response){
+                window.location.href = `/payment/callback?payment_id=${response.razorpay_payment_id}&order_id=${response.razorpay_order_id}&signature=${response.razorpay_signature}`;
+            }
+        };
+        const rzp1 = new Razorpay(options);
+        rzp1.open();
+    } catch (err) {
+        alert('Could not initialize payment. Please try again.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Proceed to Payment';
+    }
+}
+</script>
 {% endblock %}

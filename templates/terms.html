@@ -1,144 +1,102 @@
 {% extends "base.html" %}
 
-{% block title %}Terms of Service - Block Bord AI{% endblock %}
-{% block body_class %}light-theme{% endblock %}
+{% block title %}Terms of Service — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .legal-hero {
+    padding: 120px 0 64px;
+    background: linear-gradient(160deg, #f8faff 0%, #f0f4ff 100%);
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .legal-content {
+    max-width: 800px;
+    margin: 80px auto;
+    line-height: 1.8;
+    color: var(--text);
+  }
+  .legal-content h2 { margin: 48px 0 24px; font-size: 1.5rem; font-weight: 800; }
+  .legal-content p { margin-bottom: 24px; color: var(--text-muted); }
+  .legal-content ul, .legal-content ol { margin-bottom: 24px; padding-left: 20px; color: var(--text-muted); }
+  .legal-content li { margin-bottom: 12px; }
+  
+  .legal-toc {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    margin-bottom: 64px;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="main-content" style="padding: 160px 20px 120px;">
-    <div style="text-align: center; margin-bottom: 60px;">
-        <div class="badge-premium" style="margin: 0 auto 24px; display: inline-block;">LEGAL</div>
-        <h1 style="font-size: 3.5rem; font-weight: 800; margin-bottom: 16px;">Terms of <span class="text-gradient">Service</span></h1>
-        <p style="color: var(--text-muted); font-size: 1.1rem;">Effective date: March 24, 2026 &nbsp;·&nbsp; Last updated: March 24, 2026</p>
+<section class="legal-hero">
+  <div class="bb-container">
+    <span class="bb-overline">Legal Framework</span>
+    <h1 class="bb-title">Terms of <span>Service</span></h1>
+    <p class="bb-subtitle" style="margin:0 auto; max-width:600px;">Last Updated: March 24, 2026</p>
+  </div>
+</section>
+
+<div class="bb-container">
+  <article class="legal-content">
+    
+    <div class="legal-toc">
+      <h3 style="font-size:1rem; font-weight:800; margin-bottom:16px;">General Provisions</h3>
+      <nav style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.9rem; font-weight:600;">
+        <a href="#acceptance" style="color:var(--primary);">1. Acceptance</a>
+        <a href="#description" style="color:var(--primary);">2. Service Scope</a>
+        <a href="#accounts" style="color:var(--primary);">3. User Accounts</a>
+        <a href="#acceptable-use" style="color:var(--primary);">4. Usage Rules</a>
+        <a href="#billing" style="color:var(--primary);">5. Billing & Plans</a>
+        <a href="#liability" style="color:var(--primary);">6. Liability</a>
+      </nav>
     </div>
 
-    <div style="max-width: 860px; margin: 0 auto; width: 100%;">
-        <!-- Table of Contents Card -->
-        <div class="card glass" style="padding: 32px; margin-bottom: 40px; border: 1px solid var(--border-light);">
-            <h3 style="font-size: 1.1rem; font-weight: 800; margin-bottom: 16px; color: var(--text);">Contents</h3>
-            <ol style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; color: var(--primary); font-weight: 600;">
-                <li><a href="#acceptance" style="color: var(--primary);">Acceptance of Terms</a></li>
-                <li><a href="#description" style="color: var(--primary);">Description of Service</a></li>
-                <li><a href="#accounts" style="color: var(--primary);">User Accounts</a></li>
-                <li><a href="#acceptable-use" style="color: var(--primary);">Acceptable Use</a></li>
-                <li><a href="#plans" style="color: var(--primary);">Subscription Plans & Billing</a></li>
-                <li><a href="#ip" style="color: var(--primary);">Intellectual Property</a></li>
-                <li><a href="#data" style="color: var(--primary);">Your Data & Feedback</a></li>
-                <li><a href="#disclaimer" style="color: var(--primary);">Disclaimer of Warranties</a></li>
-                <li><a href="#liability" style="color: var(--primary);">Limitation of Liability</a></li>
-                <li><a href="#termination" style="color: var(--primary);">Termination</a></li>
-            </ol>
-        </div>
-
-        <!-- Main Content Card -->
-        <div class="card glass" style="padding: 56px; line-height: 1.8;">
-            
-            <div id="acceptance" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    1. Acceptance of Terms
-                </h2>
-                <p style="color: var(--text-muted);">By registering for, accessing, or using Block Bord AI (the "Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, do not use the Service. If you are using the Service on behalf of an organisation, you represent that you have authority to bind that organisation to these Terms.</p>
-            </div>
-
-            <div id="description" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    2. Description of Service
-                </h2>
-                <p style="color: var(--text-muted); margin-bottom: 16px;">Block Bord AI provides an AI-powered real-time phishing and threat detection platform. This includes:</p>
-                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
-                    <li>A web dashboard for scanning URLs, text messages, emails, and QR codes for threats.</li>
-                    <li>A browser extension that monitors visited pages for indicators of phishing, malware, and fraud.</li>
-                    <li>A programmatic REST API (for Pro subscribers) for integrating scanning into third-party systems.</li>
-                </ul>
-                <p style="color: var(--text-muted);">The Service is provided for informational and protective purposes. Scan results represent probabilistic risk assessments and should not be treated as absolute verdicts. We are not responsible for decisions made based on scan results.</p>
-            </div>
-
-            <div id="accounts" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    3. User Accounts
-                </h2>
-                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px;">
-                    <li>You must provide accurate and complete information when registering.</li>
-                    <li>You are responsible for maintaining the security of your account credentials.</li>
-                    <li>You must not share your account or API key with others.</li>
-                    <li>We reserve the right to disable or delete accounts that violate these Terms.</li>
-                </ul>
-            </div>
-
-            <div id="acceptable-use" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    4. Acceptable Use
-                </h2>
-                <p style="color: var(--text-muted); margin-bottom: 16px;">You agree NOT to use the Service to:</p>
-                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px;">
-                    <li>Probe or scan systems, networks, or infrastructure you do not own or have permission to test.</li>
-                    <li>Reverse-engineer, decompile, or attempt to extract the source code or trained models of the Service.</li>
-                    <li>Circumvent rate limits, authentication, or access controls.</li>
-                    <li>Submit content that violates any applicable law or third-party rights.</li>
-                    <li>Attempt to load the Service with excessive automated requests (DDoS or scraping).</li>
-                </ul>
-                <p style="color: var(--text-muted);">Violation of these restrictions may result in immediate account termination.</p>
-            </div>
-
-            <div id="plans" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    5. Subscription Plans & Billing
-                </h2>
-                <ul style="padding-left: 20px; color: var(--text-muted); display: flex; flex-direction: column; gap: 12px;">
-                    <li><strong style="color: var(--text);">Billing:</strong> Subscription fees are billed in advance on a per-plan basis. payments are processed securely by Razorpay.</li>
-                    <li><strong style="color: var(--text);">Plan Limits:</strong> Each plan includes a daily scan limit. Exceeding limits requires an upgrade via the Pricing page.</li>
-                    <li><strong style="color: var(--text);">Refunds:</strong> We do not offer refunds for subscription fees once a billing cycle has started, except where required by applicable law.</li>
-                    <li><strong style="color: var(--text);">Cancellations:</strong> You may cancel your subscription at any time.</li>
-                </ul>
-            </div>
-
-            <div id="ip" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    6. Intellectual Property
-                </h2>
-                <p style="color: var(--text-muted);">All content, technology, AI models, algorithms, designs, and code comprising the Service are the exclusive intellectual property of Block Bord AI and its licensors. You are granted a limited, non-exclusive, non-transferable licence to use the Service for its intended purpose.</p>
-            </div>
-
-            <div id="data" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    7. Your Data & Feedback
-                </h2>
-                <p style="color: var(--text-muted); margin-bottom: 16px;">You retain ownership of all content you submit for scanning. By submitting content to the Service, you grant Block Bord AI a limited licence to process and analyse that content solely for the purpose of providing the Service.</p>
-                <p style="color: var(--text-muted);">When you submit feedback labels ("spam" / "safe") for scan results, you grant us a royalty-free licence to use anonymised, aggregated versions of that feedback to train and improve our AI models.</p>
-            </div>
-
-            <div id="disclaimer" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    8. Disclaimer of Warranties
-                </h2>
-                <p style="color: var(--text-muted);">The Service is provided <strong style="color: var(--text);">"as is"</strong> and <strong style="color: var(--text);">"as available"</strong> without warranties of any kind, either express or implied, including but not limited to implied warranties of merchantability, fitness for a particular purpose, or non-infringement. We do not warrant that the Service will be uninterrupted, error-free, or that all phishing threats will be detected.</p>
-            </div>
-
-            <div id="liability" style="margin-bottom: 48px; padding-bottom: 40px; border-bottom: 1px solid var(--border);">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    9. Limitation of Liability
-                </h2>
-                <p style="color: var(--text-muted);">To the maximum extent permitted by applicable law, Block Bord AI shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of, or inability to use, the Service — even if we have been advised of the possibility of such damages.</p>
-            </div>
-
-            <div id="termination" style="margin-bottom: 16px;">
-                <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text); display: flex; align-items: center; gap: 12px;">
-                    <span style="display: block; width: 6px; height: 24px; background: var(--primary-grad); border-radius: 4px;"></span>
-                    10. Termination
-                </h2>
-                <p style="color: var(--text-muted);">We may suspend or terminate your account at any time, with or without notice, for violation of these Terms or for any other reason at our sole discretion.</p>
-            </div>
-
-        </div>
-
+    <div id="acceptance">
+      <h2>1. Acceptance of Terms</h2>
+      <p>By registering for, accessing, or using Block Bord AI (the "Service"), you agree to be bound by these Terms of Service. If you do not agree to these Terms, do not use the Service. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization.</p>
     </div>
+
+    <div id="description">
+      <h2>2. Description of Service</h2>
+      <p>Block Bord AI provides an AI-powered real-time threat intelligence platform. This includes web-based scanning, browser extensions, and programmatic APIs for detecting digital fraud, phishing, and cybersecurity risks.</p>
+      <p>The Service is provided for informational and protective purposes. Scan results represent probabilistic risk assessments and should not be treated as absolute verdicts. We are not responsible for decisions made based on scan results.</p>
+    </div>
+
+    <div id="accounts">
+      <h2>3. User Accounts</h2>
+      <ul>
+        <li>You must provide accurate information when registering.</li>
+        <li>You are responsible for maintaining the security of your account credentials.</li>
+        <li>Account or API key sharing is strictly prohibited.</li>
+        <li>We reserve the right to disable accounts that violate these Terms.</li>
+      </ul>
+    </div>
+
+    <div id="acceptable-use">
+      <h2>4. Acceptable Use</h2>
+      <p>You agree NOT to use the Service to:</p>
+      <ul>
+        <li>Probe or scan infrastructure you do not own or have permission to test.</li>
+        <li>Attempt to reverse-engineer or extract core AI models.</li>
+        <li>Circumvent rate limits or security controls.</li>
+        <li>Submit content that violates third-party rights or laws.</li>
+      </ul>
+    </div>
+
+    <div id="billing">
+      <h2>5. Subscription Plans & Billing</h2>
+      <p>Subscription fees are billed in advance. Payments are processed securely via Razorpay. Cancellations take effect at the end of the current billing cycle. We do not offer refunds once a billing cycle has started, except as required by law.</p>
+    </div>
+
+    <div id="liability">
+      <h2>6. Limitation of Liability</h2>
+      <p>Block Bord AI shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service. The Service is provided "as is" without warranties of any kind.</p>
+    </div>
+
+  </article>
 </div>
 {% endblock %}

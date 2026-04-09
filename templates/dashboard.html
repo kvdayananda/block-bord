@@ -1,248 +1,280 @@
 {% extends "base.html" %}
-
-{% block title %}Dashboard - Block Bord AI{% endblock %}
-
+{% block title %}Dashboard — Block Bord AI{% endblock %}
 {% block navbar %}{% endblock %}
 
 {% block extra_head %}
-<!-- Typography & Icons -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container" style="background: var(--bg);">
-    {% include "sidebar.html" %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
 
-    <main class="main-content dashboard-main">
-        <!-- ===== TOPBAR ===== -->
-        <div class="dashboard-topbar" style="margin-bottom: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                <div>
-                    <span class="footer-version-tag" style="margin: 0 0 12px 0;">SYSTEM_ONLINE</span>
-                    <h1 style="font-family: var(--font-display); font-size: 2.5rem; font-weight: 850; letter-spacing: -0.03em; margin-bottom: 4px; color: var(--text);">
-                        Intelligence Console
-                    </h1>
-                    <p style="font-size: 1rem; color: var(--text-muted); margin: 0;">
-                        Welcome back, <span style="color: var(--primary); font-weight: 700;">{{ user.username }}</span>. System telemetry is nominal.
-                    </p>
-                </div>
-                <div style="display: flex; gap: 12px;">
-                    <div class="bb-card" style="padding: 12px 20px; display: flex; align-items: center; gap: 10px; border-radius: 12px;">
-                        <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--status-safe); box-shadow: 0 0 10px var(--status-safe);"></div>
-                        <span style="font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; color: var(--text-dim);">EDGE_SHIELD_ACTIVE</span>
-                    </div>
-                </div>
-            </div>
+  <main class="app-main-content">
+
+    <!-- ── Page Header ── -->
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--status-safe);display:inline-block;box-shadow:0 0 6px var(--status-safe);"></span>
+          SYSTEM ONLINE
+        </span>
+        <h1 class="app-page-title">Intelligence Console</h1>
+        <p class="app-page-subtitle">Welcome back, <strong style="color:var(--primary);">{{ user.username }}</strong>. All systems nominal.</p>
+      </div>
+      <div class="app-page-header-right">
+        <div class="app-status-badge">
+          <div class="app-status-dot" style="background:var(--status-safe);"></div>
+          Edge Shield Active
+        </div>
+        <a href="/pricing" class="btn btn-outline" style="padding:8px 18px;font-size:0.8125rem;">
+          {% if user.is_pro %}💎 Pro Tier{% else %}Upgrade Plan{% endif %}
+        </a>
+      </div>
+    </div>
+
+    <!-- ── Stats Grid ── -->
+    <div class="stats-grid-premium">
+      <div class="stat-card-premium">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="stat-icon-new primary-bg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div>
+            <span class="stat-label-new">Total Analyses</span>
+            <h2 class="stat-value-new">{{ total_scans or 0 }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card-premium">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="stat-icon-new danger-bg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          </div>
+          <div>
+            <span class="stat-label-new">Threats Blocked</span>
+            <h2 class="stat-value-new" style="color:var(--status-danger);">{{ high_risk or 0 }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card-premium">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="stat-icon-new warn-bg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <div>
+            <span class="stat-label-new">Suspicious</span>
+            <h2 class="stat-value-new" style="color:var(--status-warn);">{{ suspicious_count or 0 }}</h2>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card-premium">
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div class="stat-icon-new safe-bg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div>
+            <span class="stat-label-new">Security Score</span>
+            <h2 class="stat-value-new" id="scoreVal" style="color:var(--score-color);">{{ security_score }}</h2>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main Grid ── -->
+    <div class="dashboard-main-grid">
+
+      <!-- Scan Console -->
+      <div class="scan-console-wrapper">
+        <div class="scan-console-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="scan-dot active-dot"></span>
+            <span style="font-size:0.8rem;font-weight:700;color:var(--text);letter-spacing:0.06em;text-transform:uppercase;">Threat Analyzer</span>
+          </div>
+          <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);">SANDBOX READY</span>
         </div>
 
-        <!-- ===== STATS GRID ===== -->
-        <div class="stats-grid-premium">
-            <div class="stat-card-premium">
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new primary-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2" /></svg>
-                    </div>
-                    <div>
-                        <span class="stat-label-new">Analyses</span>
-                        <h2 class="stat-value-new">{{ total_scans or 0 }}</h2>
-                    </div>
-                </div>
-            </div>
+        <textarea id="content" class="console-textarea" placeholder="Paste a URL, domain, email, or text for deep AI analysis…"></textarea>
 
-            <div class="stat-card-premium">
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new danger-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" /></svg>
-                    </div>
-                    <div>
-                        <span class="stat-label-new">Threats Blocking</span>
-                        <h2 class="stat-value-new" style="color: var(--status-danger);">{{ high_risk or 0 }}</h2>
-                    </div>
-                </div>
-            </div>
+        <div class="scan-console-footer">
+          <div class="usage-pill">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <strong>{{ remaining_scans }}</strong> scans left today
+          </div>
+          <button id="scanBtn" class="btn btn-primary" onclick="scanContent()" style="padding:10px 28px;font-size:0.9rem;">
+            Run Analysis
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div id="result" style="padding:0 24px 20px;"></div>
+      </div>
 
-            <div class="stat-card-premium">
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new warn-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                    </div>
-                    <div>
-                        <span class="stat-label-new">Suspicious</span>
-                        <h2 class="stat-value-new" style="color: var(--status-warning);">{{ suspicious_count or 0 }}</h2>
-                    </div>
-                </div>
-            </div>
+      <!-- Right column -->
+      <div style="display:flex;flex-direction:column;gap:20px;">
 
-            <div class="stat-card-premium">
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <div class="stat-icon-new safe-bg">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    </div>
-                    <div>
-                        <span class="stat-label-new">Security Score</span>
-                        <h2 class="stat-value-new" style="color: var(--score-color);">{{ security_score }}</h2>
-                    </div>
-                </div>
+        <!-- Risk Doughnut -->
+        <div class="bb-card" style="flex:1;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Risk Distribution</h3>
+            <span class="badge badge-primary">LIVE</span>
+          </div>
+          <div style="flex:1;position:relative;min-height:200px;">
+            <canvas id="riskChart"></canvas>
+          </div>
+          <!-- Legend -->
+          <div style="display:flex;justify-content:center;gap:20px;margin-top:16px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text-muted);">
+              <span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;"></span>Safe
             </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text-muted);">
+              <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;"></span>Suspicious
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text-muted);">
+              <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;"></span>Malicious
+            </div>
+          </div>
         </div>
 
-        <div class="dashboard-main-grid">
-            <!-- ===== SCAN CONSOLE ===== -->
-            <div class="scan-console-wrapper">
-                <div class="scan-console-header">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="scan-dot active-dot"></span>
-                        <h3 style="font-size: 0.85rem; font-weight: 850; color: var(--text); margin: 0; letter-spacing: 0.05em; text-transform: uppercase;">
-                            Threat Analyzer v4.0
-                        </h3>
-                    </div>
-                    <div style="font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-dim);">CORE_SANDBOX_READY</div>
-                </div>
-
-                <textarea id="content" class="console-textarea" style="min-height: 280px; font-family: var(--font-mono);"
-                    placeholder="Enter URL, Documentation, or Raw Data for deep neural analysis..."></textarea>
-
-                <div class="scan-console-footer">
-                    <div class="usage-pill">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        <span style="font-weight: 800;">{{ plan_limit - today_count if plan_limit != '∞' else '∞' }}</span> Scans Left
-                    </div>
-                    <button id="scanBtn" class="btn btn-primary" onclick="scanContent()" style="padding: 12px 32px; border-radius: 12px;">
-                        <span>Initiate Analysis</span>
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-                    </button>
-                </div>
-                <div id="result" style="padding: 0 4px; margin-top: 16px;"></div>
+        <!-- Edge Shield status card -->
+        <div class="bb-card" style="background:var(--primary-grad);border:none;">
+          <div style="display:flex;gap:14px;align-items:center;color:#fff;">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
-
-            <!-- ===== SECONDARY COLUMN ===== -->
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                <!-- Risk Distribution -->
-                <div class="bb-card" style="flex: 1; min-height: 300px; display: flex; flex-direction: column;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 24px;">
-                        <h3 style="font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Risk Distribution</h3>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary);"><circle cx="12" cy="12" r="10"></circle><path d="M12 2v10l4.5 4.5"></path></svg>
-                    </div>
-                    <div style="flex: 1; position: relative;">
-                        <canvas id="riskChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Edge Shield Status -->
-                <div class="bb-card" style="padding: 24px; background: var(--primary-grad); border: none;">
-                    <div style="display: flex; gap: 16px; align-items: center; color: white;">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                        </div>
-                        <div>
-                            <h4 style="margin: 0; font-size: 1rem; font-weight: 850;">Edge Shield</h4>
-                            <p style="margin: 4px 0 0; opacity: 0.8; font-size: 0.85rem;">Real-time URL protection is active.</p>
-                        </div>
-                    </div>
-                    <a href="/extension-setup" class="btn" style="width:100%; margin-top: 16px; background: white; color: var(--primary); font-weight: 800;">Configure Nodes</a>
-                </div>
+            <div>
+              <h4 style="margin:0;color:#fff;font-size:1rem;font-weight:800;">Edge Shield</h4>
+              <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:0.85rem;">Real-time browser protection is active.</p>
             </div>
+          </div>
+          <a href="/extension-setup" class="btn" style="width:100%;margin-top:16px;background:#fff;color:var(--primary);font-weight:700;">Configure Extension</a>
         </div>
 
-        <!-- Full-Width Timeline -->
-        <div class="bb-card" style="margin-top: 32px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 32px;">
-                <h3 style="font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Threat Intelligence Timeline</h3>
-                <div class="usage-pill" style="font-size: 0.7rem; font-weight: 800;">LIVE_FEED</div>
-            </div>
-            <div style="height: 300px; width: 100%;">
-                <canvas id="timelineChart"></canvas>
-            </div>
-        </div>
+      </div>
+    </div>
 
-    </main>
+    <!-- Timeline -->
+    <div class="bb-card" style="margin-top:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+        <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Threat Intelligence Timeline</h3>
+        <span class="badge badge-danger">LIVE FEED</span>
+      </div>
+      <div style="height:280px;width:100%;">
+        <canvas id="timelineChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px;">
+      <a href="/history" class="bb-card" style="text-decoration:none;padding:20px 24px;cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="stat-icon-new primary-bg" style="width:36px;height:36px;border-radius:10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;">Scan History</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">View all forensics</div>
+          </div>
+        </div>
+      </a>
+      <a href="/leak-checker" class="bb-card" style="text-decoration:none;padding:20px 24px;cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="stat-icon-new warn-bg" style="width:36px;height:36px;border-radius:10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;">Leak Checker</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">Check email exposure</div>
+          </div>
+        </div>
+      </a>
+      <a href="/scam-map" class="bb-card" style="text-decoration:none;padding:20px 24px;cursor:pointer;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="stat-icon-new safe-bg" style="width:36px;height:36px;border-radius:10px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9rem;">Threat Map</div>
+            <div style="font-size:0.8rem;color:var(--text-muted);">Global threat view</div>
+          </div>
+        </div>
+      </a>
+    </div>
+
+  </main>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <style>
-    :root {
-        --score-color: {% if security_score >= 80 %}var(--status-safe){% elif security_score >= 50 %}var(--status-warning){% else %}var(--status-danger){% endif %};
-    }
+  :root { --score-color: {% if security_score >= 80 %}var(--status-safe){% elif security_score >= 50 %}var(--status-warn){% else %}var(--status-danger){% endif %}; }
 </style>
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        const textColor = isDark ? '#94a3b8' : '#64748b';
-        const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
+document.addEventListener('DOMContentLoaded', () => {
+  const gridColor = 'rgba(15,23,42,0.05)';
+  const textColor = '#94a3b8';
 
-        // 1. Risk Chart
-        const riskCtx = document.getElementById('riskChart');
-        if (riskCtx) {
-            new Chart(riskCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Safe', 'Suspicious', 'Malicious'],
-                    datasets: [{
-                        data: [{{ safe_count or 0 }}, {{ suspicious_count or 0 }}, {{ high_risk or 0 }}],
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    cutout: '80%',
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } }
-                }
-            });
-        }
-
-        // 2. Timeline Chart
-        const timelineCtx = document.getElementById('timelineChart');
-        if (timelineCtx) {
-            new Chart(timelineCtx, {
-                type: 'line',
-                data: {
-                    labels: {{ timeline_labels | tojson | safe }},
-                    datasets: [
-                        {
-                            label: 'Risk Signals',
-                            data: {{ timeline_high | tojson | safe }},
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Safe Signals',
-                            data: {{ timeline_safe | tojson | safe }},
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            fill: true,
-                            tension: 0.4,
-                            pointRadius: 0
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { display: false } 
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            grid: { color: gridColor },
-                            ticks: { color: textColor, font: { size: 10 } }
-                        },
-                        x: { 
-                            grid: { display: false },
-                            ticks: { color: textColor, font: { size: 10 } }
-                        }
-                    }
-                }
-            });
-        }
+  // Risk Chart
+  const riskCtx = document.getElementById('riskChart');
+  if (riskCtx) {
+    new Chart(riskCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Safe', 'Suspicious', 'Malicious'],
+        datasets: [{
+          data: [{{ safe_count or 0 }}, {{ suspicious_count or 0 }}, {{ high_risk or 0 }}],
+          backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+          borderWidth: 0,
+          hoverOffset: 10
+        }]
+      },
+      options: {
+        cutout: '78%',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } }
+      }
     });
+  }
+
+  // Timeline Chart
+  const timelineCtx = document.getElementById('timelineChart');
+  if (timelineCtx) {
+    new Chart(timelineCtx, {
+      type: 'line',
+      data: {
+        labels: {{ timeline_labels | tojson | safe }},
+        datasets: [
+          {
+            label: 'Risk Signals',
+            data: {{ timeline_high | tojson | safe }},
+            borderColor: '#ef4444',
+            backgroundColor: 'rgba(239,68,68,0.08)',
+            fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2
+          },
+          {
+            label: 'Safe Signals',
+            data: {{ timeline_safe | tojson | safe }},
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16,185,129,0.08)',
+            fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
+          x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 } } }
+        }
+      }
+    });
+  }
+});
 </script>
 {% endblock %}

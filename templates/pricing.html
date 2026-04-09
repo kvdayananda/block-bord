@@ -1,127 +1,296 @@
 {% extends "base.html" %}
-
 {% block title %}Pricing - Block Bord AI{% endblock %}
 
 {% block extra_head %}
-<!-- Typography & Icons -->
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/pricing.css">
+<meta name="description" content="Choose the Block Bord AI plan that fits your security needs. Start free, upgrade anytime.">
+<style>
+  .bb-price-page { background: var(--bg-alt); min-height: calc(100vh - 68px); }
+  .price-hero {
+    background: linear-gradient(160deg, #f8faff 0%, #eef2ff 100%);
+    padding: 80px 0 64px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .price-hero h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); margin-bottom: 12px; }
+  .price-hero p  { font-size: 1.0625rem; color: var(--text-muted); }
+
+  .plans-section { padding: 64px 0; }
+
+  .bb-price-grid4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .bb-plan {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px 28px;
+    display: flex;
+    flex-direction: column;
+    transition: var(--transition);
+    position: relative;
+  }
+  .bb-plan:hover { box-shadow: var(--shadow); border-color: var(--border-bright); transform: translateY(-4px); }
+  .bb-plan.active-border { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-soft); }
+
+  .bb-plan-pro {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft), var(--shadow-lg);
+    background: linear-gradient(160deg, #f5f3ff, #ede9fe);
+  }
+  .bb-plan-pro:hover { transform: translateY(-6px); }
+
+  .pro-badge-top {
+    position: absolute;
+    top: -14px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-grad);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 5px 18px;
+    border-radius: var(--radius-pill);
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+  }
+
+  .plan-name   { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .plan-desc   { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 20px; min-height: 44px; }
+
+  .bb-plan-price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 28px; }
+  .bb-plan-price strong {
+    font-family: var(--font-display);
+    font-size: 2.375rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    color: var(--text);
+  }
+  .bb-plan-price span { font-size: 0.9rem; color: var(--text-muted); }
+
+  .plan-features { flex: 1; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .plan-feature {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .plan-feature svg { flex-shrink: 0; color: var(--status-safe); }
+  .plan-feature.unavail { color: var(--text-dim); text-decoration: line-through; }
+  .plan-feature.unavail svg { color: var(--text-dim); }
+
+  .plan-divider { height: 1px; background: var(--border); margin: 4px 0 16px; }
+
+  /* FAQ */
+  .faq-wrap { max-width: 800px; margin: 0 auto; padding: 0 24px 96px; }
+  .faq-title { text-align: center; margin-bottom: 48px; }
+
+  /* Security badges */
+  .trust-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: wrap;
+    margin-top: 56px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+  }
+  .trust-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+  .trust-item svg { color: var(--status-safe); }
+
+  @media (max-width: 1000px) { .bb-price-grid4 { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 580px)  { .bb-price-grid4 { grid-template-columns: 1fr; } }
+</style>
 {% endblock %}
 
 {% block content %}
-<section class="bb-price-page">
-  <div class="bb-price-wrap">
-    <div class="bb-price-head">
-      <span class="footer-version-tag" style="margin: 0 auto 16px; display: inline-block;">TIERS_&_ACCESS</span>
-      <h1>Elite Protection Tiers</h1>
-      <p>
-        Currently on the <strong style="color: var(--primary);">{{ plan|upper }}</strong> plan.
-        Upgrade your node capacity below.
-      </p>
-    </div>
+<!-- Hero -->
+<div class="price-hero">
+  <div class="bb-container">
+    <span class="bb-overline">Simple, Transparent Pricing</span>
+    <h1>Find the perfect plan</h1>
+    <p>Currently on the <strong style="color:var(--primary);">{{ plan|upper }}</strong> plan.
+       {% if plan == 'free' %}Upgrade anytime for more power.{% else %}Manage your subscription below.{% endif %}
+    </p>
+  </div>
+</div>
 
+<!-- Plans -->
+<section class="plans-section">
+  <div class="bb-container">
     <div class="bb-price-grid4">
 
       <!-- FREE -->
       <div class="bb-plan {% if plan == 'free' %}active-border{% endif %}">
-        <div class="bb-plan-top">
-          <h3>Community Node</h3>
-          <div class="bb-plan-price">
-            <strong>Free</strong>
+        <p class="plan-name">Community</p>
+        <p class="plan-desc">Perfect for individuals exploring cyber security.</p>
+        <div class="bb-plan-price">
+          <strong>Free</strong>
+        </div>
+        <div class="plan-features">
+          {% for feature in ['6 scans per day','Basic threat detection','Community block list','Browser extension'] %}
+          <div class="plan-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ feature }}
           </div>
+          {% endfor %}
+          {% for feature in ['Deep link analysis','API access'] %}
+          <div class="plan-feature unavail">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            {{ feature }}
+          </div>
+          {% endfor %}
         </div>
-        <ul>
-          <li>10 scans per day</li>
-          <li>Basic heuristics</li>
-          <li>Standard Support</li>
-        </ul>
-        <div class="bb-action">
-          {% if plan == "free" %}
-          <button class="btn btn-secondary btn-full" disabled style="opacity: 0.5;">Active Tier</button>
-          {% else %}
-          <a class="btn btn-secondary btn-full" href="/app">Dashboard</a>
-          {% endif %}
-        </div>
+        {% if plan == 'free' %}
+        <button class="btn btn-primary btn-full" disabled>Current Plan</button>
+        {% else %}
+        <a class="btn btn-outline btn-full" href="/app">Go to Dashboard</a>
+        {% endif %}
       </div>
 
       <!-- STARTER -->
       <div class="bb-plan {% if plan == 'starter' %}active-border{% endif %}">
-        <div class="bb-plan-top">
-          <h3>Sentry Node</h3>
-          <div class="bb-plan-price">
-            <strong>₹99</strong>
-            <span>/month</span>
+        <p class="plan-name">Starter</p>
+        <p class="plan-desc">For power users needing more daily scans and analytics.</p>
+        <div class="bb-plan-price">
+          <strong>₹99</strong><span>/ month</span>
+        </div>
+        <div class="plan-features">
+          {% for feature in ['50 scans per day','Priority threat updates','Scan analytics & history','Community block list','Browser extension'] %}
+          <div class="plan-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ feature }}
+          </div>
+          {% endfor %}
+          <div class="plan-feature unavail">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            API access
           </div>
         </div>
-        <ul>
-          <li>50 scans per day</li>
-          <li>Enhanced Analytics</li>
-          <li>Priority Telemetry</li>
-        </ul>
-        <div class="bb-action">
-          {% if plan == "starter" %}
-          <button class="btn btn-secondary btn-full" disabled style="opacity: 0.5;">Active Tier</button>
-          {% else %}
-          <a class="btn btn-secondary btn-full" href="/checkout/starter">Initialize Tier</a>
-          {% endif %}
-        </div>
+        {% if plan == 'starter' %}
+        <button class="btn btn-primary btn-full" disabled>Current Plan</button>
+        {% else %}
+        <a class="btn btn-outline btn-full" href="/checkout/starter">Upgrade to Starter</a>
+        {% endif %}
       </div>
 
-      <!-- PRO -->
+      <!-- PRO PLUS (featured) -->
       <div class="bb-plan bb-plan-pro">
-        <div class="bb-plan-top">
-          <h3>Intelligence Core</h3>
-          <div class="bb-plan-price">
-            <strong>₹199</strong>
-            <span>/month</span>
+        <div class="pro-badge-top">MOST POPULAR</div>
+        <p class="plan-name">Pro Plus</p>
+        <p class="plan-desc">Unlimited power with deep analysis and auto-protection.</p>
+        <div class="bb-plan-price">
+          <strong>₹199</strong><span>/ month</span>
+        </div>
+        <div class="plan-features">
+          {% for feature in ['Unlimited scans','Auto-Guard protection','Deep link analysis','Leak detector access','Priority threat feed','Global threat map','Browser extension','Email support'] %}
+          <div class="plan-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ feature }}
           </div>
+          {% endfor %}
         </div>
-        <ul>
-          <li>Unlimited Neural Scans</li>
-          <li>Auto-Guard Real-time</li>
-          <li>Deep Link Intelligence</li>
-          <li>24/7 Priority Ops</li>
-        </ul>
-        <div class="bb-action">
-          {% if plan == "pro" %}
-          <button class="btn btn-primary btn-full" disabled style="box-shadow: none;">Active Protocol</button>
-          {% else %}
-          <a class="btn btn-primary btn-full" href="/checkout/pro">ACTIVATE_PRO</a>
-          {% endif %}
-        </div>
+        {% if plan == 'pro' %}
+        <button class="btn btn-primary btn-full" disabled>Current Plan</button>
+        {% else %}
+        <a class="btn btn-primary btn-full" href="/checkout/pro">Get Pro Plus</a>
+        {% endif %}
       </div>
 
-      <!-- BUSINESS -->
+      <!-- TEAM -->
       <div class="bb-plan {% if plan == 'business' %}active-border{% endif %}">
-        <div class="bb-plan-top">
-          <h3>Command Node</h3>
-          <div class="bb-plan-price">
-            <strong>₹499</strong>
-            <span>/month</span>
+        <p class="plan-name">Team</p>
+        <p class="plan-desc">For organizations needing multi-user access and API integration.</p>
+        <div class="bb-plan-price">
+          <strong>₹499</strong><span>/ month</span>
+        </div>
+        <div class="plan-features">
+          {% for feature in ['Unlimited scans','Multi-user dashboard','API access (Beta)','Dedicated support','Team analytics','Custom integrations','SLA guarantee'] %}
+          <div class="plan-feature">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            {{ feature }}
           </div>
+          {% endfor %}
         </div>
-        <ul>
-          <li>Enterprise Capacity</li>
-          <li>Multi-Agent Dashboard</li>
-          <li>API Intelligence Access</li>
-        </ul>
-        <div class="bb-action">
-          {% if plan == "business" %}
-          <button class="btn btn-secondary btn-full" disabled style="opacity: 0.5;">Active Tier</button>
-          {% else %}
-          <a class="btn btn-secondary btn-full" href="/checkout/business">Contact Sales</a>
-          {% endif %}
-        </div>
+        {% if plan == 'business' %}
+        <button class="btn btn-primary btn-full" disabled>Current Plan</button>
+        {% else %}
+        <a class="btn btn-outline btn-full" href="/checkout/business">Contact Sales</a>
+        {% endif %}
       </div>
 
     </div>
 
-    <div class="bb-note">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-      Secure cryptographic processing via Razorpay. Node upgrades are instantaneous. 
-      <span style="margin-left: auto; font-family: var(--font-mono); font-size: 0.7rem; opacity: 0.5;">TX_ENCRYPTED_AES256</span>
+    <!-- Trust row -->
+    <div class="trust-row">
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Secured by Razorpay
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Instant plan activation
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3-3.5 3.5z"/></svg>
+        Cancel anytime
+      </div>
+      <div class="trust-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        SSL encrypted
+      </div>
     </div>
-
   </div>
 </section>
+
+<!-- FAQ -->
+<section style="background:#fff; border-top:1px solid var(--border); padding: 80px 0;">
+  <div class="faq-wrap">
+    <div class="faq-title">
+      <span class="bb-overline">Got questions?</span>
+      <h2 class="bb-section-title" style="margin-top:12px;">Frequently Asked Questions</h2>
+    </div>
+
+    {% set faqs = [
+      ('Can I upgrade or downgrade my plan?', 'Yes — you can change your plan at any time from the pricing page. Upgrades take effect immediately; downgrades apply at the next billing cycle.'),
+      ('What payment methods do you accept?', 'We accept all major credit and debit cards, UPI, net banking, and wallets via Razorpay. All transactions are fully encrypted.'),
+      ('Is there a free trial for paid plans?', 'The Community plan is free forever. Paid plans are month-to-month with no contracts — try Pro Plus risk-free.'),
+      ('How are scan limits counted?', 'Each unique analysis run counts as one scan. Saved history views, dashboard refreshes, and chart loads do not consume your quota.'),
+      ('Do you offer discounts for teams?', 'Yes — the Team plan includes volume discounts for organizations. Contact us for custom enterprise pricing.')
+    ] %}
+
+    {% for q, a in faqs %}
+    <div class="faq-item" id="faq-{{ loop.index }}">
+      <button class="faq-question" onclick="toggleFaq('faq-{{ loop.index }}')">
+        {{ q }}
+        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-inner">{{ a }}</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+function toggleFaq(id) {
+  const item = document.getElementById(id);
+  const isOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) item.classList.add('open');
+}
+</script>
 {% endblock %}

@@ -2,139 +2,172 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="/static/style.css?v=1.4"><!-- Typography (Google Fonts) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Favicon -->
-    <link rel="icon" href="/static/favicon.ico">
-    <meta name="csrf-token" content="{{ request.session.get('csrf_token') }}">
-    {% block extra_head %}{% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6366f1">
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="/static/style.css?v=5.0">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
+  <!-- Favicon -->
+  <link rel="icon" href="/static/favicon.ico">
+  <meta name="csrf-token" content="{{ request.session.get('csrf_token') }}">
+  <title>{% block title %}Block Bord AI{% endblock %}</title>
+  {% block extra_head %}{% endblock %}
 </head>
 
-<body class="{% block body_class %}{% endblock %}">
+<body>
+  <!-- ================= NAVBAR ================= -->
+  {% block navbar %}
+  <header class="main-navbar" id="mainNavbar">
+    <a href="/" class="logo-link">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      </svg>
+      Block <span style="color:var(--primary);">Bord</span>&nbsp;AI
+    </a>
 
-    <!-- ================= NAVBAR ================= -->
-    {% block navbar %}
-    <header class="main-navbar">
-        <div class="logo">
-            <a href="/" class="logo-link">
-                <img src="/static/logo.png" alt="Block Bord Logo" class="brand-logo">
-                <span>Block <span style="color: var(--primary);">Bord</span> AI</span>
-            </a>
-        </div>
+    <nav class="nav-right" id="navMenu">
+      <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Home</a>
+      <a href="/about" class="nav-link {% if request.url.path == '/about' %}active{% endif %}">About</a>
+      <a href="/pricing" class="nav-link {% if request.url.path == '/pricing' %}active{% endif %}">Pricing</a>
+      <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">Contact</a>
+      {% if request.session.get("user_id") %}
+      <a href="/app" class="nav-link {% if request.url.path == '/app' %}active{% endif %}">Dashboard</a>
+      {% endif %}
+    </nav>
 
-        <nav class="nav-right">
-            <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Home</a>
-            <a href="/pricing" class="nav-link {% if request.url.path == '/pricing' %}active{% endif %}">Pricing</a>
-            <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">Contact</a>
-
-            {% if request.session.get("user_id") %}
-            <a href="/app" class="btn btn-primary btn-sm">Dashboard</a>
-            <a href="/logout" class="btn btn-ghost btn-sm">Logout</a>
-            {% else %}
-            <a href="/login" class="nav-link {% if request.url.path == '/login' %}active{% endif %}">Login</a>
-            <a href="/register" class="btn btn-primary btn-sm">Try Free</a>
-            {% endif %}
-
-            <!-- Theme Toggle -->
-            <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle Theme">
-                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            </button>
-        </nav>
-
-        <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu">
-            <span></span>
-            <span></span>
-            <span></span>
-        </button>
-    </header>
-
-    {% endblock %}
-
-    <!-- ================= PAGE CONTENT ================= -->
-
-    <main class="page-main-container" style="padding-top: 120px;">
-        {% block content %}{% endblock %}
-    </main>
-
-    <!-- ================= FOOTER ================= -->
-    {% block footer %}
-    <footer class="main-footer">
-        <div class="footer-container-premium">
-            <div class="footer-logo-centered">
-                <img src="/static/logo.png" alt="Block Bord Logo" style="width: 40px; height: 40px;">
-                <span style="font-size: 1.2rem; font-weight: 800;">Block <span style="color: var(--primary);">Bord</span> AI</span>
-            </div>
-
-            <nav class="footer-nav-premium">
-                <a href="/about" class="footer-nav-link">About Us</a>
-                <a href="/pricing" class="footer-nav-link">Pricing</a>
-                <a href="/contact" class="footer-nav-link">Contact</a>
-                <a href="/status" class="footer-nav-link">Status</a>
-                <a href="/privacy" class="footer-nav-link">Privacy</a>
-                <a href="/terms" class="footer-nav-link">Terms</a>
-            </nav>
-
-            <div class="footer-divider-premium"></div>
-
-            <div class="footer-bottom-premium">
-                <p style="opacity: 0.6; font-size: 0.85rem;">© 2026 BlockBord AI — Enterprise Grade Security</p>
-                <div class="footer-version-tag">v3.0.0 (LTS)</div>
-            </div>
-        </div>
-    </footer>
-    {% endblock %}
-
-    <!-- ================= AI CYBER ASSISTANT WIDGET ================= -->
-    {% if request.session.get("user_id") %}
-    <div id="ai-assistant-widget" class="ai-widget-container">
-        <button id="ai-widget-toggle" class="ai-widget-btn" aria-label="Open AI Assistant" style="background: var(--primary); color: white; border-radius: 20px; width: 60px; height: 60px; box-shadow: 0 8px 24px var(--primary-glow);">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        </button>
-        <div id="ai-chat-window" class="ai-chat-window bb-card" style="bottom: 90px; right: 0; width: 350px; height: 500px; display: none; flex-direction: column; overflow: hidden; padding: 0;">
-            <div class="ai-chat-header" style="background: var(--primary-grad); padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="margin: 0; font-size: 1rem; font-weight: 800;">🛡️ Cyber Assistant</h4>
-                <button id="ai-chat-close" style="color: white; opacity: 0.8;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-            </div>
-            <div id="ai-chat-messages" class="ai-chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; background: var(--bg-alt);">
-                <div class="ai-msg bot-msg" style="background: var(--surface); padding: 12px 16px; border-radius: 16px; border: 1px solid var(--border); font-size: 0.9rem; line-height: 1.5; margin-bottom: 12px; max-width: 85%;">
-                    Hello! Secure your digital workspace with AI. How can I help today?
-                </div>
-            </div>
-            <div class="ai-chat-input-area" style="padding: 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 10px;">
-                <textarea id="ai-chat-input" placeholder="Type a message..." rows="1" style="flex: 1; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 12px; padding: 10px; color: var(--text); font-family: inherit; resize: none;"></textarea>
-                <button id="ai-chat-send" style="background: var(--primary); color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
-            </div>
-        </div>
+    <div class="nav-actions">
+      {% if request.session.get("user_id") %}
+      <a href="/logout" class="btn btn-outline" style="padding: 8px 20px; font-size:0.875rem;">Logout</a>
+      {% else %}
+      <a href="/login"    class="btn btn-ghost"   style="padding: 8px 16px; font-size:0.875rem;">Log in</a>
+      <a href="/register" class="btn btn-primary"  style="padding: 8px 22px; font-size:0.875rem;">Get started</a>
+      {% endif %}
+      <!-- Mobile hamburger -->
+      <button class="mobile-toggle" onclick="toggleMobileMenu()" aria-label="Toggle Menu" id="mobileToggle">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    {% endif %}
+  </header>
+  {% endblock %}
 
-    <!-- Core Scripts -->
-    <script src="/static/script.js?v=4.0"></script>
-    <script>
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('.main-navbar');
-            if (window.scrollY > 40) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-        });
-    </script>
+  <!-- ================= CONTENT ================= -->
+  <main class="page-main-container">
+    {% block content %}{% endblock %}
+  </main>
 
-    <!-- Optional Page Scripts -->
-    {% block extra_scripts %}{% endblock %}
+  <!-- ================= FOOTER ================= -->
+  {% block footer %}
+  <footer class="main-footer">
+    <div class="footer-container-premium">
+      <div class="footer-grid">
+        <!-- Brand -->
+        <div class="footer-brand-col">
+          <div class="footer-logo-centered">
+            <img src="/static/logo.png" alt="Block Bord Logo">
+            Block <span style="color:var(--primary-light);">Bord</span> AI
+          </div>
+          <p class="footer-brand-tagline">
+            Enterprise-grade cyber intelligence powered by AI. Protecting the next billion users from digital threats.
+          </p>
+        </div>
 
+        <!-- Product -->
+        <div>
+          <p class="footer-col-title">Product</p>
+          <nav class="footer-nav-premium">
+            <a href="/app"     class="footer-nav-link">Dashboard</a>
+            <a href="/pricing" class="footer-nav-link">Pricing</a>
+            <a href="/extension-setup" class="footer-nav-link">Extension</a>
+            <a href="/block-list" class="footer-nav-link">Block List</a>
+          </nav>
+        </div>
+
+        <!-- Company -->
+        <div>
+          <p class="footer-col-title">Company</p>
+          <nav class="footer-nav-premium">
+            <a href="/about"   class="footer-nav-link">About Us</a>
+            <a href="/contact" class="footer-nav-link">Contact</a>
+            <a href="/status"  class="footer-nav-link">Status</a>
+          </nav>
+        </div>
+
+        <!-- Legal -->
+        <div>
+          <p class="footer-col-title">Legal</p>
+          <nav class="footer-nav-premium">
+            <a href="/privacy" class="footer-nav-link">Privacy Policy</a>
+            <a href="/terms"   class="footer-nav-link">Terms of Service</a>
+            <a href="/cookie"  class="footer-nav-link">Cookie Policy</a>
+          </nav>
+        </div>
+      </div>
+
+      <div class="footer-divider-premium"></div>
+
+      <div class="footer-bottom-premium">
+        <p>© 2026 BlockBord AI — Enterprise Grade Security</p>
+        <div class="footer-version-tag">v3.0.0 (LTS)</div>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
+  <!-- ================= AI ASSISTANT WIDGET ================= -->
+  {% if request.session.get("user_id") %}
+  <div id="ai-assistant-widget" class="ai-widget-container">
+    <button id="ai-widget-toggle" class="ai-widget-btn" aria-label="Open AI Assistant">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+    </button>
+    <div id="ai-chat-window" class="ai-chat-window" style="display:none; display:none; flex-direction:column;">
+      <div class="ai-chat-header">
+        <h4 style="margin:0; font-size:0.95rem; font-weight:800;">🛡️ Cyber Assistant</h4>
+        <button id="ai-chat-close" style="color:rgba(255,255,255,0.8); background:none; border:none; cursor:pointer; display:flex; align-items:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+      <div id="ai-chat-messages" class="ai-chat-messages">
+        <div class="ai-msg bot-msg">Hello! I'm your AI security assistant. How can I help today?</div>
+      </div>
+      <div class="ai-chat-input-area">
+        <textarea id="ai-chat-input" placeholder="Type a message..." rows="1"></textarea>
+        <button id="ai-chat-send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Core Scripts -->
+  <script src="/static/script.js?v=5.0"></script>
+  <script>
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      document.getElementById('mainNavbar')?.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      document.getElementById('navMenu')?.classList.toggle('active');
+    }
+
+    // Close mobile menu on link click
+    document.querySelectorAll('.nav-right .nav-link').forEach(link => {
+      link.addEventListener('click', () => document.getElementById('navMenu')?.classList.remove('active'));
+    });
+  </script>
+
+  {% block extra_scripts %}{% endblock %}
 </body>
-
 </html>

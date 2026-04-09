@@ -1,140 +1,118 @@
 {% extends "base.html" %}
 
-{% block title %}Extension Setup - Block Bord AI{% endblock %}
-
+{% block title %}Extension Setup — Block Bord AI{% endblock %}
 {% block navbar %}{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    {% include "sidebar.html" %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
 
-    <main class="main-content dashboard-main">
-        <div class="dashboard-topbar">
+  <main class="app-main-content">
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">Platform Activation</span>
+        <h1 class="app-page-title">Edge Shield Setup</h1>
+        <p class="app-page-subtitle">Deploy the Block Bord AI shield into your browser for real-time protection.</p>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 340px; gap:24px; margin-top:32px; align-items:start;">
+      
+      <!-- STEPS -->
+      <div class="bb-card" style="padding:40px;">
+        <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:40px; border-bottom:1px solid var(--border); padding-bottom:16px;">Verified Installation Process</h3>
+        
+        <div style="display:flex; flex-direction:column; gap:48px;">
+          <!-- Step 1 -->
+          <div style="display:flex; gap:24px;">
+            <div style="flex-shrink:0; width:44px; height:44px; border-radius:12px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; border:1.5px solid var(--primary-soft);">1</div>
             <div>
-                <span class="badge-premium">ACTIVATION GUIDE</span>
-                <h1 style="font-size: 2.8rem;">Edge Protection Setup</h1>
-                <p class="subtitle" style="font-size: 1.1rem;">
-                    Follow the verified deployment process to load the Block Bord AI shield into your browser.
-                </p>
+              <h4 style="margin:0 0 8px; font-weight:800; font-size:1.05rem;">Locate Extension Source</h4>
+              <p style="margin:0; font-size:0.9375rem; color:var(--text-muted); line-height:1.6;">Access your local project directory and find the <code>extension/</code> folder. This contains the core logic for the Edge Shield.</p>
+              <div style="margin-top:16px; display:inline-flex; align-items:center; gap:12px; padding:10px 16px; background:var(--bg-alt); border-radius:10px; border:1px solid var(--border);">
+                 <code style="font-family:var(--font-mono); font-size:0.8rem; font-weight:700; color:var(--text);">/root/extension/</code>
+                 <button class="btn btn-ghost" onclick="copyPath()" style="padding:4px; min-height:0; border-radius:6px;" title="Copy directory">
+                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                 </button>
+              </div>
             </div>
-            <div style="display: flex; align-items: center; gap: 12px; background: var(--bg-alt); padding: 8px 16px; border-radius: 30px; border: 1px solid var(--border);">
-                <div class="pulse-dot pulse-secure"></div>
-                <span style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted);">LIVE ACTIVATION SERVER</span>
+          </div>
+
+          <!-- Step 2 -->
+          <div style="display:flex; gap:24px;">
+            <div style="flex-shrink:0; width:44px; height:44px; border-radius:12px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; border:1.5px solid var(--primary-soft);">2</div>
+            <div>
+              <h4 style="margin:0 0 8px; font-weight:800; font-size:1.05rem;">Enable Developer Mode</h4>
+              <p style="margin:0; font-size:0.9375rem; color:var(--text-muted); line-height:1.6;">Navigate to <code>chrome://extensions/</code> and toggle the <strong>Developer mode</strong> switch in the top right corner.</p>
             </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div style="display:flex; gap:24px;">
+            <div style="flex-shrink:0; width:44px; height:44px; border-radius:12px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; border:1.5px solid var(--primary-soft);">3</div>
+            <div>
+              <h4 style="margin:0 0 8px; font-weight:800; font-size:1.05rem;">Load Unpacked Shield</h4>
+              <p style="margin:0; font-size:0.9375rem; color:var(--text-muted); line-height:1.6;">Click <strong>Load unpacked</strong> and select the extension folder you identified in Step 1. The shield will activate immediately.</p>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
+          <div style="display:flex; gap:24px;">
+            <div style="flex-shrink:0; width:44px; height:44px; border-radius:12px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; border:1.5px solid var(--primary-soft);">4</div>
+            <div>
+              <h4 style="margin:0 0 8px; font-weight:800; font-size:1.05rem;">Pin For Protection</h4>
+              <p style="margin:0; font-size:0.9375rem; color:var(--text-muted); line-height:1.6;">Click the jigsaw icon (🧩). Find Block Bord AI and click the Pin icon for permanent background protection.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR TOOLS -->
+      <div style="display:flex; flex-direction:column; gap:24px;">
+        
+        <div class="bb-card">
+          <h4 style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:20px;">System Diagnostics</h4>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+              <span style="color:var(--text-muted);">Sync Server</span>
+              <span style="color:var(--status-safe); font-weight:800; font-size:0.75rem;">CONNECTED</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+              <span style="color:var(--text-muted);">Risk Engine</span>
+              <span style="color:var(--status-safe); font-weight:800; font-size:0.75rem;">ACTIVE</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.9rem;">
+              <span style="color:var(--text-muted);">Core Version</span>
+              <span style="color:var(--text-dim); font-weight:800; font-size:0.75rem;">v2.5.0</span>
+            </div>
+          </div>
         </div>
 
-        <div class="setup-grid">
-            <!-- Steps Section -->
-            <div class="step-card">
-                <div class="step-item">
-                    <div class="step-line"></div>
-                    <div class="step-icon-box">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
-                    </div>
-                    <div class="step-content">
-                        <h3>Prepare Extension Folder</h3>
-                        <p>Locate the source code in your local project directory. Use the path below to identify the folder.</p>
-                        <div class="path-action-box">
-                            <div class="path-badge" id="extensionPath" onclick="copyPath()">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="16 16 20 20 24 16"></polyline><path d="M18 20V10a4 4 0 0 0-8 0v10"></path></svg>
-                                <span>root/extension/</span>
-                            </div>
-                            <button class="copy-btn" onclick="copyPath()" title="Copy Path">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="step-item">
-                    <div class="step-line"></div>
-                    <div class="step-icon-box">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    </div>
-                    <div class="step-content">
-                        <h3>Enable Developer Mode</h3>
-                        <p>Navigate to <code>chrome://extensions/</code> and toggle the <b>Developer mode</b> switch in the top right corner.</p>
-                    </div>
-                </div>
-
-                <div class="step-item">
-                    <div class="step-line"></div>
-                    <div class="step-icon-box">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    </div>
-                    <div class="step-content">
-                        <h3>Load Unpacked</h3>
-                        <p>Click <b>Load unpacked</b> and select the <code>extension</code> folder you identified in Step 1.</p>
-                    </div>
-                </div>
-
-                <div class="step-item">
-                    <div class="step-icon-box">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline><polyline points="7.5 19.79 7.5 14.6 3 12"></polyline><polyline points="21 12 16.5 14.6 16.5 19.79"></polyline><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                    </div>
-                    <div class="step-content">
-                        <h3>Pin & Protect</h3>
-                        <p>Click the jigsaw icon (🧩). Find Block Bord AI and click the Pin icon for permanent background protection.</p>
-                    </div>
-                </div>
+        <div class="bb-card" style="background:var(--primary-grad); border:none; color:#fff;">
+          <h4 style="margin:0 0 12px; font-weight:800; color:#fff;">Professional Coverage</h4>
+          <p style="margin:0; font-size:0.85rem; color:rgba(255,255,255,0.85); line-height:1.6;">The extension provides real-time heuristic analysis on every page, neutralizing threats before they load.</p>
+          <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+            <div style="display:flex; align-items:center; gap:8px; font-size:0.8rem; font-weight:700;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              Zero-Day phishing blocks
             </div>
-
-            <!-- Preview/Support Card -->
-            <div class="side-support">
-                <div class="status-panel">
-                    <h4 style="font-size: 1.1rem; font-weight: 850; margin-bottom: 24px; color: var(--text);">System Diagnostics</h4>
-                    
-                    <div class="status-row">
-                        <div class="status-label-group">
-                            <div class="pulse-dot pulse-secure"></div>
-                            <span class="status-label">Backend Connection</span>
-                        </div>
-                        <span style="font-size: 0.75rem; font-weight: 850; color: #10b981; background: rgba(16,185,129,0.1); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.2);">SECURE</span>
-                    </div>
-
-                    <div class="status-row">
-                        <div class="status-label-group">
-                            <div class="pulse-dot pulse-active"></div>
-                            <span class="status-label">ML Risk Engine</span>
-                        </div>
-                        <span style="font-size: 0.75rem; font-weight: 850; color: #818cf8; background: rgba(129,140,248,0.1); padding: 4px 12px; border-radius: 20px; border: 1px solid rgba(129,140,248,0.2);">ACTIVE</span>
-                    </div>
-
-                    <div class="status-row">
-                        <div class="status-label-group">
-                            <div style="width: 10px; height: 10px; border-radius: 50%; background: #e2e8f0; margin-right: 12px;"></div>
-                            <span class="status-label">Core Version</span>
-                        </div>
-                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted);">v2.5.0-PRO</span>
-                    </div>
-                </div>
-
-                <div class="card premium-card" style="padding: 32px; border-left: 4px solid var(--primary);">
-                    <h4 style="font-size: 1.1rem; font-weight: 850; margin-bottom: 16px; color: var(--text);">Professional Coverage</h4>
-                    <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px;">The extension provides real-time heuristic analysis on every page you visit, neutralizing phishing attempts before they load.</p>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; color: var(--text);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Zero-Day phishing blocks</div>
-                        <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; font-weight: 600; color: var(--text);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> Automated threat mitigation</div>
-                    </div>
-                </div>
-                
-                <a href="/app" class="btn btn-primary btn-full" style="justify-content: center; padding: 16px;">
-                    Return to Dashboard Overview
-                </a>
+            <div style="display:flex; align-items:center; gap:8px; font-size:0.8rem; font-weight:700;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              Auto-threat mitigation
             </div>
+          </div>
         </div>
 
-        <script>
-            function copyPath() {
-                const pathText = "root/extension/";
-                navigator.clipboard.writeText(pathText).then(() => {
-                    const badge = document.getElementById('extensionPath');
-                    const originalHTML = badge.innerHTML;
-                    badge.innerHTML = '<span style="color: #10b981;">Path Copied!</span>';
-                    setTimeout(() => { badge.innerHTML = originalHTML; }, 2000);
-                });
-            }
-        </script>
-    </main>
+        <a href="/app" class="btn btn-primary btn-full" style="padding:14px; font-weight:700;">Return to Dashboard</a>
+
+      </div>
+    </div>
+  </main>
 </div>
+
+<script>
+function copyPath() {
+  navigator.clipboard.writeText('root/extension/').then(() => alert('Path copied!'));
+}
+</script>
 {% endblock %}
