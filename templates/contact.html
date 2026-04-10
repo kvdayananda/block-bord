@@ -47,6 +47,8 @@
   @media (max-width: 900px) {
     .contact-grid { grid-template-columns: 1fr; gap: 48px; }
     .contact-hero { padding: 100px 0 48px; }
+    .contact-form-card { padding: 24px !important; }
+    .btn-full-mobile { width: 100% !important; }
   }
 </style>
 {% endblock %}
@@ -65,7 +67,7 @@
     
     <!-- Support Quick Link -->
     <div style="display: flex; justify-content: center; margin-bottom: 48px;">
-      <div class="bb-card" style="padding: 24px 32px; display: flex; align-items: center; gap: 24px; width: 100%; max-width: 600px; background: var(--bg-alt);">
+      <div class="bb-card flex-stack-mobile" style="padding: 24px 32px; display: flex; align-items: center; gap: 24px; width: 100%; max-width: 600px; background: var(--bg-alt);">
         <div class="info-icon" style="background: var(--primary); color: #fff; width: 48px; height: 48px;">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
@@ -73,7 +75,7 @@
           <h4 style="margin: 0; font-weight: 800; font-size: 1rem;">Direct Technical Support</h4>
           <p style="margin: 2px 0 0; font-size: 0.85rem; color: var(--text-muted);">Get help with configuration or troubleshooting.</p>
         </div>
-        <a href="mailto:support@blockbord.ai" class="btn btn-outline btn-sm">Email Support</a>
+        <a href="mailto:support@blockbord.ai" class="btn btn-outline btn-sm btn-full-mobile">Email Support</a>
       </div>
     </div>
 
@@ -85,7 +87,7 @@
       </div>
       
       <form onsubmit="event.preventDefault(); alert('Message sent! Our team will contact you soon.'); this.reset();" style="display: flex; flex-direction: column; gap: 24px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <div class="grid-stack-mobile" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <div class="input-group">
             <label>First Name</label>
             <input type="text" placeholder="John" required>

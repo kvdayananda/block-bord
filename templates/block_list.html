@@ -24,12 +24,12 @@
 
     <!-- Quick Report Banner -->
     <div class="bb-card" style="margin-top:32px; border-left:4px solid var(--primary); padding:32px;">
-      <div style="display:flex; align-items:center; gap:32px; flex-wrap:wrap;">
+      <div class="flex-stack-mobile" style="display:flex; align-items:center; gap:32px; flex-wrap:wrap;">
         <div style="flex:1; min-width:300px;">
           <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:6px;">Spotted a new threat?</h3>
           <p style="margin:0; font-size:0.9rem; color:var(--text-muted);">Protect the community by reporting suspicious domains for AI verification.</p>
         </div>
-        <div style="flex:1.5; display:flex; gap:12px; min-width:300px;">
+        <div class="flex-stack-mobile" style="flex:1.5; display:flex; gap:12px; min-width:300px;">
           <input type="text" id="reportUrl" placeholder="Enter suspicious domain or URL..." style="flex:1; padding:12px 16px; border:1.5px solid var(--border-bright); border-radius:10px; outline:none; font-size:0.9rem;">
           <button class="btn btn-primary" onclick="submitReport()" id="reportBtn" style="padding:12px 24px;">Report Threat</button>
         </div>

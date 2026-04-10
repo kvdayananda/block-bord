@@ -376,12 +376,12 @@
 <!-- ═══════════ CTA BANNER ═══════════ -->
 <section class="bb-cta-section">
   <div class="bb-container" style="position:relative; z-index:1;">
-    <h2 class="bb-cta-title">Ready to secure your digital assets?</h2>
+    <h2 class="bb-cta-title" style="font-size:clamp(1.5rem, 5vw, 2.5rem);">Ready to secure your digital assets?</h2>
     <p class="bb-cta-sub">Join 50,000+ security professionals who trust Block Bord AI every day.</p>
     {% if request.session.get("user_id") %}
     <a href="/app" class="btn-cta-white">Open Dashboard</a>
     {% else %}
-    <a href="/register" class="btn-cta-white">Start for free — no credit card needed</a>
+    <a href="/register" class="btn-cta-white btn-cta-stack-mobile">Start for free — no credit card needed</a>
     {% endif %}
   </div>
 </section>

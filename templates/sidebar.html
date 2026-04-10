@@ -12,7 +12,7 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="color:var(--primary);">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
       </svg>
-      Block <span class="sidebar-brand-highlight">Bord</span>
+      Block <span class="sidebar-brand-highlight">Bord</span> AI
     </a>
   </div>
 
@@ -125,22 +125,10 @@
     <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" style="color:var(--primary);">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
     </svg>
-    Block <span style="color:var(--primary);">Bord</span>
+    Block <span style="color:var(--primary);">Bord</span> AI
   </div>
   <button class="app-mobile-hamburger" onclick="openSidebar()" aria-label="Open menu">
     <span></span><span></span><span></span>
   </button>
 </header>
 
-<script>
-function openSidebar() {
-  document.getElementById('appSidebar').classList.add('mobile-open');
-  document.getElementById('sidebarOverlay').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-function closeSidebar() {
-  document.getElementById('appSidebar').classList.remove('mobile-open');
-  document.getElementById('sidebarOverlay').classList.remove('active');
-  document.body.style.overflow = '';
-}
-</script>
