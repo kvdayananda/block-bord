@@ -119,7 +119,13 @@
         <div class="bb-card" style="flex:1;display:flex;flex-direction:column;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
             <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Risk Distribution</h3>
-            <span class="badge badge-primary">LIVE</span>
+            <div style="display:flex; gap: 8px; align-items:center;">
+              <span class="badge badge-primary">LIVE</span>
+              <a href="/analytics" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem; display:flex; align-items:center; gap:4px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><line x1="9" y1="21" x2="21" y2="3"/><polyline points="9 21 3 21 3 15"/><line x1="15" y1="3" x2="3" y2="21"/></svg>
+                Expand
+              </a>
+            </div>
           </div>
           <div style="flex:1;position:relative;min-height:200px;">
             <canvas id="riskChart"></canvas>

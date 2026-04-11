@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Risk Analytics — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+
+  <main class="app-main-content">
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">Analytics Engine</span>
+        <h1 class="app-page-title">Risk Distribution</h1>
+        <p class="app-page-subtitle">Detailed breakdown of threat telemetry and historical forensic scans.</p>
+      </div>
+      <div class="app-page-header-right">
+        <a href="/app" class="btn btn-outline" style="padding:8px 18px;font-size:0.8125rem;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+          Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+    <div class="premium-grid-2">
+      <!-- Risk Doughnut -->
+      <div class="bb-card" style="display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Global Distribution</h3>
+          <span class="badge badge-primary">LIVE FETCH</span>
+        </div>
+        <div style="flex:1;position:relative;min-height:300px;">
+          <canvas id="riskChart"></canvas>
+        </div>
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:24px;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text);font-weight:600;">
+            <span style="width:12px;height:12px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 8px #10b981;"></span>Safe
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text);font-weight:600;">
+            <span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 8px #f59e0b;"></span>Suspicious
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text);font-weight:600;">
+            <span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 8px #ef4444;"></span>Malicious
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories breakdown -->
+      <div class="bb-card" style="display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Threat Categories</h3>
+        </div>
+        <div id="categoryContainer" style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Fetched via JS -->
+          <div style="color:var(--text-muted);font-size:0.9rem;text-align:center;padding:40px 0;">Loading telemetry...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="bb-card" style="margin-top:32px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
+        <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">30-Day Threat Intelligence Timeline</h3>
+      </div>
+      <div style="height:350px;width:100%;">
+        <canvas id="timelineChart"></canvas>
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const gridColor = 'rgba(15,23,42,0.05)';
+  const textColor = '#94a3b8';
+  
+  try {
+    // 1. Fetch Stats for Risk Distribution
+    const statsRes = await fetch('/api/stats');
+    const stats = await statsRes.json();
+    
+    const riskCtx = document.getElementById('riskChart');
+    if (riskCtx && stats.total_scans !== undefined) {
+      new Chart(riskCtx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Safe', 'Suspicious', 'Malicious'],
+          datasets: [{
+            data: [stats.safe, stats.suspicious, stats.high_risk],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 0,
+            hoverOffset: 12
+          }]
+        },
+        options: {
+          cutout: '75%',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+    }
+
+    // Render Categories
+    const catContainer = document.getElementById('categoryContainer');
+    if (stats.categories && Object.keys(stats.categories).length > 0) {
+        catContainer.innerHTML = '';
+        // Sort categories by volume
+        const sortedCats = Object.entries(stats.categories).sort((a, b) => b[1] - a[1]);
+        const maxVol = sortedCats[0][1] || 1;
+        
+        sortedCats.forEach(([cat, count]) => {
+            const pct = Math.min(100, (count / maxVol) * 100);
+            catContainer.innerHTML += `
+              <div>
+                 <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.875rem;">
+                   <span style="font-weight:700;">${Math.round((count/stats.total_scans)*100)}% - ${cat}</span>
+                   <span style="color:var(--text-muted);">${count} logs</span>
+                 </div>
+                 <div style="height:8px; background:var(--bg-alt); border-radius:4px; overflow:hidden;">
+                   <div style="height:100%; width:${pct}%; background:var(--primary-grad); border-radius:4px;"></div>
+                 </div>
+              </div>
+            `;
+        });
+    } else {
+        catContainer.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem;text-align:center;padding:40px 0;">No category telemetry available.</div>';
+    }
+
+
+    // 2. Fetch Analytics for Timeline
+    const analyticsRes = await fetch('/api/analytics');
+    const analytics = await analyticsRes.json();
+
+    const timelineCtx = document.getElementById('timelineChart');
+    if (timelineCtx && analytics.labels) {
+      new Chart(timelineCtx, {
+        type: 'line',
+        data: {
+          labels: analytics.labels,
+          datasets: [
+            {
+              label: 'Threats Blocked',
+              data: analytics.high,
+              borderColor: '#ef4444',
+              backgroundColor: 'rgba(239,68,68,0.1)',
+              fill: true, tension: 0.4, pointRadius: 3, borderWidth: 3
+            },
+            {
+              label: 'Safe Content',
+              data: analytics.safe,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16,185,129,0.1)',
+              fill: true, tension: 0.4, pointRadius: 3, borderWidth: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 12 } } },
+            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 12 } } }
+          }
+        }
+      });
+    }
+
+  } catch (err) {
+    console.error("Error fetching analytics:", err);
+  }
+});
+</script>
+{% endblock %}

@@ -36,12 +36,20 @@
       <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">Contact</a>
       {% if request.session.get("user_id") %}
       <a href="/app" class="nav-link {% if request.url.path == '/app' %}active{% endif %}">Dashboard</a>
+      <div class="mobile-only-nav">
+        <a href="/logout" class="nav-link" style="color:var(--status-danger);" onclick="sessionStorage.clear()">Logout</a>
+      </div>
+      {% else %}
+      <div class="mobile-only-nav">
+        <a href="/login" class="nav-link">Log in</a>
+        <a href="/register" class="nav-link">Get started</a>
+      </div>
       {% endif %}
     </nav>
 
     <div class="nav-actions">
       {% if request.session.get("user_id") %}
-      <a href="/logout" class="btn btn-outline" style="padding: 8px 20px; font-size:0.875rem;">Logout</a>
+      <a href="/logout" class="btn btn-outline" style="padding: 8px 20px; font-size:0.875rem;" onclick="sessionStorage.clear()">Logout</a>
       {% else %}
       <a href="/login"    class="btn btn-ghost"   style="padding: 8px 16px; font-size:0.875rem;">Log in</a>
       <a href="/register" class="btn btn-primary"  style="padding: 8px 22px; font-size:0.875rem;">Get started</a>
@@ -150,6 +158,7 @@
   {% endif %}
 
   <!-- Core Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="/static/script.js?v=5.2"></script>
   <script>
     // Navbar scroll effect

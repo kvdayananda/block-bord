@@ -451,8 +451,26 @@ function escapeHtml(str) {
 
     if (!toggleBtn || !chatWindow) return; // Widget not present (logged out)
 
+    const CHAT_SESSION_KEY = 'bb_ai_chat_history';
     let isOpen = false;
     chatWindow.style.display = 'none';
+
+    function saveChatHistory(text, type) {
+        let history = JSON.parse(sessionStorage.getItem(CHAT_SESSION_KEY) || '[]');
+        history.push({ text, type });
+        sessionStorage.setItem(CHAT_SESSION_KEY, JSON.stringify(history));
+    }
+
+    function loadChatHistory() {
+        let history = JSON.parse(sessionStorage.getItem(CHAT_SESSION_KEY) || '[]');
+        if (history.length > 0) {
+            messagesDiv.innerHTML = '';
+            history.forEach(item => addMessage(item.text, item.type, false));
+        }
+    }
+    
+    // Load history on init
+    loadChatHistory();
 
     toggleBtn.addEventListener('click', () => {
         if (!isOpen) {
@@ -492,16 +510,29 @@ function escapeHtml(str) {
     });
 
 
-    function addMessage(text, type) {
+    function addMessage(text, type, saveToSession = true) {
         const msg = document.createElement('div');
         msg.className = `ai-msg ${type === 'user' ? 'user-msg' : 'bot-msg'}`;
-        // Simple markdown: **bold**
-        const formatted = escapeHtml(text)
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n/g, '<br>');
-        msg.innerHTML = formatted;
+        
+        if (type === 'user') {
+            const p = document.createElement('p');
+            p.textContent = text;
+            msg.appendChild(p);
+        } else {
+            if (typeof marked !== 'undefined') {
+                msg.innerHTML = marked.parse(text);
+            } else {
+                msg.textContent = text;
+            }
+        }
+        
         messagesDiv.appendChild(msg);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        if (saveToSession) {
+            saveChatHistory(text, type);
+        }
+        
         return msg;
     }
 
@@ -509,7 +540,13 @@ function escapeHtml(str) {
         const msg = document.createElement('div');
         msg.className = 'ai-msg bot-msg';
         msg.id = 'typing-indicator';
-        msg.innerHTML = '<span style="opacity:0.6;font-style:italic;display:flex;gap:4px;align-items:center;"><span>Analyzing</span><span style="animation:typing-dots 1.2s infinite">...</span></span>';
+        msg.innerHTML = `
+          <div style="display:flex; gap:6px; padding:4px;">
+            <div class="typing-dot" style="animation-delay: 0s"></div>
+            <div class="typing-dot" style="animation-delay: 0.2s"></div>
+            <div class="typing-dot" style="animation-delay: 0.4s"></div>
+          </div>
+        `;
         messagesDiv.appendChild(msg);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
@@ -565,10 +602,16 @@ function escapeHtml(str) {
         const style = document.createElement('style');
         style.setAttribute('data-ai-widget', '1');
         style.textContent = `
-            @keyframes typing-dots {
-                0%, 20% { content: '.'; }
-                40% { content: '..'; }
-                60%, 100% { content: '...'; }
+            .typing-dot {
+                width: 6px;
+                height: 6px;
+                background-color: var(--primary);
+                border-radius: 50%;
+                animation: typingBounce 1.4s infinite ease-in-out both;
+            }
+            @keyframes typingBounce {
+                0%, 80%, 100% { transform: scale(0); opacity: 0.4; }
+                40% { transform: scale(1); opacity: 1; }
             }
         `;
         document.head.appendChild(style);

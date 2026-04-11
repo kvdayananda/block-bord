@@ -1571,7 +1571,13 @@ def upgrade_beta(plan: str, request: Request, db: Session = Depends(get_db)):
 
 @app.get("/analytics", response_class=HTMLResponse)
 def analytics_page(request: Request, db: Session = Depends(get_db)):
-    return RedirectResponse("/history", status_code=302)
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("analytics.html", {
+        "request": request,
+        "user": user,
+    })
 
 
 @app.get("/downgrade")
