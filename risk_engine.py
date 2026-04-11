@@ -88,6 +88,20 @@ PHISHING_KEYWORDS = {
     "otp", "credentials", "ssn", "social security", "card number",
     "cvv", "ifsc", "aadhaar"
 }
+JOB_SCAM_KEYWORDS = {
+    "work from home", "telegram recruitment", "salary via crypto",
+    "part time job", "no experience needed", "daily earning",
+    "easy money", "remotely", "package handling", "online assistant"
+}
+CRYPTO_SCAM_KEYWORDS = {
+    "wallet", "connect wallet", "drainer", "metamask", "seed phrase",
+    "private key", "airdrop", "presale", "whitelist join", "matic",
+    "ethereum", "pancake swap", "token launch", "guaranteed profit"
+}
+EXTORTION_PATTERNS = {
+    "warrant issued", "income tax notice", "lawsuit", "illegal activity detected",
+    "police investigation", "penalty fee", "court summons", "case filed"
+}
 SCAM_MANIPULATION = {
     "you have been selected", "congratulations you won", "your account will be closed",
     "verify your identity", "unusual sign-in", "suspicious activity detected",
@@ -109,6 +123,9 @@ SCAM_LURE_RE = _build_word_pattern(SCAM_LURE_WORDS)
 PHISHING_KEYWORDS_RE = _build_word_pattern(PHISHING_KEYWORDS)
 UPI_SCAM_RE = _build_word_pattern(UPI_SCAM_WORDS - {"upi://pay"})
 MANIPULATION_RE = _build_word_pattern(SCAM_MANIPULATION)
+JOB_SCAM_RE = _build_word_pattern(JOB_SCAM_KEYWORDS)
+CRYPTO_SCAM_RE = _build_word_pattern(CRYPTO_SCAM_KEYWORDS)
+EXTORTION_RE = _build_word_pattern(EXTORTION_PATTERNS)
 
 
 # ─────────────────────────────────────────
@@ -792,6 +809,24 @@ def calculate_risk(text: str, url_context: str = None, telemetry: dict = None, f
         score += 12
         reasons.append("Link + money bait combination (high risk).")
 
+    # ── Job scam detection ──
+    job_hits = JOB_SCAM_RE.findall(low)
+    if job_hits:
+        score += min(30, 10 + 6 * len(set(job_hits)))
+        reasons.append(f"Job/Employment scam indicators: {', '.join(set(job_hits))}.")
+
+    # ── Crypto scam detection ──
+    crypto_hits = CRYPTO_SCAM_RE.findall(low)
+    if crypto_hits:
+        score += min(40, 15 + 8 * len(set(crypto_hits)))
+        reasons.append(f"Crypto/Wallet hijacking indicators: {', '.join(set(crypto_hits))}.")
+
+    # ── Extortion/Authority detection ──
+    extortion_hits = EXTORTION_RE.findall(low)
+    if extortion_hits:
+        score += min(45, 20 + 10 * len(set(extortion_hits)))
+        reasons.append(f"Authority extortion/Legal threat pattern: {', '.join(set(extortion_hits))}.")
+
     # ── Sensitive form detection ──
     form_score, form_reasons = detect_sensitive_form_indicators(raw)
     if form_score > 0:
@@ -868,18 +903,25 @@ def calculate_risk(text: str, url_context: str = None, telemetry: dict = None, f
 
     score = max(0, min(100, score))
 
-    # ── ML blending (Ensemble: FastText + Sklearn SVM) ──
+    # ── ML blending (Ensemble: FastText + Heuristic Weighted Blend) ──
     ml_prob = predict_blended_prob(raw)
     if ml_prob is not None:
         ml_score = int(round(ml_prob * 100))
-        if 15 <= score <= 65:
-            weight = 0.7 if score >= 35 else 0.55
-            blended = int(round(weight * score + (1 - weight) * ml_score))
-            if blended != score:
-                reasons.append(f"ML model signal: spam probability {int(ml_prob * 100)}%.")
-            score = blended
+        
+        # Production Logic: Heuristics lead (60%), ML assists (40%)
+        # If heuristics are extremely high, ML verifies but doesn't override
+        if score > 75:
+            score = int(round(0.85 * score + 0.15 * ml_score))
+        # If score is in ambiguous range, use the 60/40 blend
+        elif 15 <= score <= 75:
+            score = int(round(0.60 * score + 0.40 * ml_score))
         else:
-            score = int(round(0.8 * score + 0.2 * ml_score))
+            # Low detected risk: ML acts as a sanity check
+            score = int(round(0.70 * score + 0.30 * ml_score))
+            
+        if abs(ml_score - score) > 30 and ml_score > 60:
+             reasons.append(f"AI Model Confidence: High probability of scam patterns ({ml_score}%).")
+             
         score = max(0, min(100, score))
 
     # ── Final classification ──
@@ -906,6 +948,12 @@ def calculate_risk(text: str, url_context: str = None, telemetry: dict = None, f
 def _classify_threat_category(reasons: list) -> str:
     """Derive a human-readable threat category from reasons."""
     reason_text = " ".join(reasons).lower()
+    if "job" in reason_text or "recruitment" in reason_text:
+        return "Job/Employment Fraud"
+    if "crypto" in reason_text or "wallet" in reason_text or "drainer" in reason_text:
+        return "Crypto / Wallet Hijacking"
+    if "extortion" in reason_text or "legal threat" in reason_text or "notice" in reason_text:
+        return "Authority Extortion / Scareware"
     if "upi" in reason_text:
         return "UPI/Payment Fraud"
     if "credit card" in reason_text or "cvv" in reason_text:

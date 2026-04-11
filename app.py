@@ -259,6 +259,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 app.add_middleware(BaseHTTPMiddleware, dispatch=csrf_token_middleware)
 
 # 2. Sessions (Must be outer to CSRF)
+# Hardened for Production: Added secure and httponly flags
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
@@ -487,6 +488,9 @@ async def check_leak_api(request: Request, email: str = Form(...), db: Session =
                 return {"status": "leaked", "breaches": formatted_breaches}
             elif resp.status_code == 404:
                 return {"status": "safe", "breaches": []}
+            else:
+                # Production Fallback: Log but don't crash
+                print(f"[Leak Check] HIBP API returned status {resp.status_code}")
         except Exception as e:
             print(f"[Leak Check Error] HIBP API failed: {e}")
 

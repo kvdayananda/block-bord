@@ -1,28 +1,89 @@
 {% extends "base.html" %}
+{% block title %}Payment Status - Block Bord AI{% endblock %}
 
-{% block title %}Subscription Status — Block Bord AI{% endblock %}
+{% block extra_head %}
+<style>
+    .payment-status-page {
+        min-height: calc(100vh - 200px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+    }
+    .status-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 48px 32px;
+        max-width: 480px;
+        width: 100%;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }
+    .status-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+    }
+    .status-icon.success { background: #ecfdf5; color: #10b981; }
+    .status-icon.error { background: #fef2f2; color: #ef4444; }
+    
+    .status-card h1 { font-size: 1.5rem; margin-bottom: 12px; font-weight: 800; }
+    .status-card p { color: var(--text-muted); margin-bottom: 32px; line-height: 1.6; }
+    
+    .redirect-hint {
+        font-size: 0.8125rem;
+        color: var(--text-dim);
+        margin-top: 24px;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="bb-container" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 120px 20px;">
-  <div class="bb-card" style="max-width: 500px; width: 100%; padding: 64px; text-align: center;">
-    
-    {% if status == 'success' %}
-    <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--status-safe); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; box-shadow: 0 0 24px rgba(16, 185, 129, 0.3);">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+<div class="payment-status-page">
+    <div class="status-card">
+        {% if ok %}
+            <div class="status-icon success">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <h1>Payment Successful!</h1>
+            <p>{{ message }}</p>
+            <a href="/app" class="btn btn-primary btn-full">Go to Dashboard</a>
+        {% else %}
+            <div class="status-icon error">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </div>
+            <h1>Payment Failed</h1>
+            <p>{{ message }}</p>
+            <div style="display: flex; gap: 12px;">
+                <a href="/pricing" class="btn btn-outline btn-full">Try Again</a>
+                <a href="/app" class="btn btn-ghost btn-full">Dashboard</a>
+            </div>
+        {% endif %}
+        
+        <p class="redirect-hint">Redirecting to dashboard in <span id="countdown">5</span> seconds...</p>
     </div>
-    <h1 style="font-size: 2rem; font-weight: 900; margin-bottom: 12px; letter-spacing: -0.03em;">Activation Successful</h1>
-    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 40px; line-height: 1.6;">Your subscription is now active. You have full access to all premium threat intelligence tools.</p>
-    <a href="/app" class="btn btn-primary btn-full" style="padding: 16px;">Go to Dashboard</a>
-    {% else %}
-    <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--status-danger); color: #fff; display: flex; align-items: center; justify-content: center; margin: 0 auto 32px; box-shadow: 0 0 24px rgba(239, 68, 68, 0.3);">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </div>
-    <h1 style="font-size: 2rem; font-weight: 900; margin-bottom: 12px; letter-spacing: -0.03em;">Payment Failed</h1>
-    <p style="color: var(--text-muted); font-size: 1.05rem; margin-bottom: 40px; line-height: 1.6;">We couldn't process your transaction. No charges were made. Please check your payment method and try again.</p>
-    <a href="/pricing" class="btn btn-primary btn-full" style="padding: 16px;">Try Again</a>
-    <a href="/contact" class="btn btn-ghost" style="margin-top:16px; font-size: 0.9rem; font-weight: 700;">Get Support</a>
-    {% endif %}
-
-  </div>
 </div>
+
+<script>
+    let seconds = 5;
+    const countdownEl = document.getElementById('countdown');
+    const interval = setInterval(() => {
+        seconds--;
+        if (countdownEl) countdownEl.innerText = seconds;
+        if (seconds <= 0) {
+            clearInterval(interval);
+            window.location.href = "/app";
+        }
+    }, 1000);
+</script>
 {% endblock %}

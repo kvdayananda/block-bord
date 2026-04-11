@@ -259,14 +259,14 @@ function toggleSidebar() {
 
 function toggleMobileMenu() {
     const nav = document.querySelector(".nav-right");
-    const toggleBtn = document.querySelector(".mobile-toggle");
+    const toggleBtn = document.getElementById("mobileToggle");
     const isOpening = !nav.classList.contains("active");
 
     if (nav) nav.classList.toggle("active");
     if (toggleBtn) toggleBtn.classList.toggle("active");
     
     // Lock scroll when menu is open
-    document.body.classList.toggle("menu-open", isOpening);
+    document.body.style.overflow = isOpening ? 'hidden' : '';
 
     // Close menu when clicking links
     const links = nav.querySelectorAll(".nav-link, .btn");
@@ -274,18 +274,36 @@ function toggleMobileMenu() {
         link.onclick = () => {
             nav.classList.remove("active");
             toggleBtn.classList.remove("active");
-            document.body.classList.remove("menu-open");
+            document.body.style.overflow = '';
         };
     });
+}
+
+function handleMobileToggle() {
+    const sidebar = document.getElementById('appSidebar');
+    if (sidebar) {
+        // We are on an app page with the sidebar
+        const isOpening = !sidebar.classList.contains('mobile-open');
+        if (isOpening) {
+            openSidebar();
+        } else {
+            closeSidebar();
+        }
+    } else {
+        // We are on a landing page with the top nav
+        toggleMobileMenu();
+    }
 }
 
 // ── App Sidebar Toggle Logic ── 
 function openSidebar() {
   const sidebar = document.getElementById('appSidebar');
   const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('mobileToggle');
   if (sidebar && overlay) {
     sidebar.classList.add('mobile-open');
     overlay.classList.add('active');
+    if (hamburger) hamburger.classList.add('active');
     document.body.style.overflow = 'hidden';
   }
 }
@@ -293,9 +311,11 @@ function openSidebar() {
 function closeSidebar() {
   const sidebar = document.getElementById('appSidebar');
   const overlay = document.getElementById('sidebarOverlay');
+  const hamburger = document.getElementById('mobileToggle');
   if (sidebar && overlay) {
     sidebar.classList.remove('mobile-open');
     overlay.classList.remove('active');
+    if (hamburger) hamburger.classList.remove('active');
     document.body.style.overflow = '';
   }
 }
