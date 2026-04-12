@@ -944,6 +944,124 @@ def retrain_ml(request: Request, db: Session = Depends(get_db), _csrf: None = De
 
 
 # -----------------------------
+# ADMIN: USER MANAGEMENT
+# -----------------------------
+
+@app.get("/api/admin/users")
+def admin_list_users(request: Request, db: Session = Depends(get_db)):
+    """List all users — admin only."""
+    user = get_current_user(request, db)
+    if not user or not user.is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    users = db.query(User).order_by(User.created_at.desc()).all()
+    return [
+        {
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "plan": get_user_plan(u),
+            "is_pro": u.is_pro,
+            "is_admin": u.is_admin,
+            "is_active": u.is_active,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+        }
+        for u in users
+    ]
+
+
+@app.patch("/api/admin/users/{user_id}/plan")
+async def admin_set_user_plan(
+    user_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    _csrf: None = Depends(validate_csrf),
+):
+    """Manually set a user's plan — admin only. Use this to grant paid plans after manual payment."""
+    admin = get_current_user(request, db)
+    if not admin or not admin.is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
+    new_plan = (body.get("plan") or "").strip().lower()
+    if new_plan not in PLAN_LIMITS:
+        raise HTTPException(status_code=400, detail=f"Invalid plan. Must be one of: {list(PLAN_LIMITS.keys())}")
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    set_user_plan(target, new_plan)
+    db.commit()
+    return {"ok": True, "user_id": user_id, "username": target.username, "plan": get_user_plan(target)}
+
+
+@app.patch("/api/admin/users/{user_id}/toggle-admin")
+async def admin_toggle_admin(
+    user_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    _csrf: None = Depends(validate_csrf),
+):
+    """Grant or revoke admin status — admin only."""
+    admin = get_current_user(request, db)
+    if not admin or not admin.is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if admin.id == user_id:
+        raise HTTPException(status_code=400, detail="Cannot change your own admin status")
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    target.is_admin = not target.is_admin
+    db.commit()
+    return {"ok": True, "user_id": user_id, "username": target.username, "is_admin": target.is_admin}
+
+
+@app.patch("/api/admin/users/{user_id}/toggle-active")
+async def admin_toggle_active(
+    user_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    _csrf: None = Depends(validate_csrf),
+):
+    """Suspend or reactivate a user account — admin only."""
+    admin = get_current_user(request, db)
+    if not admin or not admin.is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    if admin.id == user_id:
+        raise HTTPException(status_code=400, detail="Cannot suspend yourself")
+    target = db.query(User).filter(User.id == user_id).first()
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    target.is_active = not target.is_active
+    db.commit()
+    return {"ok": True, "user_id": user_id, "username": target.username, "is_active": target.is_active}
+
+
+@app.get("/api/admin/stats")
+def admin_platform_stats(request: Request, db: Session = Depends(get_db)):
+    """Platform-wide stats for admin dashboard."""
+    admin = get_current_user(request, db)
+    if not admin or not admin.is_admin:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    total_users = db.query(User).count()
+    pro_users = db.query(User).filter(User.is_pro == True).count()
+    total_scans = db.query(ScanHistory).count()
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    scans_today = db.query(ScanHistory).filter(ScanHistory.created_at >= today_start).count()
+    plan_breakdown = {}
+    for plan_name in PLAN_LIMITS.keys():
+        plan_breakdown[plan_name] = db.query(User).filter(User.plan == plan_name).count()
+    return {
+        "total_users": total_users,
+        "pro_users": pro_users,
+        "free_users": total_users - pro_users,
+        "total_scans": total_scans,
+        "scans_today": scans_today,
+        "plan_breakdown": plan_breakdown,
+    }
+
+
+# -----------------------------
 # ADMIN BLACKLIST MANAGEMENT
 # -----------------------------
 class BlacklistRequest(BaseModel):
@@ -1396,6 +1514,10 @@ def login(
     user = db.query(User).filter(User.username == username).first()
 
     if user and pwd_context.verify(password, user.password):
+        if not user.is_active:
+            return templates.TemplateResponse(
+                "login.html", {"request": request, "error": "Your account has been suspended. Contact support."}
+            )
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         return RedirectResponse("/app", status_code=302)
@@ -1560,14 +1682,7 @@ def upgrade_user(request: Request, db: Session = Depends(get_db)):
     db.commit()
     return RedirectResponse("/app", status_code=302)
 
-@app.get("/upgrade-beta/{plan}")
-def upgrade_beta(plan: str, request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
-    if not user:
-        return RedirectResponse("/login", status_code=302)
-    set_user_plan(user, plan)
-    db.commit()
-    return RedirectResponse("/app?message=Beta Upgrade Successful", status_code=302)
+# /upgrade-beta removed — was a critical security hole (free plan upgrade with no payment)
 
 @app.get("/analytics", response_class=HTMLResponse)
 def analytics_page(request: Request, db: Session = Depends(get_db)):
