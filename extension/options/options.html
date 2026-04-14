@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Bord AI — Extension Settings</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --primary: #6366f1;
+            --primary-grad: linear-gradient(135deg, #6366f1, #a855f7);
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+        }
+        h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
+        p.subtitle { color: var(--muted); margin-bottom: 32px; font-size: 0.9rem; }
+        
+        .form-group { margin-bottom: 24px; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.05em; }
+        input {
+            width: 100%;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input:focus { border-color: var(--primary); }
+        
+        .save-btn {
+            background: var(--primary-grad);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .save-btn:hover { transform: translateY(-1px); }
+        
+        #status { margin-top: 16px; font-size: 0.9rem; font-weight: 600; }
+        .success { color: #10b981; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Extension Preferences</h1>
+        <p class="subtitle">Configure how Block Bord AI interacts with your browser.</p>
+        
+        <div class="form-group">
+            <label for="api-url">Backend Server URL</label>
+            <input type="text" id="api-url" placeholder="http://127.0.0.1:8000">
+        </div>
+
+        <div class="form-group">
+            <label for="api-key">API Key (Automatic for Dashboard users)</label>
+            <input type="password" id="api-key" placeholder="bb_live_...">
+        </div>
+
+        <button class="save-btn" id="save">Save Configuration</button>
+        <div id="status"></div>
+    </div>
+    <script src="options.js"></script>
+</body>
+</html>

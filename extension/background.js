@@ -169,7 +169,8 @@ function handleScanResult(tabId, data, url) {
                 message: `High-risk site detected! Score: ${data.risk_score}/100. Category: ${data.category || "Phishing"}.`,
                 priority: 2
             });
-            // Overlay removed by user preference — badge + notification only
+            // Trigger full-page warning overlay via content script
+            chrome.tabs.sendMessage(tabId, { action: 'showWarning', data: data }).catch(() => {});
         } else if (data.risk_level === 'Suspicious') {
             chrome.action.setBadgeText({ text: "!", tabId });
             chrome.action.setBadgeBackgroundColor({ color: "#e8901e", tabId });
@@ -179,7 +180,7 @@ function handleScanResult(tabId, data, url) {
                 message: `This site looks suspicious. Risk: ${data.risk_score}/100`,
                 priority: 1
             });
-            // Overlay removed by user preference — badge + notification only
+            // For suspicious sites, we only show badge/notification, no full overlay
         } else {
             chrome.action.setBadgeText({ text: "OK", tabId });
             chrome.action.setBadgeBackgroundColor({ color: "#38a169", tabId });

@@ -3,8 +3,12 @@ import hmac
 import hashlib
 import csv
 import io
-from datetime import datetime
+import json
+import logging
+import asyncio
+from datetime import datetime, timezone, timedelta
 from typing import Optional
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -12,10 +16,11 @@ load_dotenv()
 import secrets
 
 from fastapi import FastAPI, Request, Form, Depends, HTTPException, Header, BackgroundTasks
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -32,6 +37,15 @@ from risk_engine import calculate_risk
 from ml_spam import train_model_from_samples
 from security import SecurityHeadersMiddleware
 from fastapi.middleware.cors import CORSMiddleware
+
+# ─────────────────────────────────────────
+# STRUCTURED LOGGING
+# ─────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+logger = logging.getLogger("blockbord")
 
 
 # ─────────────────────────────────────────
@@ -70,16 +84,12 @@ def send_high_risk_alert(email: str, url: str, result: dict):
                 server.starttls()
                 server.login(smtp_user, smtp_pass)
                 server.sendmail(from_email, [email], msg.as_string())
-            print(f"[EMAIL ALERT] High-risk alert sent to {email} for {url}")
+            logger.info(f"[Email Alert] High-risk alert sent to {email} for {url}")
         except Exception as e:
-            print(f"[EMAIL ALERT] Failed to send email to {email}: {e}")
+            logger.error(f"[Email Alert] Failed to send email to {email}: {e}")
     else:
         # Fallback: log to console (no SMTP configured)
-        print(f"[EMAIL ALERT] (console-mode) HIGH RISK for {email}: {url} — Score: {result.get('risk_score')}/100")
-
-
-from fastapi.responses import RedirectResponse, HTMLResponse
-from fastapi import Depends, Request
+        logger.warning(f"[Email Alert] (no SMTP) HIGH RISK for {email}: {url} — Score: {result.get('risk_score')}/100")
 
 
 # Optional dependency (only required for Razorpay)
@@ -90,15 +100,8 @@ except Exception:
 
 
 # -----------------------------
-# APP SETUP
-# -----------------------------
-app = FastAPI(title="Block Bord AI")
-
-# -----------------------------
 # AUTO-RETRAIN BACKGROUND TASK
 # -----------------------------
-import asyncio
-
 async def _auto_retrain_loop():
     """Automatically retrains the ML model from feedback every 24 hours."""
     await asyncio.sleep(60)  # give server 60s to settle on startup
@@ -110,16 +113,27 @@ async def _auto_retrain_loop():
             db.close()
             if len(samples) >= 5:
                 ok, msg = train_model_from_samples(samples)
-                print(f"[Block Bord Auto-Retrain] {msg} ({'OK' if ok else 'FAILED'})")
+                logger.info(f"[Auto-Retrain] {msg} ({'OK' if ok else 'FAILED'})")
             else:
-                print(f"[Block Bord Auto-Retrain] Skipped — only {len(samples)} feedback samples.")
+                logger.info(f"[Auto-Retrain] Skipped — only {len(samples)} feedback samples.")
         except Exception as e:
-            print(f"[Block Bord Auto-Retrain] Error: {e}")
+            logger.error(f"[Auto-Retrain] Error: {e}")
         await asyncio.sleep(86400)  # wait 24 hours
 
-@app.on_event("startup")
-async def startup_event():
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """FastAPI lifespan: start background tasks on boot, cleanup on shutdown."""
     asyncio.create_task(_auto_retrain_loop())
+    logger.info("Block Bord AI started. Auto-retrain loop scheduled.")
+    yield
+    logger.info("Block Bord AI shutting down.")
+
+
+# -----------------------------
+# APP SETUP
+# -----------------------------
+app = FastAPI(title="Block Bord AI", lifespan=lifespan)
 
 
 
@@ -128,9 +142,10 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
 # Allow customizing CORS in production
+# Default: dev-only localhost. MUST be set in production .env to your actual domain.
 CORS_ORIGIN_REGEX = os.getenv(
     "CORS_ORIGIN_REGEX",
-    r".*",
+    r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
 )
 
 # CORS Setup handled in middleware stack below
@@ -230,7 +245,7 @@ def set_user_plan(user: User, plan: str):
 
 
 def get_today_scan_count(db: Session, user_id: int) -> int:
-    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     return (
         db.query(ScanHistory)
         .filter(ScanHistory.user_id == user_id, ScanHistory.created_at >= today_start)
@@ -255,7 +270,6 @@ async def csrf_token_middleware(request: Request, call_next):
 # Bottom-up: Last added is outermost (runs first on request)
 
 # 1. CSRF Token
-from starlette.middleware.base import BaseHTTPMiddleware
 app.add_middleware(BaseHTTPMiddleware, dispatch=csrf_token_middleware)
 
 # 2. Sessions (Must be outer to CSRF)
@@ -319,6 +333,14 @@ async def validate_csrf(request: Request, db: Session = Depends(get_db)):
 # Password hashing (Production)
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
+
+# -----------------------------
+# HEALTH CHECK
+# -----------------------------
+@app.get("/health")
+def health_check():
+    """Health check endpoint for Render, Docker, and load balancers."""
+    return {"status": "ok", "version": "2.0.0", "service": "blockbord-ai"}
 
 
 # -----------------------------
@@ -591,6 +613,7 @@ async def cyber_assistant_api(request: Request, db: Session = Depends(get_db)):
 
 # -----------------------------
 # GLOBAL SCAM MAP
+# (NOTE: /api/scam-stats is defined once below at line ~1299 — do not duplicate here)
 # -----------------------------
 @app.get("/scam-map", response_class=HTMLResponse)
 def scam_map_page(request: Request, db: Session = Depends(get_db)):
@@ -602,77 +625,6 @@ def scam_map_page(request: Request, db: Session = Depends(get_db)):
         "user": user,
         "plan": get_user_plan(user)
     })
-
-@app.get("/api/scam-stats")
-async def scam_stats_api(request: Request, db: Session = Depends(get_db)):
-    import random, time
-    
-    total_scans = db.query(ScanHistory).count() or 0
-    recent_scans = db.query(ScanHistory).order_by(ScanHistory.created_at.desc()).limit(8).all()
-    
-    # Realistic country-level threat data (semi-randomized to simulate live data)
-    seed = int(time.time() // 60)  # Updates every minute
-    rng = random.Random(seed)
-    
-    base_threats = {
-        "US": 3800, "IN": 2400, "BR": 1700, "CN": 1500, "RU": 1200,
-        "GB": 950, "DE": 720, "FR": 640, "NG": 580, "PK": 510,
-        "AU": 480, "CA": 420, "MX": 390, "ZA": 350, "ID": 330,
-        "TR": 310, "IT": 290, "ES": 270, "AR": 250, "KR": 220,
-        "UA": 200, "PH": 190, "BD": 180, "EG": 170, "VN": 160
-    }
-    
-    # Scale based on actual usage + slight randomness
-    multiplier = max(1.0, total_scans / 50.0)
-    country_data = {
-        code: int(max(10, (count * multiplier) + rng.randint(-100, 100)))
-        for code, count in base_threats.items()
-    }
-    
-    total_today = sum(country_data.values())
-    
-    # Live feed of recent events
-    cities = ["New York", "Mumbai", "São Paulo", "London", "Moscow", "Berlin",
-              "Lagos", "Karachi", "Jakarta", "Cairo", "Manila", "Dhaka"]
-    attack_types = [
-        "Phishing SMS detected", "Fake bank alert intercepted", "Lottery scam blocked",
-        "Authority impersonation stopped", "Suspicious URL analyzed", "Malware link flagged",
-        "Urgent payment request blocked", "Credential harvesting attempt stopped"
-    ]
-    
-    feed = []
-    
-    if recent_scans:
-        for s in recent_scans:
-            try:
-                import ast
-                reasons = ast.literal_eval(s.reasons) if s.reasons else []
-            except:
-                reasons = []
-            
-            time_formatted = s.created_at.strftime("%H:%M") if s.created_at else "Just now"
-            feed.append({
-                "city": rng.choice(cities),
-                "type": f"{(s.category or 'Threat')} blocked",
-                "time": "Just now"
-            })
-            
-    while len(feed) < 8:
-        feed.append({
-            "city": rng.choice(cities),
-            "type": rng.choice(attack_types),
-            "time": f"{rng.randint(1, 59)}m ago"
-        })
-    
-    # SAFE MAX: Prevent crash if country_data is somehow empty
-    top_country = max(country_data.keys(), key=lambda k: country_data[k]) if country_data else "Global"
-    
-    return {
-        "countries": country_data,
-        "total_today": total_today,
-        "feed": feed,
-        "top_country": top_country
-    }
 
 
 @app.get("/admin", response_class=HTMLResponse)
@@ -806,12 +758,13 @@ def scan_content(data: ScanRequest, request: Request, db: Session = Depends(get_
     # Ensure risk_score is a valid number before storage
     raw_score = result.get("risk_score", 0)
     score_val = float(raw_score) if isinstance(raw_score, (int, float, str)) else 0.0
-    
+
+    # Store reasons as JSON string (not Python repr) for safe parsing
     new_scan = ScanHistory(
         content=data.content,
         risk_score=score_val,
         risk_level=str(result["risk_level"]),
-        reasons=str(result.get("reasons", [])),
+        reasons=json.dumps(result.get("reasons", [])),
         category=result.get("category", "General Threat"),
         scam_intent=result.get("scam_intent", "None Detected"),
         user_id=user.id,
@@ -841,12 +794,16 @@ def scan_details_api(scan_id: int, request: Request, db: Session = Depends(get_d
     if not scan:
         raise HTTPException(status_code=404, detail="Scan not found")
     
-    import ast
     reasons = []
     try:
-        reasons = ast.literal_eval(scan.reasons) if scan.reasons else []
-    except Exception:
-        reasons = [scan.reasons] if scan.reasons else []
+        reasons = json.loads(scan.reasons) if scan.reasons else []
+    except (json.JSONDecodeError, TypeError):
+        # Fallback: handle legacy data stored as str(list)
+        import ast
+        try:
+            reasons = ast.literal_eval(scan.reasons) if scan.reasons else []
+        except Exception:
+            reasons = [scan.reasons] if scan.reasons else []
         
     return {
         "id": scan.id,
@@ -875,14 +832,16 @@ def scan_detail_page(request: Request, scan_id: int, db: Session = Depends(get_d
     if not scan:
         return HTMLResponse("Scan not found", status_code=404)
 
-    # Parse reasons string into a list for the template
-    import ast
+    # Parse reasons from JSON (with fallback for legacy str(list) format)
     reasons_list = []
     try:
-        if scan.reasons:
-            reasons_list = ast.literal_eval(scan.reasons)
-    except Exception:
-        reasons_list = [scan.reasons] if scan.reasons else []
+        reasons_list = json.loads(scan.reasons) if scan.reasons else []
+    except (json.JSONDecodeError, TypeError):
+        import ast
+        try:
+            reasons_list = ast.literal_eval(scan.reasons) if scan.reasons else []
+        except Exception:
+            reasons_list = [scan.reasons] if scan.reasons else []
 
     return templates.TemplateResponse(
         "scan_detail.html",
@@ -1465,6 +1424,16 @@ def register(
     username = username.strip()
     email = email.strip().lower()
 
+    # Password strength validation
+    if len(password) < 8:
+        return templates.TemplateResponse(
+            "register.html", {"request": request, "error": "Password must be at least 8 characters long."}
+        )
+    if not any(c.isdigit() for c in password):
+        return templates.TemplateResponse(
+            "register.html", {"request": request, "error": "Password must contain at least one number."}
+        )
+
     if db.query(User).filter(User.username == username).first():
         return templates.TemplateResponse(
             "register.html", {"request": request, "error": "Username already taken."}
@@ -1671,18 +1640,29 @@ def pricing(request: Request, db: Session = Depends(get_db)):
 
 
 # -----------------------------
-# COMPAT: OLD UPGRADE/DOWNGRADE
+# UPGRADE / DOWNGRADE (SECURE)
 # -----------------------------
+# SECURITY FIX: /upgrade no longer auto-upgrades without payment.
+# Users must go through /checkout/{plan} and Razorpay payment flow.
 @app.get("/upgrade")
-def upgrade_user(request: Request, db: Session = Depends(get_db)):
+def upgrade_user(request: Request):
+    """Redirect to pricing page — payment required to upgrade."""
+    return RedirectResponse("/pricing", status_code=302)
+
+
+# SECURITY FIX: /downgrade converted from GET to POST to prevent CSRF attacks.
+# A GET request to /downgrade could be triggered by an img tag on any website.
+@app.post("/downgrade", dependencies=[Depends(validate_csrf)])
+def downgrade_user(request: Request, db: Session = Depends(get_db)):
+    """Downgrade user plan to free (requires CSRF token, POST only)."""
     user = get_current_user(request, db)
     if not user:
-        return RedirectResponse("/login", status_code=302)
-    set_user_plan(user, "pro")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    set_user_plan(user, "free")
     db.commit()
+    logger.info(f"User {user.username} (id={user.id}) downgraded to free plan.")
     return RedirectResponse("/app", status_code=302)
 
-# /upgrade-beta removed — was a critical security hole (free plan upgrade with no payment)
 
 @app.get("/analytics", response_class=HTMLResponse)
 def analytics_page(request: Request, db: Session = Depends(get_db)):
@@ -1693,16 +1673,6 @@ def analytics_page(request: Request, db: Session = Depends(get_db)):
         "request": request,
         "user": user,
     })
-
-
-@app.get("/downgrade")
-def downgrade_user(request: Request, db: Session = Depends(get_db)):
-    user = get_current_user(request, db)
-    if not user:
-        return RedirectResponse("/login", status_code=302)
-    set_user_plan(user, "free")
-    db.commit()
-    return RedirectResponse("/app", status_code=302)
 
 
 # -----------------------------
@@ -1975,7 +1945,8 @@ async def razorpay_webhook(
         return {"ok": False, "message": "Webhook secret not configured"}
 
     body = await request.body()
-    expected = hmac.new(
+    # SECURITY FIX: Python's hmac module uses hmac.HMAC(), not hmac.new()
+    expected = hmac.HMAC(
         RAZORPAY_WEBHOOK_SECRET.encode(), body, hashlib.sha256
     ).hexdigest()
 

@@ -324,8 +324,36 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 function injectWarningOverlay(data) {
-    console.log("Block Bord AI: Detected suspicious page, but warning overlay is disabled by user configuration.");
-    return;
+    if (document.getElementById('blockbord-warning-root')) return;
+
+    const root = document.createElement('div');
+    root.id = 'blockbord-warning-root';
+    root.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        z-index: 2147483647; background: #000; display: flex;
+        align-items: center; justify-content: center; font-family: 'Inter', sans-serif;
+    `;
+
+    const iframe = document.createElement('iframe');
+    iframe.src = chrome.runtime.getURL('warning/warning.html');
+    iframe.style.cssText = `
+        width: 100%; height: 100%; border: none;
+    `;
+    
+    // Pass data to iframe via postMessage after it loads
+    iframe.onload = () => {
+        iframe.contentWindow.postMessage({
+            type: 'BB_WARNING_DATA',
+            data: data,
+            url: window.location.href
+        }, '*');
+    };
+
+    root.appendChild(iframe);
+    (document.body || document.documentElement).appendChild(root);
+    
+    // Stop any media/scripts if possible
+    window.stop();
 }
 
 function init() {

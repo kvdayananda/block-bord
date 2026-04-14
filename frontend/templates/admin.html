@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel — Block Bord AI{% endblock %}
+
+{% block content %}
+<div class="glass-card mb-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-extrabold text-white mb-2">Platform Administration</h1>
+            <p class="text-gray-400">Manage users, analyze threats, and oversee system health.</p>
+        </div>
+        <div class="flex gap-4">
+            <a href="/admin/export/scans" class="btn-secondary flex items-center gap-2">
+                <span>📥</span> Export Scans CSV
+            </a>
+            <div class="status-badge status-online">System Live</div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10" id="stats-grid">
+        <div class="stats-card animate-fade-in">
+            <div class="text-gray-400 text-sm mb-1">Total Users</div>
+            <div class="text-2xl font-bold text-white tracking-tight" id="stat-total-users">{{ total_users }}</div>
+            <div class="text-xs text-green-400 mt-2">↑ 12% this month</div>
+        </div>
+        <div class="stats-card animate-fade-in" style="animation-delay: 0.1s">
+            <div class="text-gray-400 text-sm mb-1">Pro Subscriptions</div>
+            <div class="text-2xl font-bold text-blue-400 tracking-tight">{{ pro_users }}</div>
+            <div class="text-xs text-gray-500 mt-2">{{ (pro_users / total_users * 100)|round(1) if total_users > 0 else 0 }}% conversion</div>
+        </div>
+        <div class="stats-card animate-fade-in" style="animation-delay: 0.2s">
+            <div class="text-gray-400 text-sm mb-1">Total Scans</div>
+            <div class="text-2xl font-bold text-white tracking-tight">{{ total_scans }}</div>
+            <div class="text-xs text-purple-400 mt-2">Live stream active</div>
+        </div>
+        <div class="stats-card animate-fade-in" style="animation-delay: 0.3s">
+            <div class="text-gray-400 text-sm mb-1">Active Threats</div>
+            <div class="text-2xl font-bold text-red-500 tracking-tight" id="stat-high-risk">...</div>
+            <div class="text-xs text-red-300 mt-2">Blocked in last 24h</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex gap-4 mb-8">
+        <button onclick="openTab('users')" class="btn-tab active" id="tab-btn-users">User Management</button>
+        <button onclick="openTab('reports')" class="btn-tab" id="tab-btn-reports">User Reports</button>
+        <button onclick="location.href='/admin/blacklist'" class="btn-tab">Domain Blacklist</button>
+        <button onclick="location.href='/admin/whitelist'" class="btn-tab">Domain Whitelist</button>
+    </div>
+
+    <!-- User Management Section -->
+    <div id="section-users" class="tab-content active">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold text-white">All Users</h2>
+            <div class="flex gap-2">
+                <select id="bulk-action-select" class="form-input text-sm py-1 bg-gray-800">
+                    <option value="">Bulk Action...</option>
+                    <option value="pro">Set Pro</option>
+                    <option value="free">Set Free</option>
+                    <option value="suspend">Suspend</option>
+                    <option value="activate">Activate</option>
+                </select>
+                <button onclick="applyBulkAction()" class="btn-primary text-sm py-1">Apply</button>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm text-gray-300">
+                <thead class="bg-gray-800/50 text-gray-400 uppercase text-xs">
+                    <tr>
+                        <th class="px-4 py-3"><input type="checkbox" id="select-all-users"></th>
+                        <th class="px-4 py-3">User</th>
+                        <th class="px-4 py-3">Email</th>
+                        <th class="px-4 py-3">Plan</th>
+                        <th class="px-4 py-3">Status</th>
+                        <th class="px-4 py-3">Joined</th>
+                        <th class="px-4 py-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- Loaded via API for better interactivity -->
+                    <tr><td colspan="7" class="text-center py-8">Loading users...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div id="section-reports" class="tab-content">
+        <h2 class="text-xl font-bold text-white mb-4">Recent User Reports</h2>
+        <div class="grid gap-4">
+            {% for report in recent_reports %}
+            <div class="bg-gray-800/30 border border-gray-700 p-4 rounded-xl flex justify-between items-center">
+                <div>
+                    <div class="font-mono text-xs text-blue-400 mb-1">{{ report.reported_domain }}</div>
+                    <div class="text-sm font-semibold text-white mb-1">{{ report.reported_url | truncate(80) }}</div>
+                    <div class="text-xs text-gray-400">{{ report.description or "No description" }}</div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn-secondary text-xs px-3 py-1">Dismiss</button>
+                    <button class="btn-primary text-xs px-3 py-1 bg-red-600 hover:bg-red-700">Blacklist</button>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-8 text-gray-500">No pending reports.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Scripts for dynamic interaction -->
+<script>
+    function openTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.btn-tab').forEach(el => el.classList.remove('active'));
+        document.getElementById('section-' + tabName).classList.add('active');
+        document.getElementById('tab-btn-' + tabName).classList.add('active');
+    }
+
+    async function loadUsers() {
+        const res = await fetch('/admin/users');
+        const users = await res.json();
+        const tbody = document.getElementById('users-table-body');
+        tbody.innerHTML = users.map(u => `
+            <tr class="border-b border-gray-800 hover:bg-white/5 transition">
+                <td class="px-4 py-4"><input type="checkbox" class="user-check" data-id="${u.id}"></td>
+                <td class="px-4 py-4 font-semibold text-white">${u.username}</td>
+                <td class="px-4 py-4 text-xs">${u.email}</td>
+                <td class="px-4 py-4">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold ${u.is_pro ? 'bg-blue-900/40 text-blue-300 border border-blue-700' : 'bg-gray-700 text-gray-400'}">
+                        ${u.plan}
+                    </span>
+                </td>
+                <td class="px-4 py-4">
+                    <span class="w-2 h-2 rounded-full inline-block mr-1 ${u.is_active ? 'bg-green-500' : 'bg-red-500'}"></span>
+                    ${u.is_active ? 'Active' : 'Suspended'}
+                </td>
+                <td class="px-4 py-4 text-xs text-gray-500">${u.created_at.split('T')[0]}</td>
+                <td class="px-4 py-4">
+                    <button class="text-blue-400 hover:underline text-xs" onclick="updatePlan(${u.id}, '${u.is_pro ? 'free' : 'pro'}')">Toggle Plan</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function updatePlan(id, plan) {
+        const formData = new FormData();
+        formData.append('plan', plan);
+        await fetch(`/admin/users/${id}/plan`, { method: 'POST', body: formData });
+        loadUsers();
+    }
+
+    async function applyBulkAction() {
+        const action = document.getElementById('bulk-action-select').value;
+        if (!action) return;
+        
+        const selectedIds = Array.from(document.querySelectorAll('.user-check:checked')).map(cb => parseInt(cb.dataset.id));
+        if (selectedIds.length === 0) return alert('Select users first');
+
+        const formData = new FormData();
+        selectedIds.forEach(id => formData.append('user_ids', id));
+        formData.append('action', action);
+
+        const res = await fetch('/admin/api/bulk-action', { method: 'POST', body: formData });
+        const data = await res.json();
+        alert(data.message);
+        loadUsers();
+    }
+
+    async function refreshStats() {
+        try {
+            const res = await fetch('/admin/api/stats');
+            const data = await res.json();
+            document.getElementById('stat-high-risk').textContent = data.high_risk_24h;
+        } catch(e) {}
+    }
+
+    document.getElementById('select-all-users').onclick = (e) => {
+        document.querySelectorAll('.user-check').forEach(cb => cb.checked = e.target.checked);
+    };
+
+    loadUsers();
+    refreshStats();
+    setInterval(refreshStats, 30000);
+</script>
+
+<style>
+    .glass-card {
+        background: rgba(15, 15, 25, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 32px;
+    }
+    .stats-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        border-radius: 16px;
+    }
+    .btn-tab {
+        background: transparent;
+        color: #94a3b8;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+    .btn-tab:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+    }
+    .btn-tab.active {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border-color: rgba(59, 130, 246, 0.2);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .status-online { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+    .status-online::before { content: ''; width: 6px; height: 6px; background: #22c55e; border-radius: 50%; box-shadow: 0 0 8px #22c55e; }
+</style>
+{% endblock %}

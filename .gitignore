@@ -1,7 +1,47 @@
+## Python
 venv/
 __pycache__/
 *.pyc
-blockbord.db
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+
+## Environment & Secrets (NEVER commit these)
 .env
-data/
-models/
+.env.local
+.env.production
+.env.staging
+
+## Databases (use cloud DB in production)
+*.db
+*.sqlite
+*.sqlite3
+
+## ML Model files (large binary files — generate via train_model.py)
+models/*.bin
+models/*.joblib
+models/*.pkl
+models/*.h5
+ml_data/
+ml/data/
+ml/models/
+
+## IDE & OS
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+
+## Testing & Coverage
+.pytest_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+## Logs
+*.log
+logs/

@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 
 from sqlalchemy import (
     create_engine,
@@ -11,31 +11,47 @@ from sqlalchemy import (
     Boolean,
     ForeignKey,
     Text,
-    text,
     Index,
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
-# ---------------- DATABASE CONFIG ----------------
-
+# ──────────────────────────────────────────────────────────────
+# DATABASE CONFIG
+# ──────────────────────────────────────────────────────────────
+# Production: Neon PostgreSQL (set DATABASE_URL in .env)
+# Dev fallback: SQLite (only for local testing without Neon)
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./blockbord.db")
 
-connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
+# psycopg2 requires "postgresql://" — fix Heroku/Neon "postgres://" prefix if needed
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-engine = create_engine(
-    DATABASE_URL,
-    connect_args=connect_args,
-    pool_pre_ping=True,
-    future=True,
-)
+# PostgreSQL-specific engine args (connection pooling for Neon serverless)
+is_sqlite = DATABASE_URL.startswith("sqlite")
+connect_args = {"check_same_thread": False} if is_sqlite else {}
+engine_kwargs = {
+    "connect_args": connect_args,
+    "pool_pre_ping": True,  # Test connections before use (handles Neon cold starts)
+    "future": True,
+}
+
+# For PostgreSQL (Neon): use NullPool to prevent connection exhaustion on serverless
+if not is_sqlite:
+    engine_kwargs["pool_size"] = 5
+    engine_kwargs["max_overflow"] = 10
+    engine_kwargs["pool_timeout"] = 30
+    engine_kwargs["pool_recycle"] = 1800  # Recycle after 30min (Neon idle timeout)
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 Base = declarative_base()
 
-# ---------------- USER TABLE ----------------
 
-
+# ──────────────────────────────────────────────────────────────
+# USER TABLE
+# ──────────────────────────────────────────────────────────────
 class User(Base):
     __tablename__ = "users"
 
@@ -50,8 +66,8 @@ class User(Base):
     plan = Column(String, default="free")
     api_key = Column(String(100), unique=True, index=True, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow)  # ✅ CORRECT PLACE
-    
+    # Use timezone-aware UTC (PEP 495 — datetime.utcnow() deprecated in Python 3.12)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     scans = relationship(
         "ScanHistory", back_populates="user", cascade="all, delete-orphan"
@@ -61,22 +77,21 @@ class User(Base):
     )
 
 
-# ---------------- SCAN HISTORY TABLE ----------------
-
-
+# ──────────────────────────────────────────────────────────────
+# SCAN HISTORY TABLE
+# ──────────────────────────────────────────────────────────────
 class ScanHistory(Base):
     __tablename__ = "scans"
 
     id = Column(Integer, primary_key=True, index=True)
-
     content = Column(Text, nullable=False)
     risk_score = Column(Float, nullable=False)
     risk_level = Column(String(50), nullable=False)
     reasons = Column(Text, nullable=True)       # stored as JSON string
-    category = Column(String(100), nullable=True)  # e.g. "UPI Scam", "Brand Impersonation"
+    category = Column(String(100), nullable=True)
     scam_intent = Column(String(100), nullable=True)
 
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="scans")
@@ -85,9 +100,9 @@ class ScanHistory(Base):
 Index("idx_scans_user_created", ScanHistory.user_id, ScanHistory.created_at)
 
 
-# ---------------- PAYMENTS TABLE ----------------
-
-
+# ──────────────────────────────────────────────────────────────
+# PAYMENTS TABLE
+# ──────────────────────────────────────────────────────────────
 class Payment(Base):
     __tablename__ = "payments"
 
@@ -96,8 +111,8 @@ class Payment(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     user = relationship("User", back_populates="payments")
 
-    plan = Column(String(50), nullable=False)  # starter | pro | business
-    amount = Column(Integer, nullable=False)  # paise
+    plan = Column(String(50), nullable=False)   # starter | pro | business
+    amount = Column(Integer, nullable=False)    # paise (INR)
     currency = Column(String(10), default="INR")
 
     razorpay_order_id = Column(String(255), nullable=False, index=True)
@@ -105,12 +120,12 @@ class Payment(Base):
     razorpay_signature = Column(String(255), nullable=True)
 
     status = Column(String(50), default="created")  # created | paid | failed
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
 
-# ---------------- FEEDBACK TABLE ----------------
-
-
+# ──────────────────────────────────────────────────────────────
+# FEEDBACK TABLE
+# ──────────────────────────────────────────────────────────────
 class Feedback(Base):
     __tablename__ = "feedback"
 
@@ -123,11 +138,12 @@ class Feedback(Base):
     content = Column(Text, nullable=False)
 
     source_scan_id = Column(Integer, ForeignKey("scans.id"), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
 
-# ---------------- BLACKLIST TABLE ----------------
-
+# ──────────────────────────────────────────────────────────────
+# BLACKLIST TABLE
+# ──────────────────────────────────────────────────────────────
 class BlacklistDomain(Base):
     __tablename__ = "blacklist_domains"
 
@@ -135,11 +151,12 @@ class BlacklistDomain(Base):
     domain = Column(String(255), unique=True, index=True, nullable=False)
     added_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     reason = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
 
-# ---------------- WHITELIST TABLE ----------------
-
+# ──────────────────────────────────────────────────────────────
+# WHITELIST TABLE
+# ──────────────────────────────────────────────────────────────
 class WhitelistDomain(Base):
     __tablename__ = "whitelist_domains"
 
@@ -147,11 +164,12 @@ class WhitelistDomain(Base):
     domain = Column(String(255), unique=True, index=True, nullable=False)
     added_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     reason = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
 
-# ---------------- USER REPORTS TABLE ----------------
-
+# ──────────────────────────────────────────────────────────────
+# USER REPORTS TABLE
+# ──────────────────────────────────────────────────────────────
 class UserReport(Base):
     __tablename__ = "user_reports"
 
@@ -162,11 +180,12 @@ class UserReport(Base):
     status = Column(String(50), default="pending")  # pending | reviewed | confirmed | dismissed
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     user = relationship("User", backref="reports")
-    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
 
-# ---------------- PASSWORD RESET TABLE ----------------
-
+# ──────────────────────────────────────────────────────────────
+# PASSWORD RESET TOKENS TABLE
+# ──────────────────────────────────────────────────────────────
 class PasswordResetToken(Base):
     __tablename__ = "password_reset_tokens"
 
@@ -175,52 +194,14 @@ class PasswordResetToken(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     expires_at = Column(DateTime, nullable=False)
     used = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", backref="reset_tokens")
 
 
-# ---------------- CREATE TABLES ----------------
-
-
+# ──────────────────────────────────────────────────────────────
+# INITIALISE TABLES
+# Creates all tables in Neon PostgreSQL if they don't exist.
+# For production schema changes, use Alembic migrations (Phase 6).
+# ──────────────────────────────────────────────────────────────
 Base.metadata.create_all(bind=engine)
-
-
-# ---------------- SIMPLE SQLITE MIGRATIONS ----------------
-def run_migrations():
-    """Lightweight SQLite migration support (safe for production boot)."""
-    if not DATABASE_URL.startswith("sqlite"):
-        return
-    try:
-        with engine.connect() as conn:
-            cols = [
-                r[1]
-                for r in conn.execute(text("PRAGMA table_info(users)")).fetchall()
-            ]
-            if "plan" not in cols:
-                conn.execute(
-                    text("ALTER TABLE users ADD COLUMN plan VARCHAR DEFAULT 'free'")
-                )
-            if "is_admin" not in cols:
-                conn.execute(
-                    text("ALTER TABLE users ADD COLUMN is_admin BOOLEAN DEFAULT 0")
-                )
-            if "api_key" not in cols:
-                conn.execute(
-                    text("ALTER TABLE users ADD COLUMN api_key VARCHAR(100) UNIQUE")
-                )
-                
-            scan_cols = [
-                r[1]
-                for r in conn.execute(text("PRAGMA table_info(scans)")).fetchall()
-            ]
-            if "scam_intent" not in scan_cols:
-                conn.execute(
-                    text("ALTER TABLE scans ADD COLUMN scam_intent VARCHAR(100)")
-                )
-            conn.commit()
-    except Exception:
-        pass
-
-
-run_migrations()

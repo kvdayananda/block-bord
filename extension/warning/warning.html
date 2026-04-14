@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Block Bord AI — Security Warning</title>
+    <link rel="stylesheet" href="warning.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="bb-warning-overlay">
+        <div class="bb-warning-container">
+            <span class="bb-warning-icon">⚠️</span>
+            <h1 class="bb-warning-title">Deceptive Site Ahead</h1>
+            <p class="bb-warning-sub">
+                Block Bord AI has flagged this page as highly suspicious. 
+                It may be a phishing attempt designed to steal your credentials or financial information.
+            </p>
+            
+            <div class="bb-warning-details">
+                <h3>Detection Breakdown</h3>
+                <ul id="reasons-list">
+                    <li>Multi-layered scan detected suspicious patterns</li>
+                </ul>
+            </div>
+
+            <div class="bb-warning-actions">
+                <button id="go-back" class="bb-btn bb-btn-primary">Get Me Out of Here</button>
+                <button id="proceed-anyway" class="bb-btn bb-btn-secondary">Proceed Anyway (Unsafe)</button>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 12px; opacity: 0.6;">
+                Protected by Block Bord AI — Real-time Cybersecurity Shield
+            </p>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'BB_WARNING_DATA') {
+                const { data, url } = event.data;
+                const list = document.getElementById('reasons-list');
+                list.innerHTML = '';
+                
+                if (data.reasons && data.reasons.length > 0) {
+                    data.reasons.forEach(r => {
+                        const li = document.createElement('li');
+                        li.textContent = r;
+                        list.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = "General Phishing/Malware pattern detected by AI engine.";
+                    list.appendChild(li);
+                }
+            }
+        });
+
+        document.getElementById('go-back').onclick = () => {
+            window.parent.postMessage({ type: 'BB_GO_BACK' }, '*');
+            // Background script handles navigation if needed, or we just use history
+            history.back();
+            // If history.back doesn't work (e.g. no history), go to a safe page
+            setTimeout(() => { location.href = 'about:blank'; }, 100);
+        };
+
+        document.getElementById('proceed-anyway').onclick = () => {
+            if (confirm("Are you SURE you want to proceed? This site is dangerous.")) {
+                window.parent.postMessage({ type: 'BB_DISMISS_WARNING' }, '*');
+                // Remove root div in parent
+                const root = window.parent.document.getElementById('blockbord-warning-root');
+                if (root) root.remove();
+            }
+        };
+    </script>
+</body>
+</html>
