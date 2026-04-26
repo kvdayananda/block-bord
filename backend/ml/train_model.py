@@ -19,13 +19,17 @@ logger = logging.getLogger("train_model")
 DATA_URL = "https://archive.ics.uci.edu/static/public/967/phiusiil+phishing+url+website.zip" 
 # Note: UCI ZIP contains CSV. Alternatively, Mendeley has direct CSV.
 # For simplicity, I'll use a direct CSV link if possible or instructions to place it.
-CSV_PATH = "backend/ml/data/PhiUSIIL_Phishing_URL_Dataset.csv"
+CSV_PATH = "ml_data/PhiUSIIL_Phishing_URL_Dataset.csv"
 MODEL_PATH = "backend/ml/models/xgboost_phishing_v1.joblib"
 
 def download_dataset():
-    """Bypasses external download for now (broken link) and uses synthetic data."""
-    # Since the Mendeley link is 404/dynamic, we'll generate high-quality 
-    # synthetic data for this environment.
+    """Checks if dataset exists; if not, creates synthetic data as fallback."""
+    if os.path.exists(CSV_PATH):
+        logger.info(f"Dataset found at {CSV_PATH}. Skipping download/synthetic generation.")
+        return
+    
+    # Since the Mendeley/UCI link can be dynamic, we'll generate high-quality 
+    # synthetic data if the user hasn't provided the file yet.
     _create_synthetic_data()
 
 def _create_synthetic_data():

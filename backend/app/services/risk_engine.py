@@ -64,7 +64,8 @@ KNOWN_BRANDS = {
 MEGA_TRUSTED_DOMAINS = {
     "google.com", "google.co.in", "github.com", "microsoft.com",
     "apple.com", "netflix.com", "amazon.com", "amazon.in",
-    "play.google.com", "apps.apple.com", "youtube.com", "linkedin.com"
+    "play.google.com", "apps.apple.com", "youtube.com", "linkedin.com",
+    "localhost", "127.0.0.1"
 }
 
 URGENCY_MANIPULATION = {
@@ -238,7 +239,7 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
     
     # UPI Scam
     if "upi://pay" in low or UPI_SCAM_RE.search(low):
-        heuristic_score += 45
+        heuristic_score += 100
         reasons.append("UPI scam pattern detected.")
 
     # Phishing Keywords
@@ -261,7 +262,7 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
         heuristic_score += s
         reasons.extend(c)
         if any(sd in URL_SHORTENERS for sd in domains):
-            heuristic_score += 25
+            heuristic_score += 40
             reasons.append("URL shortener used to hide destination.")
 
     for d in domains[:2]:
@@ -286,12 +287,16 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
     if is_sb_malicious:
         final_score = max(85, (0.4 * ml_score) + (0.3 * heuristic_score) + 30)
     else:
-        final_score = (0.5 * ml_score) + (0.5 * heuristic_score)
+        # Final blend: Higher weight to the stronger signal if one is significantly higher
+        if abs(ml_score - heuristic_score) > 50:
+            final_score = (0.7 * max(ml_score, heuristic_score)) + (0.3 * min(ml_score, heuristic_score))
+        else:
+            final_score = (0.5 * ml_score) + (0.5 * heuristic_score)
 
     final_score = min(100, round(final_score, 1))
     
-    if final_score >= 75: level = "High"
-    elif final_score >= 40: level = "Suspicious"
+    if final_score >= 70: level = "High"
+    elif final_score >= 30: level = "Suspicious"
     else: level = "OK"
 
     return {

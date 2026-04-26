@@ -7,8 +7,10 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Read DATABASE_URL (already loaded via .env in main.py)
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./blockbord.db")
+from backend.app.config import settings
+
+# Use URL from settings (loaded from .env)
+DATABASE_URL = settings.database_url
 
 # Normalize postgres:// → postgresql:// (Heroku/Neon compatibility)
 if DATABASE_URL.startswith("postgres://"):

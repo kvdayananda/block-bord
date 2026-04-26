@@ -2,7 +2,7 @@
 Block Bord AI — Plan / Subscription Service
 Centralizes all plan-related logic: limits, pricing, get/set plan.
 """
-from database import User
+from backend.app.models import User
 
 # ── Scan limits per plan (None = unlimited) ──
 PLAN_LIMITS: dict = {

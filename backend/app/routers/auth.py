@@ -11,19 +11,17 @@ from fastapi import APIRouter, Request, Form, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from passlib.context import CryptContext
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from backend.app.utils.limiter import limiter
 from sqlalchemy.orm import Session
 
 from backend.app.dependencies import get_db, validate_csrf
-from database import User, PasswordResetToken
+from backend.app.models import User, PasswordResetToken
 from backend.app.services.email_service import send_high_risk_alert
 
 logger = logging.getLogger("blockbord.auth")
 router = APIRouter(tags=["Auth"])
 templates = Jinja2Templates(directory="frontend/templates")
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
-limiter = Limiter(key_func=get_remote_address)
 
 
 # ──────────────────────────────────────────────────────────────

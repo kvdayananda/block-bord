@@ -16,8 +16,9 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from backend.app.dependencies import get_db, require_admin
+from backend.app.utils.limiter import limiter
 from backend.app.services.plan_service import set_user_plan
-from database import User, ScanHistory, BlacklistDomain, WhitelistDomain, Feedback, UserReport
+from backend.app.models import User, ScanHistory, BlacklistDomain, WhitelistDomain, Feedback, UserReport
 
 logger = logging.getLogger("blockbord.admin")
 router = APIRouter(prefix="/admin", tags=["Admin"])
@@ -73,7 +74,9 @@ def list_users(db: Session = Depends(get_db), admin: User = Depends(require_admi
     } for u in users]
 
 @router.post("/api/bulk-action")
+@limiter.limit("20/minute")
 def bulk_user_action(
+    request: Request,
     user_ids: List[int] = Form(...), 
     action: str = Form(...),
     db: Session = Depends(get_db), 
@@ -130,7 +133,9 @@ def blacklist_page(request: Request, db: Session = Depends(get_db), admin: User 
     return templates.TemplateResponse("admin_blacklist.html", {"request": request, "items": items, "admin": admin})
 
 @router.post("/blacklist")
+@limiter.limit("10/minute")
 def add_to_blacklist(
+    request: Request,
     domain: str = Form(...), 
     reason: str = Form(None), 
     db: Session = Depends(get_db), 
@@ -158,7 +163,9 @@ def whitelist_page(request: Request, db: Session = Depends(get_db), admin: User 
     return templates.TemplateResponse("admin_whitelist.html", {"request": request, "items": items, "admin": admin})
 
 @router.post("/whitelist")
+@limiter.limit("10/minute")
 def add_to_whitelist(
+    request: Request,
     domain: str = Form(...), 
     reason: str = Form(None), 
     db: Session = Depends(get_db), 

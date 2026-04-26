@@ -13,13 +13,13 @@ pip install -r requirements.txt
 ### Initialize AI Model (Recommended)
 To ensure the AI has the latest threat intelligence, run:
 ```powershell
-python update_datasets.py
+python backend/ml/train_model.py
 ```
 
 ### Start the Server
 Run the FastAPI backend using Uvicorn:
 ```powershell
-python -m uvicorn app:app --reload
+python -m uvicorn backend.app.main:app --reload
 ```
 The server will be available at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
 

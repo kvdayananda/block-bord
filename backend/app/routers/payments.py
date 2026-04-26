@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 
 from backend.app.dependencies import get_db, get_current_user, validate_csrf
 from backend.app.services.plan_service import PLAN_PRICES_PAISE, set_user_plan
-from database import User, Payment
+from backend.app.models import User, Payment
 
 # Optional dependency check
 try:

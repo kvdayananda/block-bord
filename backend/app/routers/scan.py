@@ -13,21 +13,21 @@ from fastapi import APIRouter, Request, Depends, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from slowapi import Limiter
-from slowapi.util import get_remote_address
+from backend.app.utils.limiter import limiter
 from sqlalchemy.orm import Session
 
 from backend.app.dependencies import get_db, get_current_user, validate_csrf
 from backend.app.services.plan_service import get_user_plan, PLAN_LIMITS
 from backend.app.services.email_service import send_high_risk_alert
-from database import ScanHistory, User, Feedback, BlacklistDomain, WhitelistDomain, UserReport
-from risk_engine import calculate_risk, _extract_domains
-from ml_spam import train_model_from_samples
+from backend.app.models import ScanHistory, User, Feedback, BlacklistDomain, WhitelistDomain, UserReport
+from backend.app.services.risk_engine import calculate_risk, _extract_domains
+from backend.app.services.ml_engine import ml_engine
+from backend.app.services.ml_training_service import train_model_from_samples
+
 
 logger = logging.getLogger("blockbord.scan")
 router = APIRouter(tags=["Scan"])
 templates = Jinja2Templates(directory="frontend/templates")
-limiter = Limiter(key_func=get_remote_address)
 
 
 # ── Pydantic Models ──
@@ -82,7 +82,7 @@ def _parse_reasons(raw: str) -> list:
 # ──────────────────────────────────────────────────────────────
 @router.post("/scan")
 @limiter.limit("30/minute")
-def scan_content(
+async def scan_content(
     data: ScanRequest,
     request: Request,
     db: Session = Depends(get_db),
@@ -133,9 +133,9 @@ def scan_content(
             return {**result, "scan_id": scan.id}
 
     # Run full risk analysis
-    result = calculate_risk(
+    result = await calculate_risk(
         text=data.content,
-        url_context=data.url,
+        url=data.url,
         telemetry=data.telemetry,
         form_data=data.formData,
         has_redirected=data.hasRedirected,
@@ -264,7 +264,7 @@ def retrain_ml(
 # ──────────────────────────────────────────────────────────────
 @router.post("/api/check-link")
 @limiter.limit("20/minute")
-def check_link(
+async def check_link(
     data: LinkAnalysisRequest,
     request: Request,
     background_tasks: BackgroundTasks,
@@ -289,7 +289,7 @@ def check_link(
             current_user = db.query(User).filter(User.id == uid).first()
 
     text_to_scan = data.content if data.content else url
-    result = calculate_risk(text_to_scan)
+    result = await calculate_risk(text=text_to_scan, url=url)
 
     if current_user and result.get("risk_level") == "High":
         background_tasks.add_task(send_high_risk_alert, current_user.email, url, result)

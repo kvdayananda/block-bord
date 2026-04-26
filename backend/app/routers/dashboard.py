@@ -18,7 +18,7 @@ import io
 
 from backend.app.dependencies import get_db, get_current_user
 from backend.app.services.plan_service import get_user_plan, get_plan_limit, PLAN_LIMITS
-from database import ScanHistory, User
+from backend.app.models import ScanHistory, User
 
 logger = logging.getLogger("blockbord.dashboard")
 router = APIRouter(tags=["Dashboard"])

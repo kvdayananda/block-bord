@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from backend.app.database.connection import SessionLocal
 
 # Import models from root database.py (existing monolith — shared during migration)
-from database import User
+from backend.app.models import User
 
 
 # ──────────────────────────────────────────────────────────────
