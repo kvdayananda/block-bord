@@ -568,6 +568,7 @@ function escapeHtml(str) {
         addTypingIndicator();
 
         try {
+            console.log("Chatbot: Sending message to assistant...", text);
             const res = await fetch('/api/assistant', {
                 method: 'POST',
                 headers: { 
@@ -581,17 +582,37 @@ function escapeHtml(str) {
             removeTypingIndicator();
 
             if (res.status === 401) {
+                console.warn("Chatbot: Unauthorized (401). User not logged in.");
                 addMessage('Please log in to use the AI Assistant.', 'bot');
                 return;
             }
 
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                console.error("Chatbot: API Error", res.status, errorData);
+                
+                let errorMsg = `Sorry, the assistant encountered an error (${res.status}).`;
+                if (res.status === 503) {
+                    errorMsg = "Our database is currently performing maintenance. Please try your message again in a minute. 🛠️";
+                } else if (res.status === 500) {
+                    errorMsg = "The AI brain is having a temporary glitch. Try again shortly!";
+                } else if (errorData.error) {
+                    errorMsg = errorData.error;
+                }
+                
+                addMessage(errorMsg, 'bot');
+                return;
+            }
+
             const data = await res.json();
+            console.log("Chatbot: Received response", data);
             addMessage(data.response || 'Sorry, I could not analyze that.', 'bot');
 
 
         } catch (err) {
+            console.error("Chatbot: Network or Runtime Error", err);
             removeTypingIndicator();
-            addMessage('Connection error. Please try again.', 'bot');
+            addMessage('Connection error. Please check your internet and try again.', 'bot');
         } finally {
             sendBtn.disabled = false;
         }

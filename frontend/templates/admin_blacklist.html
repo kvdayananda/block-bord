@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Domain Blacklist — Block Bord AI Admin{% endblock %}
+
+{% block content %}
+<div class="glass-card mb-8">
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <a href="/admin" class="back-link">← Back to Admin</a>
+            <h1 class="text-3xl font-extrabold text-white mt-2 mb-1">⛔ Domain Blacklist</h1>
+            <p class="text-gray-400 text-sm">Domains listed here are instantly flagged as <strong>High Risk (score 100)</strong> for all users.</p>
+        </div>
+        <div class="status-badge status-danger">{{ items | length }} Blocked Domains</div>
+    </div>
+
+    <!-- Add New Domain Form -->
+    <div class="add-form-card mb-8">
+        <h2 class="text-white font-bold text-lg mb-4">➕ Add Domain to Blacklist</h2>
+        <form action="/admin/blacklist" method="POST" class="flex flex-col gap-4 md:flex-row md:items-end">
+            <div class="flex-1">
+                <label class="form-label">Domain (e.g. phishing-site.com)</label>
+                <input
+                    type="text"
+                    name="domain"
+                    id="blacklist-domain-input"
+                    class="form-input w-full"
+                    placeholder="example-scam.com"
+                    required
+                    autocomplete="off"
+                    spellcheck="false"
+                >
+            </div>
+            <div class="flex-1">
+                <label class="form-label">Reason (optional)</label>
+                <input
+                    type="text"
+                    name="reason"
+                    id="blacklist-reason-input"
+                    class="form-input w-full"
+                    placeholder="Phishing / Malware / UPI Scam..."
+                >
+            </div>
+            <div>
+                <button type="submit" id="add-blacklist-btn" class="btn-danger px-6 py-2 w-full md:w-auto">
+                    🚫 Blacklist Domain
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="mb-4">
+        <input
+            type="text"
+            id="bl-search"
+            class="form-input"
+            placeholder="🔍 Search blacklisted domains..."
+            oninput="filterBlacklist()"
+            style="max-width:400px;"
+        >
+    </div>
+
+    <!-- Domain Table -->
+    <div class="overflow-x-auto rounded-xl border border-white/5">
+        <table class="w-full text-left text-sm text-gray-300" id="blacklist-table">
+            <thead class="bg-gray-800/60 text-gray-400 uppercase text-xs">
+                <tr>
+                    <th class="px-5 py-3">#</th>
+                    <th class="px-5 py-3">Domain</th>
+                    <th class="px-5 py-3">Reason</th>
+                    <th class="px-5 py-3">Added</th>
+                    <th class="px-5 py-3">Action</th>
+                </tr>
+            </thead>
+            <tbody id="bl-table-body">
+                {% for item in items %}
+                <tr class="bl-row border-b border-white/5 hover:bg-white/3 transition" data-domain="{{ item.domain }}">
+                    <td class="px-5 py-4 text-gray-600 text-xs">{{ loop.index }}</td>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-2">
+                            <span class="risk-dot"></span>
+                            <span class="font-mono text-red-400 font-semibold">{{ item.domain }}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4 text-gray-400 text-xs">{{ item.reason or "No reason provided" }}</td>
+                    <td class="px-5 py-4 text-gray-500 text-xs">
+                        {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else '—' }}
+                    </td>
+                    <td class="px-5 py-4">
+                        <button
+                            class="remove-btn text-xs px-3 py-1 rounded-lg"
+                            onclick="removeBlacklist({{ item.id }}, '{{ item.domain }}', this)"
+                            id="remove-bl-{{ item.id }}"
+                        >
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center py-12 text-gray-500">
+                        <div style="font-size:2rem;">✅</div>
+                        <div class="mt-2">No domains in the blacklist yet.</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Count badge -->
+    <div class="mt-4 text-xs text-gray-600">
+        Showing <span id="bl-visible-count">{{ items | length }}</span> of {{ items | length }} domains
+    </div>
+</div>
+
+<script>
+    function filterBlacklist() {
+        const q = document.getElementById('bl-search').value.toLowerCase();
+        const rows = document.querySelectorAll('.bl-row');
+        let visible = 0;
+        rows.forEach(row => {
+            const domain = row.dataset.domain || '';
+            const match = domain.toLowerCase().includes(q);
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+        document.getElementById('bl-visible-count').textContent = visible;
+    }
+
+    async function removeBlacklist(id, domain, btn) {
+        if (!confirm(`Remove "${domain}" from blacklist?`)) return;
+        btn.disabled = true;
+        btn.textContent = 'Removing...';
+        try {
+            const formData = new FormData();
+            formData.append('domain_id', id);
+            const res = await fetch(`/admin/blacklist/${id}/delete`, { method: 'POST', body: formData });
+            if (res.ok || res.status === 303) {
+                btn.closest('tr').style.opacity = '0.3';
+                btn.closest('tr').style.transition = 'opacity 0.4s';
+                setTimeout(() => btn.closest('tr').remove(), 400);
+            } else {
+                btn.textContent = 'Error';
+                btn.disabled = false;
+            }
+        } catch(e) {
+            // Fallback: reload page
+            window.location.reload();
+        }
+    }
+</script>
+
+<style>
+    .glass-card {
+        background: rgba(15, 15, 25, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 24px;
+        padding: 32px;
+    }
+    .add-form-card {
+        background: rgba(239, 68, 68, 0.04);
+        border: 1px solid rgba(239, 68, 68, 0.15);
+        border-radius: 16px;
+        padding: 24px;
+    }
+    .form-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 6px;
+    }
+    .form-input {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 14px;
+        color: white;
+        font-size: 0.9rem;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: rgba(239,68,68,0.4); }
+    .btn-danger {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        padding: 10px 20px;
+    }
+    .btn-danger:hover { opacity: 0.9; transform: translateY(-1px); }
+    .remove-btn {
+        background: rgba(239,68,68,0.1);
+        color: #f87171;
+        border: 1px solid rgba(239,68,68,0.2);
+        cursor: pointer;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    .remove-btn:hover { background: rgba(239,68,68,0.2); }
+    .remove-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .risk-dot {
+        width: 8px; height: 8px;
+        background: #ef4444;
+        border-radius: 50%;
+        box-shadow: 0 0 8px #ef4444;
+        flex-shrink: 0;
+    }
+    .status-badge {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: flex; align-items: center; gap: 6px;
+    }
+    .status-danger {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .back-link {
+        color: #6366f1;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex; align-items: center; gap: 4px;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .hover\:bg-white\/3:hover { background: rgba(255,255,255,0.03); }
+</style>
+{% endblock %}

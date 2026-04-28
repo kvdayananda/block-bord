@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from typing import Optional, List
 
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -186,6 +186,41 @@ def add_to_whitelist(
     return RedirectResponse("/admin/whitelist", status_code=303)
 
 # ──────────────────────────────────────────────────────────────
+# DELETE DOMAIN ENTRIES
+# ──────────────────────────────────────────────────────────────
+@router.post("/blacklist/{domain_id}/delete")
+def delete_blacklist_domain(
+    domain_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin)
+):
+    """Remove a domain from the blacklist by ID."""
+    item = db.query(BlacklistDomain).filter(BlacklistDomain.id == domain_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Domain not found in blacklist")
+    logger.info(f"Admin {admin.username} REMOVED from blacklist: {item.domain}")
+    db.delete(item)
+    db.commit()
+    return {"ok": True, "message": f"Domain '{item.domain}' removed from blacklist"}
+
+
+@router.post("/whitelist/{domain_id}/delete")
+def delete_whitelist_domain(
+    domain_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin)
+):
+    """Remove a domain from the whitelist by ID."""
+    item = db.query(WhitelistDomain).filter(WhitelistDomain.id == domain_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Domain not found in whitelist")
+    logger.info(f"Admin {admin.username} REMOVED from whitelist: {item.domain}")
+    db.delete(item)
+    db.commit()
+    return {"ok": True, "message": f"Domain '{item.domain}' removed from whitelist"}
+
+
+# ──────────────────────────────────────────────────────────────
 # EXPORT
 # ──────────────────────────────────────────────────────────────
 @router.get("/export/scans")
@@ -201,8 +236,10 @@ def export_scans_csv(db: Session = Depends(get_db), admin: User = Depends(requir
         writer.writerow([s.id, s.content[:100], s.risk_score, s.risk_level, s.category, s.user_id, s.created_at])
     
     output.seek(0)
-    return FileResponse(
-        io.BytesIO(output.getvalue().encode()), 
-        media_type="text/csv", 
-        filename=f"blockbord_scans_{datetime.now().strftime('%Y%m%d')}.csv"
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=blockbord_scans_{datetime.now().strftime('%Y%m%d')}.csv"
+        }
     )

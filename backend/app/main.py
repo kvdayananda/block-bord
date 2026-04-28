@@ -14,6 +14,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy.exc import OperationalError
+from fastapi.responses import JSONResponse
 
 from backend.app.config import settings
 from backend.app.middleware.security import SecurityHeadersMiddleware
@@ -53,9 +55,21 @@ logger = logging.getLogger("blockbord")
 # ──────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize database tables if they don't exist
-    logger.info("Initializing database tables...")
-    Base.metadata.create_all(bind=engine)
+    # Initialize database tables if they don't exist (with retry logic)
+    max_retries = 5
+    for i in range(max_retries):
+        try:
+            logger.info(f"Initializing database tables (Attempt {i+1}/{max_retries})...")
+            Base.metadata.create_all(bind=engine)
+            logger.info("Database tables initialized successfully.")
+            break
+        except Exception as e:
+            if i < max_retries - 1:
+                logger.warning(f"DB Connection failed: {e}. Retrying in 5s...")
+                import time
+                time.sleep(5)
+            else:
+                logger.error("CRITICAL: Database initialization failed after all retries.")
     
     logger.info(f"Block Bord AI v{app.version} — Mode: {settings.env.upper()}")
     yield
@@ -77,6 +91,24 @@ app.state.limiter = limiter
 
 # 1. Rate Limiting Handler
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+# 2. Global Database Error Handler (Neon/Postgres Down)
+@app.exception_handler(OperationalError)
+async def db_exception_handler(request: Request, exc: OperationalError):
+    logger.error(f"DATABASE ERROR: {exc}")
+    return JSONResponse(
+        status_code=503,
+        content={"error": "Database temporarily unavailable. Please try again in a few moments."},
+    )
+
+# 3. Generic Exception Fallback
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    logger.error(f"UNEXPECTED ERROR: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"error": "An internal server error occurred. Our team has been notified."},
+    )
 
 # 2. CORS Middleware - Restrict to actual origins + Browser Extension
 app.add_middleware(

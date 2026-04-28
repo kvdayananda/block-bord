@@ -58,7 +58,7 @@ yarl==1.18.3
 # reportlab==4.2.2
 
 # External APIs  
-google-generativeai
+google-genai
 razorpay
 
 # Error Monitoring (optional)

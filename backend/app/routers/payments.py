@@ -115,10 +115,12 @@ def verify_payment(
     }
     
     try:
-        # client.utility.verify_payment_signature(params_dict) — manually or via client
+        # Verify Razorpay payment signature using HMAC-SHA256
         data = f"{razorpay_order_id}|{razorpay_payment_id}"
         generated_signature = hmac.new(
-            razorpay_secret.encode(), data.encode(), hashlib.sha256
+            razorpay_secret.encode("utf-8"),
+            data.encode("utf-8"),
+            hashlib.sha256
         ).hexdigest()
         
         if generated_signature != razorpay_signature:
@@ -154,8 +156,8 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     if not signature or not secret:
         return JSONResponse({"status": "ignored"}, status_code=200)
 
-    # Verification using HMAC object (fixed from monolith hmac.new crash)
-    h = hmac.new(secret.encode(), body, hashlib.sha256)
+    # Verify webhook signature using HMAC-SHA256
+    h = hmac.new(secret.encode("utf-8"), body, hashlib.sha256)
     expected = h.hexdigest()
 
     if expected != signature:

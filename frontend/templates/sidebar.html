@@ -99,6 +99,16 @@
       </svg>
       Upgrade Plan
     </a>
+
+    {% if user.is_admin %}
+    <a href="/admin" class="sidebar-nav-item {% if request.url.path.startswith('/admin') %}active{% endif %}" style="margin-top: 4px; border: 1px solid rgba(245, 158, 11, 0.2); background: rgba(245, 158, 11, 0.05); color: #f59e0b;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      Admin Panel
+    </a>
+    {% endif %}
   </nav>
 
   <!-- Bottom Actions -->

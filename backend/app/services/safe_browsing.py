@@ -1,7 +1,6 @@
 """
 Block Bord AI — Google Safe Browsing Integration
-Checks URLs against Google's database of malicious sites.
-Currently implements a placeholder flow as requested by the user.
+Checks URLs against Google's database of malicious sites in real-time.
 """
 import httpx
 import logging

@@ -167,8 +167,9 @@
     });
 
     // Mobile menu toggle
-    function toggleMobileMenu() {
+    function handleMobileToggle() {
       document.getElementById('navMenu')?.classList.toggle('active');
+      document.getElementById('mobileToggle')?.classList.toggle('open');
     }
 
     // Close mobile menu on link click

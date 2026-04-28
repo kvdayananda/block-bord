@@ -121,6 +121,9 @@ def _extract_domains(text: str):
 
 def _get_root_domain(domain: str) -> str:
     parts = domain.split(".")
+    is_ip = len(parts) == 4 and all(p.isdigit() for p in parts)
+    if is_ip:
+        return domain
     if len(parts) >= 2: return ".".join(parts[-2:])
     return domain
 
@@ -206,7 +209,7 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
     if url:
         try:
             d = urlparse(url if "://" in url else "http://" + url).netloc.lower().split(":")[0]
-            if _get_root_domain(d) in MEGA_TRUSTED_DOMAINS:
+            if _get_root_domain(d) in MEGA_TRUSTED_DOMAINS or d in MEGA_TRUSTED_DOMAINS:
                 return {"risk_score": 0, "risk_level": "OK", "reasons": ["Trusted official domain."], "category": "Safe"}
         except: pass
 
@@ -282,26 +285,74 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
     # ──────────────────────────────────────────────────────────────
     # FINAL WEIGHTED BLEND
     # ──────────────────────────────────────────────────────────────
-    # If Safe Browsing is positive, it's an automatic High Risk (min 85)
-    # Otherwise: 0.5 * ML + 0.5 * Heuristics
     if is_sb_malicious:
         final_score = max(85, (0.4 * ml_score) + (0.3 * heuristic_score) + 30)
     else:
-        # Final blend: Higher weight to the stronger signal if one is significantly higher
         if abs(ml_score - heuristic_score) > 50:
             final_score = (0.7 * max(ml_score, heuristic_score)) + (0.3 * min(ml_score, heuristic_score))
         else:
             final_score = (0.5 * ml_score) + (0.5 * heuristic_score)
 
     final_score = min(100, round(final_score, 1))
-    
+
     if final_score >= 70: level = "High"
     elif final_score >= 30: level = "Suspicious"
     else: level = "OK"
 
+    # ──────────────────────────────────────────────────────────────
+    # SCAM INTENT CLASSIFICATION
+    # ──────────────────────────────────────────────────────────────
+    scam_intent = "None Detected"
+    if final_score >= 30:
+        # Priority-ordered intent detection
+        if "upi://pay" in low or UPI_SCAM_RE.search(low):
+            scam_intent = "UPI / Payment Scam"
+        elif is_sb_malicious:
+            scam_intent = "Known Malware / Phishing Site"
+        elif re.search(r'\bpassword\b|\botp\b|\bupi pin\b|\bcvv\b|\baadhaar\b|\bssn\b', low):
+            scam_intent = "Credential Harvesting"
+        elif SCAM_LURE_RE.search(low):
+            scam_intent = "Lottery / Prize Scam"
+        elif re.search(r'\bloan\b|\bpre.?approved\b|\bcredit\b|\binvestment\b|\bearning\b', low):
+            scam_intent = "Financial Fraud"
+        elif URGENT_RE.search(low) and ACTION_RE.search(low):
+            scam_intent = "Social Engineering"
+        elif ml_prob > 0.5:
+            scam_intent = "AI-Detected Phishing Pattern"
+        elif any(sd in URL_SHORTENERS for sd in domains):
+            scam_intent = "Hidden Destination (URL Shortener)"
+        else:
+            scam_intent = "General Threat"
+
+    # ──────────────────────────────────────────────────────────────
+    # CATEGORY LABEL
+    # ──────────────────────────────────────────────────────────────
+    if level == "OK":
+        category = "Safe"
+    elif is_sb_malicious:
+        category = "Confirmed Malware / Phishing"
+    elif "UPI" in scam_intent or "Payment" in scam_intent:
+        category = "UPI / Financial Scam"
+    elif "Credential" in scam_intent:
+        category = "Credential Phishing"
+    elif "Lottery" in scam_intent or "Prize" in scam_intent:
+        category = "Scam Lure"
+    elif "Financial" in scam_intent:
+        category = "Financial Fraud"
+    elif ml_prob > 0.5 and heuristic_score > 20:
+        category = "ML + Heuristic Hybrid"
+    elif ml_prob > 0.5:
+        category = "AI-Detected Threat"
+    elif heuristic_score > 20:
+        category = "Heuristic Threat"
+    else:
+        category = "General Threat"
+
     return {
         "risk_score": final_score,
         "risk_level": level,
-        "reasons": list(dict.fromkeys(reasons)), # deduplicate preserving order
-        "category": "ML + Heuristic Hybrid" if final_score > 10 else "General"
+        "reasons": list(dict.fromkeys(reasons)),  # deduplicate preserving order
+        "category": category,
+        "scam_intent": scam_intent,
     }
+

@@ -19,19 +19,23 @@ if DATABASE_URL.startswith("postgres://"):
 is_sqlite = DATABASE_URL.startswith("sqlite")
 connect_args = {"check_same_thread": False} if is_sqlite else {}
 
+# ──────────────────────────────────────────────────────────────
+# ENGINE CONFIGURATION
+# ──────────────────────────────────────────────────────────────
+# pool_pre_ping=True is CRITICAL for serverless DBs like Neon/Heroku
+# It checks the connection health before every request.
 engine_kwargs: dict = {
     "connect_args": connect_args,
-    "pool_pre_ping": True,
+    "pool_pre_ping": True, 
     "future": True,
 }
 
-# PostgreSQL pooling — optimized for Neon serverless
 if not is_sqlite:
     engine_kwargs.update({
-        "pool_size": 5,
-        "max_overflow": 10,
-        "pool_timeout": 30,
-        "pool_recycle": 1800,
+        "pool_size": 10,
+        "max_overflow": 20,
+        "pool_timeout": 60,      # Give more time for DNS resolution
+        "pool_recycle": 1200,    # Recycle connections before they are killed by serverless idle limits
     })
 
 engine = create_engine(DATABASE_URL, **engine_kwargs)
