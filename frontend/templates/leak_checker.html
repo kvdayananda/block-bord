@@ -59,7 +59,10 @@ document.getElementById('leakForm').addEventListener('submit', async (e) => {
   try {
     const r = await fetch('/api/check-leak', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+      },
       body: new URLSearchParams({ email })
     });
     const d = await r.json();

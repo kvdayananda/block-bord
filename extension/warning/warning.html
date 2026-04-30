@@ -58,18 +58,11 @@
 
         document.getElementById('go-back').onclick = () => {
             window.parent.postMessage({ type: 'BB_GO_BACK' }, '*');
-            // Background script handles navigation if needed, or we just use history
-            history.back();
-            // If history.back doesn't work (e.g. no history), go to a safe page
-            setTimeout(() => { location.href = 'about:blank'; }, 100);
         };
 
         document.getElementById('proceed-anyway').onclick = () => {
             if (confirm("Are you SURE you want to proceed? This site is dangerous.")) {
                 window.parent.postMessage({ type: 'BB_DISMISS_WARNING' }, '*');
-                // Remove root div in parent
-                const root = window.parent.document.getElementById('blockbord-warning-root');
-                if (root) root.remove();
             }
         };
     </script>

@@ -1,6 +1,6 @@
 // Content Script for Block Bord AI - Advanced Edition
 
-const BB_REPORT_URL = "http://127.0.0.1:8000";
+const BB_REPORT_URL = "https://block-bord.onrender.com";
 
 const currentURL = window.location.href;
 const currentDomain = window.location.hostname;
@@ -348,6 +348,21 @@ function injectWarningOverlay(data) {
             url: window.location.href
         }, '*');
     };
+
+    // Listen for messages from the warning iframe
+    window.addEventListener('message', (event) => {
+        if (!event.data) return;
+        if (event.data.type === 'BB_DISMISS_WARNING') {
+            const root = document.getElementById('blockbord-warning-root');
+            if (root) root.remove();
+        } else if (event.data.type === 'BB_GO_BACK') {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = 'about:blank';
+            }
+        }
+    });
 
     root.appendChild(iframe);
     (document.body || document.documentElement).appendChild(root);

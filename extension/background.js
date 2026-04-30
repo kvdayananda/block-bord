@@ -1,5 +1,5 @@
 // Background Service Worker for Block Bord AI – Full Feature Set
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://block-bord.onrender.com";
 
 // ─── Browser-side Cache (Feature #11) ────────────────────────────────────────
 const scanCache = new Map();

@@ -22,8 +22,4 @@ services:
       - key: GOOGLE_SAFE_BROWSING_KEY
         value: YOUR_PLACEHOLDER_KEY
 
-databases:
-  - name: block-bord-db
-    plan: free # Note: Use Neon external DB normally, but this defines a managed one if preferred.
-    databaseName: blockbord
-    user: admin
+

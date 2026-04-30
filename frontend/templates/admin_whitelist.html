@@ -19,6 +19,7 @@
     <div class="add-form-card mb-8">
         <h2 class="text-white font-bold text-lg mb-4">➕ Add Domain to Whitelist</h2>
         <form action="/admin/whitelist" method="POST" class="flex flex-col gap-4 md:flex-row md:items-end">
+            <input type="hidden" name="csrf_token" value="{{ request.session.get('csrf_token') }}">
             <div class="flex-1">
                 <label class="form-label">Domain (e.g. trusted-partner.com)</label>
                 <input
@@ -138,7 +139,11 @@
         try {
             const formData = new FormData();
             formData.append('domain_id', id);
-            const res = await fetch(`/admin/whitelist/${id}/delete`, { method: 'POST', body: formData });
+            const res = await fetch(`/admin/whitelist/${id}/delete`, { 
+                method: 'POST', 
+                body: formData,
+                headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content }
+            });
             if (res.ok || res.status === 303) {
                 btn.closest('tr').style.opacity = '0.3';
                 btn.closest('tr').style.transition = 'opacity 0.4s';

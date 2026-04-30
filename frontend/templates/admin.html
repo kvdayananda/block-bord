@@ -147,7 +147,11 @@
     async function updatePlan(id, plan) {
         const formData = new FormData();
         formData.append('plan', plan);
-        await fetch(`/admin/users/${id}/plan`, { method: 'POST', body: formData });
+        await fetch(`/admin/users/${id}/plan`, { 
+            method: 'POST', 
+            body: formData,
+            headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content }
+        });
         loadUsers();
     }
 
@@ -162,7 +166,11 @@
         selectedIds.forEach(id => formData.append('user_ids', id));
         formData.append('action', action);
 
-        const res = await fetch('/admin/api/bulk-action', { method: 'POST', body: formData });
+        const res = await fetch('/admin/api/bulk-action', { 
+            method: 'POST', 
+            body: formData,
+            headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content }
+        });
         const data = await res.json();
         alert(data.message);
         loadUsers();

@@ -1523,8 +1523,12 @@ h1, h2, h3, h4, h5 {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
-.premium-table th {
+.premium-table th,
+.premium-table td {
   padding: 16px 20px;
+  vertical-align: middle;
+}
+.premium-table th {
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;

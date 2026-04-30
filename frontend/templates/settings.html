@@ -213,7 +213,10 @@
   }
   async function rotateKey() {
     if (!confirm('This will invalidate your current API key. Proceed?')) return;
-    const res = await fetch('/api/generate_key', { method: 'POST' });
+    const res = await fetch('/api/generate_key', { 
+      method: 'POST',
+      headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content }
+    });
     const data = await res.json();
     if (data.api_key) {
       document.getElementById('apiKeyInp').value = data.api_key;
