@@ -226,7 +226,7 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
 
     # --- LAYER 2: XGBOOST ML ENGINE (40% weight) ---
     from backend.app.services.ml_engine import ml_engine
-    ml_prob = ml_engine.predict(url) if url else 0.0
+    ml_prob = ml_engine.predict(url, raw) if url else 0.0
     ml_score = ml_prob * 100
     if ml_prob > 0.7:
         reasons.append(f"AI Detection: Highly suspicious pattern detected (Confidence: {ml_prob:.2f}).")
