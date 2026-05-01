@@ -1,121 +1,195 @@
 """
 Block Bord AI — ML Model Training Script
-Downloads the PhiUSIIL dataset and trains an XGBoost classifier.
+Trains an XGBoost classifier on the PhiUSIIL Phishing URL Dataset.
+
+Usage:
+    # Place PhiUSIIL_Phishing_URL_Dataset.csv in ml_data/ then run:
+    python -m backend.ml.train_model
 """
 import os
-import pandas as pd
-import requests
+import sys
 import joblib
+import logging
+import numpy as np
+import pandas as pd
 from xgboost import XGBClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, accuracy_score
-import logging
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score,
+    f1_score, roc_auc_score, classification_report, confusion_matrix
+)
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
+# ── Setup Logging ──────────────────────────────────────────────────────────────
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("train_model")
 
-# ── CONFIGURATION ──
-DATA_URL = "https://archive.ics.uci.edu/static/public/967/phiusiil+phishing+url+website.zip" 
-# Note: UCI ZIP contains CSV. Alternatively, Mendeley has direct CSV.
-# For simplicity, I'll use a direct CSV link if possible or instructions to place it.
-CSV_PATH = "ml_data/PhiUSIIL_Phishing_URL_Dataset.csv"
-MODEL_PATH = "backend/ml/models/xgboost_phishing_v1.joblib"
+# ── Configuration ──────────────────────────────────────────────────────────────
+# Adjust paths relative to project root
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+# Support both the original filename and the prefixed variant
+_CSV_CANDIDATES = [
+    os.path.join(PROJECT_ROOT, "ml_data", "PhiUSIIL_Phishing_URL_Dataset.csv"),
+    os.path.join(PROJECT_ROOT, "ml_data", "ml_dataPhiUSIIL_Phishing_URL_Dataset.csv"),
+]
+CSV_PATH  = next((p for p in _CSV_CANDIDATES if os.path.exists(p)), _CSV_CANDIDATES[0])
+MODEL_DIR = os.path.join(PROJECT_ROOT, "backend", "ml", "models")
+MODEL_PATH = os.path.join(MODEL_DIR, "xgboost_phishing_v1.joblib")
 
-def download_dataset():
-    """Checks if dataset exists; if not, creates synthetic data as fallback."""
-    if os.path.exists(CSV_PATH):
-        logger.info(f"Dataset found at {CSV_PATH}. Skipping download/synthetic generation.")
-        return
-    
-    # Since the Mendeley/UCI link can be dynamic, we'll generate high-quality 
-    # synthetic data if the user hasn't provided the file yet.
-    _create_synthetic_data()
+# PhiUSIIL dataset has 54+ features. We list the known numeric ones here.
+# If the CSV has more, they are used automatically.
+PHIUSIIL_NUMERIC_FEATURES = [
+    "URLLength", "DomainLength", "IsDomainIP", "URLSimilarityIndex",
+    "CharContinuationRate", "TLDLegitimateProb", "URLCharProb",
+    "TLDLength", "NoOfSubDomain", "HasObfuscation",
+    "NoOfObfuscatedChar", "ObfuscationRatio", "NoOfLettersInURL",
+    "LetterRatioInURL", "NoOfDegitsInURL", "DegitRatioInURL",
+    "NoOfEqualsInURL", "NoOfQMarkInURL", "NoOfAmpersandInURL",
+    "NoOfOtherSpecialCharsInURL", "SpacialCharRatioInURL",
+    "IsHTTPS", "LineOfCode", "LargestLineLength", "HasTitle",
+    "DomainTitleMatchScore", "URLTitleMatchScore", "HasFavicon",
+    "Robots", "IsResponsive", "NoOfURLRedirect", "NoOfSelfRedirect",
+    "HasDescription", "NoOfPopup", "NoOfiFrame", "HasExternalFormSubmit",
+    "HasSocialNet", "HasSubmitButton", "HasHiddenFields",
+    "HasPasswordField", "Bank", "Pay", "Crypto", "HasCopyrightInfo",
+    "NoOfImage", "NoOfCSS", "NoOfJS", "NoOfSelfRef",
+    "NoOfEmptyRef", "NoOfExternalRef",
+    # Lexical extras
+    "NoOfDotsInURL", "HasHTTPS", "EntropyOfURL", "IsDomainIP",
+]
+LABEL_COL = "label"  # normalized in load_data()
 
-def _create_synthetic_data():
-    """Creates a high-quality synthetic dataset for demonstration."""
-    logger.warning("Download failed or invalid file. Creating synthetic dataset...")
-    import numpy as np
-    
-    n_samples = 1000
-    data = {
-        'URLLength': np.random.randint(20, 200, n_samples),
-        'DomainLength': np.random.randint(5, 30, n_samples),
-        'IsDomainIP': np.random.choice([0, 1], n_samples, p=[0.95, 0.05]),
-        'NoOfDotsInURL': np.random.randint(1, 10, n_samples),
-        'HasHTTPS': np.random.choice([0, 1], n_samples, p=[0.5, 0.5]),
-        'NoOfSubDomain': np.random.randint(0, 5, n_samples),
-        'EntropyOfURL': np.random.uniform(3.0, 5.0, n_samples),
-        'Label': np.random.choice([0, 1], n_samples) # 0 = Safe, 1 = Phishing
-    }
-    
-    # Introduce some correlations for "realism"
-    df = pd.DataFrame(data)
-    df.loc[df['IsDomainIP'] == 1, 'Label'] = 1
-    df.loc[df['URLLength'] > 150, 'Label'] = 1
-    df.loc[df['HasHTTPS'] == 0, 'Label'] = 1
-    
-    os.makedirs(os.path.dirname(CSV_PATH), exist_ok=True)
-    df.to_csv(CSV_PATH, index=False)
-    logger.info(f"Synthetic dataset created at {CSV_PATH}")
+# ── XGBoost hyperparameters ─────────────────────────────────────────────────
+XGBOOST_PARAMS = dict(
+    n_estimators=300,
+    max_depth=7,
+    learning_rate=0.08,
+    subsample=0.85,
+    colsample_bytree=0.85,
+    min_child_weight=3,
+    gamma=0.1,
+    reg_alpha=0.05,
+    reg_lambda=1.5,
+    random_state=42,
+    n_jobs=-1,
+    eval_metric="logloss",
+    early_stopping_rounds=20,
+)
 
-def train():
-    """Trains the model using the dataset."""
+
+# ── Dataset Loader ─────────────────────────────────────────────────────────────
+def load_data() -> tuple[pd.DataFrame, pd.Series]:
+    """Loads the PhiUSIIL CSV and returns (X, y)."""
     if not os.path.exists(CSV_PATH):
-        logger.error(f"Cannot find dataset at {CSV_PATH}. Aborting.")
-        return
+        logger.error(
+            f"Dataset not found at: {CSV_PATH}\n"
+            "  → Download from: https://archive.ics.uci.edu/dataset/967/phiusiil+phishing+url+dataset\n"
+            "  → Save the CSV to ml_data/PhiUSIIL_Phishing_URL_Dataset.csv\n"
+            "  → Then re-run this script."
+        )
+        sys.exit(1)
 
-    logger.info("Loading dataset...")
-    try:
-        df = pd.read_csv(CSV_PATH)
-        # Check if it's the JSON error message
-        if df.columns[0] == '{':
-            logger.warning("Invalid CSV detected (HTML/JSON error). Regenerating data...")
-            _create_synthetic_data()
-            df = pd.read_csv(CSV_PATH)
-    except Exception:
-        _create_synthetic_data()
-        df = pd.read_csv(CSV_PATH)
+    logger.info(f"Loading dataset from {CSV_PATH} …")
+    df = pd.read_csv(CSV_PATH, low_memory=False)
+    logger.info(f"Loaded {len(df):,} rows × {df.shape[1]} columns")
 
-    # PhiUSIIL specific columns
-    # We normalize 'Label' vs 'label'
-    if 'Label' in df.columns:
-        df = df.rename(columns={'Label': 'label'})
-    
-    if 'label' not in df.columns:
-        logger.error("Column 'label' not found. Data generation failed.")
-        return
+    # ── Validate size – warn if it looks like synthetic/truncated data ─────
+    if len(df) < 5_000:
+        logger.warning(
+            f"Dataset has only {len(df)} rows — this looks like the SYNTHETIC FALLBACK, "
+            "not the real PhiUSIIL dataset (235,000 rows). "
+            "Accuracy will be LOW. Please download the real dataset."
+        )
 
-    # Drop ID-like or string columns for training
-    to_drop = ['FILENAME', 'URL', 'label']
-    X = df.drop(columns=[c for c in to_drop if c in df.columns])
-    y = df['label']
+    # ── Normalize label column ─────────────────────────────────────────────
+    for candidate in ["Label", "label", "CLASS_LABEL", "phishing"]:
+        if candidate in df.columns:
+            df = df.rename(columns={candidate: LABEL_COL})
+            break
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    if LABEL_COL not in df.columns:
+        raise ValueError(f"Cannot find label column. Columns: {list(df.columns)}")
 
-    logger.info(f"Training XGBoost on {len(X_train)} samples with {X.shape[1]} features...")
-    model = XGBClassifier(
-        n_estimators=100,
-        max_depth=6,
-        learning_rate=0.1,
-        random_state=42,
-        use_label_encoder=False,
-        eval_metric='logloss'
+    # ── Encode label → 0/1 ────────────────────────────────────────────────
+    y = df[LABEL_COL]
+    if y.dtype == object:
+        le = LabelEncoder()
+        y = pd.Series(le.fit_transform(y), name=LABEL_COL)
+        logger.info(f"Label classes: {le.classes_}")
+
+    # ── Select numeric feature columns ─────────────────────────────────────
+    drop_cols = {LABEL_COL, "FILENAME", "URL", "url", "Domain", "domain"}
+    X = df.drop(columns=[c for c in drop_cols if c in df.columns])
+
+    # Keep only numeric columns (handles string URL column etc.)
+    X = X.select_dtypes(include=[np.number]).fillna(0)
+    logger.info(f"Feature matrix: {X.shape[1]} features, {len(X):,} samples")
+    logger.info(f"Label distribution: {dict(y.value_counts().sort_index())}")
+
+    return X, y
+
+
+# ── Training ───────────────────────────────────────────────────────────────────
+def train(X: pd.DataFrame, y: pd.Series) -> XGBClassifier:
+    """Trains and evaluates an XGBoost model. Returns the fitted model."""
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.20, random_state=42, stratify=y
     )
-    
-    model.fit(X_train, y_train)
-    # XGBoost automatically populates feature names if trained on a DataFrame
+    logger.info(f"Train: {len(X_train):,} rows | Test: {len(X_test):,} rows")
 
-    # Evaluation
-    y_pred = model.predict(X_test)
-    acc = accuracy_score(y_test, y_pred)
-    logger.info(f"Training complete. Accuracy: {acc:.4f}")
+    model = XGBClassifier(**XGBOOST_PARAMS)
+    model.fit(
+        X_train, y_train,
+        eval_set=[(X_test, y_test)],
+        verbose=50
+    )
 
-    # Save
-    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
+    # ── Evaluation ──────────────────────────────────────────────────────────
+    y_pred      = model.predict(X_test)
+    y_prob      = model.predict_proba(X_test)[:, 1]
+
+    acc       = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall    = recall_score(y_test, y_pred, zero_division=0)
+    f1        = f1_score(y_test, y_pred, zero_division=0)
+    auc       = roc_auc_score(y_test, y_prob)
+
+    logger.info("\n" + "=" * 55)
+    logger.info("  BLOCK BORD AI — XGBOOST MODEL EVALUATION REPORT")
+    logger.info("=" * 55)
+    logger.info(f"  Accuracy  : {acc:.4f}  ({acc*100:.2f}%)")
+    logger.info(f"  Precision : {precision:.4f}")
+    logger.info(f"  Recall    : {recall:.4f}")
+    logger.info(f"  F1 Score  : {f1:.4f}")
+    logger.info(f"  AUC-ROC   : {auc:.4f}")
+    logger.info("=" * 55)
+    logger.info("\nClassification Report:\n" + classification_report(y_test, y_pred,
+        target_names=["Safe (0)", "Phishing (1)"]))
+
+    cm = confusion_matrix(y_test, y_pred)
+    logger.info(f"Confusion Matrix:\n{cm}")
+
+    # ── Feature importance (top 15) ─────────────────────────────────────────
+    fi = pd.Series(model.feature_importances_, index=X.columns)
+    top15 = fi.nlargest(15)
+    logger.info("\nTop-15 Feature Importances:")
+    for feat, score in top15.items():
+        logger.info(f"  {feat:<35} {score:.4f}")
+
+    return model
+
+
+# ── Save Model ─────────────────────────────────────────────────────────────────
+def save_model(model: XGBClassifier) -> None:
+    os.makedirs(MODEL_DIR, exist_ok=True)
     joblib.dump(model, MODEL_PATH)
-    logger.info(f"Model saved to {MODEL_PATH}")
+    size_kb = os.path.getsize(MODEL_PATH) / 1024
+    logger.info(f"\nModel saved → {MODEL_PATH}  ({size_kb:.1f} KB)")
 
+
+# ── Entry Point ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    download_dataset()
-    train()
+    X, y = load_data()
+    model = train(X, y)
+    save_model(model)
+    logger.info("Training complete. Model is ready for production.")
