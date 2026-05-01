@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Malicious Test Page</title>
+</head>
+<body>
+    <h1>This is a fake malicious page</h1>
+    <p>This page should be blocked by the Block Bord AI warning overlay.</p>
+
+    <!-- Mock Chrome API -->
+    <script>
+        window.chrome = {
+            runtime: {
+                getURL: function(path) {
+                    // Serve from the local filesystem instead of chrome-extension://
+                    return 'file:///d:/BlockBord_Premium_SaaS_Style/Block%20Bord/extension/' + path;
+                },
+                sendMessage: function(msg) {
+                    console.log("Mock sendMessage:", msg);
+                },
+                onMessage: {
+                    listeners: [],
+                    addListener: function(fn) {
+                        this.listeners.push(fn);
+                    }
+                }
+            }
+        };
+    </script>
+
+    <!-- Load the content script -->
+    <script src="file:///d:/BlockBord_Premium_SaaS_Style/Block%20Bord/extension/content.js"></script>
+
+    <!-- Trigger the warning overlay after a short delay -->
+    <script>
+        setTimeout(() => {
+            console.log("Triggering showWarning...");
+            chrome.runtime.onMessage.listeners.forEach(fn => {
+                fn({
+                    action: 'showWarning',
+                    data: {
+                        reasons: [
+                            "ML Model detected high phishing probability (98%)",
+                            "Google Safe Browsing flagged this site",
+                            "Domain is newly registered"
+                        ]
+                    }
+                }, null, () => {});
+            });
+        }, 500);
+    </script>
+</body>
+</html>

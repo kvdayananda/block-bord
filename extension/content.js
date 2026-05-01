@@ -2,9 +2,10 @@
 
 const BB_REPORT_URL = "https://block-bord.onrender.com";
 
-const currentURL = window.location.href;
-const currentDomain = window.location.hostname;
-const pageTitle = document.title || "";
+// Use functions to get dynamic values for SPAs
+const getCurrentURL = () => window.location.href;
+const getCurrentDomain = () => window.location.hostname;
+const getPageTitle = () => document.title || "";
 
 // State tracking for dynamic features
 let bbState = {
@@ -116,7 +117,7 @@ function detectEnhancedForms() {
         if (action && action.startsWith('http')) {
             try {
                 const actionHost = new URL(action).hostname;
-                if (actionHost !== currentDomain) {
+                if (actionHost !== getCurrentDomain()) {
                     result.externalFormAction = true;
                 }
             } catch (e) {}
@@ -153,7 +154,7 @@ function detectEnhancedForms() {
 
 function detectRedirects() {
     const referrer = document.referrer;
-    if (referrer && new URL(referrer).hostname !== currentDomain) {
+    if (referrer && new URL(referrer).hostname !== getCurrentDomain()) {
         return true; 
     }
     return false;
@@ -164,7 +165,7 @@ function setupDOMObserver() {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach(m => bbState.domNodesAdded += m.addedNodes.length);
         if (bbState.domNodesAdded > 50) {
-            extractPageContent(true);
+            debouncedExtractPageContent(true);
             bbState.domNodesAdded = 0;
         }
     });
@@ -176,7 +177,7 @@ function setupInteractionTracking() {
     document.addEventListener('click', (e) => {
         bbState.interactionClicks++;
         if (e.target.tagName === 'BUTTON' || (e.target.tagName === 'INPUT' && e.target.type === 'submit')) {
-            extractPageContent(true); 
+            debouncedExtractPageContent(true); 
         }
     }, true);
     
@@ -186,17 +187,42 @@ function setupInteractionTracking() {
 }
 
 // ─── EXTRACT & SEND ───────────────────────────
+function simpleHash(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash.toString(36);
+}
+
+let extractTimeout = null;
+let lastScannedHash = null;
+
+function debouncedExtractPageContent(isUpdate = false) {
+    if (extractTimeout) clearTimeout(extractTimeout);
+    extractTimeout = setTimeout(() => {
+        extractPageContent(isUpdate);
+    }, 2000);
+}
+
 function extractPageContent(isUpdate = false) {
     const pageText = document.body ? (document.body.innerText || "") : "";
     const cleanText = pageText.substring(0, 5000).replace(/\s+/g, ' ').trim();
     const timeSinceLoad = Date.now() - bbState.startTime;
 
+    const currentHash = simpleHash(cleanText + getCurrentURL());
+    if (currentHash === lastScannedHash) return; // Prevent spamming identical content
+
     if (cleanText.length > 30 || isUpdate) {
+        lastScannedHash = currentHash;
         chrome.runtime.sendMessage({
             action: 'pageContentDetected',
-            url: currentURL,
-            title: pageTitle,
+            url: getCurrentURL(),
+            title: getPageTitle(),
             content: cleanText,
+            contentHash: simpleHash(cleanText),
             formData: detectEnhancedForms(),
             hasRedirected: detectRedirects(),
             telemetry: {
@@ -283,7 +309,7 @@ function injectReportButton() {
 }
 
 function reportCurrentSite() {
-    const description = prompt(`Report "${currentDomain}" as suspicious to Block Bord?\n\nOptionally add a description:`);
+    const description = prompt(`Report "${getCurrentDomain()}" as suspicious to Block Bord?\n\nOptionally add a description:`);
     if (description !== null) { 
         fetch(`${BB_REPORT_URL}/report`, {
             method: 'POST',
@@ -292,7 +318,7 @@ function reportCurrentSite() {
                 'X-BlockBord-Source': 'extension'
             },
             credentials: 'include',
-            body: JSON.stringify({ url: currentURL, description: description || "" })
+            body: JSON.stringify({ url: getCurrentURL(), description: description || "" })
         }).then(r => r.json()).then(data => {
             showTemporaryBanner(data.message || "Report submitted!", "success");
         }).catch(() => {
@@ -371,9 +397,31 @@ function injectWarningOverlay(data) {
     window.stop();
 }
 
+// ─── SPA ROUTING HOOKS ──────────────────────────────────────
+function setupSPARouting() {
+    let lastUrl = location.href;
+    new MutationObserver(() => {
+        const url = location.href;
+        if (url !== lastUrl) {
+            lastUrl = url;
+            console.log("Block Bord: SPA route change detected:", url);
+            debouncedExtractPageContent(true);
+        }
+    }).observe(document, {subtree: true, childList: true});
+
+    window.addEventListener('popstate', () => {
+        if (location.href !== lastUrl) {
+            lastUrl = location.href;
+            console.log("Block Bord: popstate detected:", lastUrl);
+            debouncedExtractPageContent(true);
+        }
+    });
+}
+
 function init() {
     injectOverrides();
     setupInteractionTracking();
+    setupSPARouting();
     
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', run);

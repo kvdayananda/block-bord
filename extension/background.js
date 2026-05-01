@@ -3,7 +3,9 @@ const API_URL = "https://block-bord.onrender.com";
 
 // ─── Browser-side Cache (Feature #11) ────────────────────────────────────────
 const scanCache = new Map();
-const CACHE_DURATION_MS = 5 * 60 * 1000; // 5 min
+const CACHE_DURATION_MS = 60 * 1000; // 1 min (reduced from 5 min)
+const tabCooldowns = new Map();
+const COOLDOWN_DURATION_MS = 60 * 1000; // 60 seconds per tab
 
 function normalizeUrl(url) {
     if (!url) return "";
@@ -78,29 +80,40 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 const lastScannedUrls = new Map(); // tabId -> url
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    // Trigger on both loading (for speed) and complete (for reliability)
-    if ((changeInfo.status === 'loading' || changeInfo.status === 'complete') && tab.url && tab.url.startsWith('http')) {
+    // Trigger ONLY on complete to prevent duplicate scans during loading redirects
+    if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
         const url = tab.url.toLowerCase();
         
         // Avoid redundant scans if the URL hasn't changed for this tab
-        if (lastScannedUrls.get(tabId) === url && changeInfo.status === 'loading') return;
+        if (lastScannedUrls.get(tabId) === url) return;
         lastScannedUrls.set(tabId, url);
 
-        console.log(`Block Bord: Auto-trigger (${changeInfo.status}):`, url);
+        console.log(`Block Bord: Auto-trigger (complete):`, url);
         processScan(tabId, tab.url);
     }
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => {
     lastScannedUrls.delete(tabId);
+    tabCooldowns.delete(tabId);
 });
 
 // ─── Core Scan Logic ─────────────────────────────────────────────────────────
 // ─── Core Scan Logic ─────────────────────────────────────────────────────────
 async function processScan(tabId, url, scanData = null) {
+    if (tabId) {
+        const lastScan = tabCooldowns.get(tabId) || 0;
+        if (Date.now() - lastScan < COOLDOWN_DURATION_MS) {
+            console.log("Block Bord: Scan skipped (cooldown active):", url);
+            return;
+        }
+        tabCooldowns.set(tabId, Date.now());
+    }
+
     // scanData can be the full message object from content.js
     const pageContent = scanData ? scanData.content : null;
-    const cacheKey = `${url}_${pageContent ? 'content' : 'url'}`;
+    const contentHash = scanData && scanData.contentHash ? scanData.contentHash : 'nohash';
+    const cacheKey = `${url}_${contentHash}`;
     const cached = getCached(cacheKey);
     
     if (cached) {

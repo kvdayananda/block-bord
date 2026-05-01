@@ -8,6 +8,7 @@ class ScanHistory(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     content = Column(Text, nullable=False)
+    url_hash = Column(String(64), index=True, nullable=True)
     risk_score = Column(Float, nullable=False)
     risk_level = Column(String(50), nullable=False)
     reasons = Column(Text, nullable=True)       # Stored as JSON string

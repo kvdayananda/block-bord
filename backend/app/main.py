@@ -45,10 +45,15 @@ if settings.sentry_dsn:
 # ──────────────────────────────────────────────────────────────
 # Use a unified format, in production we could use a JSON formatter here
 logging.basicConfig(
-    level=logging.INFO if settings.is_production else logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 )
 logger = logging.getLogger("blockbord")
+
+# Silence noisy external loggers
+logging.getLogger("python_multipart").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 # ──────────────────────────────────────────────────────────────
 # LIFESPAN (Background tasks)

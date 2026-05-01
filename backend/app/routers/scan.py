@@ -6,7 +6,10 @@ Routes: POST /scan, GET /scan/{id}, GET /api/scan/{id},
 """
 import json
 import logging
-from datetime import datetime, timezone
+import hashlib
+import time
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Request, Depends, HTTPException, BackgroundTasks
@@ -76,6 +79,23 @@ def _parse_reasons(raw: str) -> list:
         except Exception:
             return [raw] if raw else []
 
+# Simple In-Memory TTL Cache for Scans
+_scan_cache = {}
+_scan_cache_ttl = 60  # 60 seconds
+
+def normalize_url(url: str) -> str:
+    if not url:
+        return ""
+    try:
+        parsed = urlparse(url)
+        tracking_params = {'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'sourceid', 'gs_lcrp'}
+        qs = parse_qs(parsed.query)
+        filtered_qs = {k: v for k, v in qs.items() if k.lower() not in tracking_params}
+        new_query = urlencode(filtered_qs, doseq=True)
+        return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment)).lower()
+    except Exception:
+        return url.lower()
+
 
 # ──────────────────────────────────────────────────────────────
 # POST /scan — Main scan endpoint (used by extension + web)
@@ -104,6 +124,47 @@ async def scan_content(
             "limit": limit,
         }
 
+    # 1. URL Normalization & Hashing
+    norm_url = normalize_url(data.url) if data.url else ""
+    content_hash_input = (norm_url + (data.content or "")).encode('utf-8')
+    content_hash = hashlib.sha256(content_hash_input).hexdigest()
+
+    # 2. TTL Cache Check (In-memory bypass)
+    now = time.time()
+    # Cleanup naive cache occasionally
+    if len(_scan_cache) > 5000:
+        keys_to_del = [k for k, (ts, _) in _scan_cache.items() if now - ts > _scan_cache_ttl]
+        for k in keys_to_del:
+            del _scan_cache[k]
+
+    if content_hash in _scan_cache:
+        ts, cached_result = _scan_cache[content_hash]
+        if now - ts < _scan_cache_ttl:
+            logger.info(f"Scan hit TTL memory cache for user={user.username}")
+            return cached_result
+
+    # Deduplication: Check if exact same content was scanned by this user in last 5 mins
+    five_mins_ago = datetime.now(timezone.utc) - timedelta(minutes=5)
+    recent_scan = db.query(ScanHistory).filter(
+        ScanHistory.user_id == user.id,
+        ScanHistory.url_hash == content_hash,
+        ScanHistory.created_at >= five_mins_ago
+    ).order_by(ScanHistory.created_at.desc()).first()
+
+    if recent_scan:
+        logger.info(f"Scan #{recent_scan.id} | user={user.username} | Deduplicated DB hit.")
+        result = {
+            "risk_score": recent_scan.risk_score,
+            "risk_level": recent_scan.risk_level,
+            "reasons": _parse_reasons(recent_scan.reasons),
+            "category": recent_scan.category,
+            "scam_intent": recent_scan.scam_intent,
+            "scan_id": recent_scan.id,
+            "cached": True
+        }
+        _scan_cache[content_hash] = (now, result)
+        return result
+
     urls, domains = _extract_domains(data.content)
 
     # Check whitelist first
@@ -114,8 +175,9 @@ async def scan_content(
                 "reasons": [f"Domain '{d}' is on the trusted whitelist."],
                 "category": "Whitelisted",
             }
-            _save_and_return(result, data, user, db)
-            return result
+            scan = _save_and_return(result, data, user, db, content_hash)
+            _scan_cache[content_hash] = (now, {**result, "scan_id": scan.id})
+            return _scan_cache[content_hash][1]
 
     # Check blacklist
     for d in domains:
@@ -129,8 +191,9 @@ async def scan_content(
                 ],
                 "category": "Blacklisted Domain",
             }
-            scan = _save_and_return(result, data, user, db)
-            return {**result, "scan_id": scan.id}
+            scan = _save_and_return(result, data, user, db, content_hash)
+            _scan_cache[content_hash] = (now, {**result, "scan_id": scan.id})
+            return _scan_cache[content_hash][1]
 
     # Run full risk analysis
     result = await calculate_risk(
@@ -141,7 +204,7 @@ async def scan_content(
         has_redirected=data.hasRedirected,
     )
 
-    scan = _save_and_return(result, data, user, db)
+    scan = _save_and_return(result, data, user, db, content_hash)
     logger.info(
         f"Scan #{scan.id} | user={user.username} | score={result['risk_score']} "
         f"| level={result['risk_level']} | url={data.url or 'text'}"
@@ -155,12 +218,15 @@ async def scan_content(
         "scam_intent": result.get("scam_intent", "None Detected"),
         "scan_id": scan.id,
     }
+    _scan_cache[content_hash] = (now, final_resp)
+    return final_resp
 
 
-def _save_and_return(result: dict, data: ScanRequest, user: User, db: Session) -> ScanHistory:
+def _save_and_return(result: dict, data: ScanRequest, user: User, db: Session, url_hash: str) -> ScanHistory:
     score_val = float(result.get("risk_score", 0))
     scan = ScanHistory(
         content=data.content,
+        url_hash=url_hash,
         risk_score=score_val,
         risk_level=str(result["risk_level"]),
         reasons=json.dumps(result.get("reasons", [])),

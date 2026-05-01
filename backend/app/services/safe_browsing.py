@@ -4,9 +4,15 @@ Checks URLs against Google's database of malicious sites in real-time.
 """
 import httpx
 import logging
+import asyncio
+import time
 from backend.app.config import settings
 
 logger = logging.getLogger("blockbord.safe_browsing")
+
+_sb_cache = {}
+_sb_cache_ttl = 3600
+_sb_semaphore = asyncio.Semaphore(10)
 
 class SafeBrowsingService:
     def __init__(self):
@@ -30,6 +36,18 @@ class SafeBrowsingService:
                 return True
             return False
 
+        now = time.time()
+        # Clean up cache occasionally (very naive cleanup)
+        if len(_sb_cache) > 5000:
+            keys_to_del = [k for k, (ts, _) in _sb_cache.items() if now - ts > _sb_cache_ttl]
+            for k in keys_to_del:
+                del _sb_cache[k]
+
+        if url in _sb_cache:
+            ts, result = _sb_cache[url]
+            if now - ts < _sb_cache_ttl:
+                return result
+
         payload = {
             "client": {
                 "clientId": "block-bord-ai",
@@ -43,19 +61,27 @@ class SafeBrowsingService:
             }
         }
 
-        try:
-            async with httpx.AsyncClient() as client:
-                response = await client.post(self.api_url, json=payload, timeout=5.0)
-                if response.status_code == 200:
-                    data = response.json()
-                    # If 'matches' exists in response, it's malicious
-                    return "matches" in data
-                else:
-                    logger.error(f"Safe Browsing API Error: {response.status_code} - {response.text}")
-                    return False
-        except Exception as e:
-            logger.error(f"Safe Browsing Connection Error: {e}")
-            return False
+        async with _sb_semaphore:
+            try:
+                async with httpx.AsyncClient(timeout=3.0) as client:
+                    for attempt in range(2):
+                        try:
+                            response = await client.post(self.api_url, json=payload)
+                            if response.status_code == 200:
+                                data = response.json()
+                                result = "matches" in data
+                                _sb_cache[url] = (now, result)
+                                return result
+                            else:
+                                logger.warning(f"Safe Browsing API Error: {response.status_code} - {response.text}")
+                                return False
+                        except httpx.TimeoutException:
+                            if attempt == 1:
+                                logger.warning(f"Safe Browsing timeout for {url} after 2 attempts.")
+                                return False
+            except Exception as e:
+                logger.error(f"Safe Browsing Connection Error: {e}")
+                return False
 
 # Singleton instance
 safe_browsing = SafeBrowsingService()
