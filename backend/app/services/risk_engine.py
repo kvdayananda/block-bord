@@ -80,7 +80,7 @@ SCAM_LURE_WORDS = {
     "reward", "cashback", "prize", "winner", "congratulations", "bonus", "offer",
     "free recharge", "loan", "credit", "pre-approved", "limit increased",
     "investment", "profit", "earn", "work from home", "lucky draw",
-    "selected", "gift card", "voucher"
+    "selected", "gift card", "voucher", "won", "win", "lottery"
 }
 PHISHING_KEYWORDS = {
     "login", "verify", "secure", "bank", "free", "claim", "reward",
@@ -176,6 +176,9 @@ def analyze_domain_structure(domain: str):
     if is_ip:
         score += 15
         checks.append("URL uses a raw IP address.")
+    if any(domain.endswith(tld) for tld in SUSPICIOUS_TLDS):
+        score += 10
+        checks.append(f"Suspicious top-level domain detected ({domain.split('.')[-1]}).")
     return score, checks
 
 def check_ssl_certificate(domain: str):
@@ -248,17 +251,23 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
     # Phishing Keywords
     phishing_hits = set(PHISHING_KEYWORDS_RE.findall(low))
     if phishing_hits:
-        heuristic_score += min(30, 10 + 5 * len(phishing_hits))
+        heuristic_score += min(40, 15 + 10 * len(phishing_hits))
         reasons.append(f"Phishing indicators: {', '.join(phishing_hits)}.")
 
     # Urgency
     if URGENT_RE.search(low) and ACTION_RE.search(low):
-        heuristic_score += 20
+        heuristic_score += 35
         reasons.append("Urgency + Action combo (high risk).")
 
     # Structural Checks
     urls, domains = _extract_domains(low)
-    if url: urls.insert(0, url)
+    if url:
+        urls.insert(0, url)
+        try:
+            d = urlparse(url if "://" in url else "http://" + url).netloc.lower().split(":")[0]
+            if d and d not in domains:
+                domains.insert(0, d)
+        except: pass
     
     for u in urls[:2]:
         s, c = analyze_url_structure(u)
