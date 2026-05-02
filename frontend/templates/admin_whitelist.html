@@ -3,48 +3,37 @@
 {% block title %}Domain Whitelist — Block Bord AI Admin{% endblock %}
 
 {% block content %}
-<div class="glass-card mb-8">
-
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    
     <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-        <div>
-            <a href="/admin" class="back-link">← Back to Admin</a>
-            <h1 class="text-3xl font-extrabold text-white mt-2 mb-1">✅ Domain Whitelist</h1>
-            <p class="text-gray-400 text-sm">Domains listed here are instantly marked <strong>Safe (score 0)</strong> and bypass all scanning layers.</p>
-        </div>
-        <div class="status-badge status-safe">{{ items | length }} Trusted Domains</div>
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <a href="/admin" style="font-size:0.85rem; font-weight:700; color:var(--primary); text-decoration:none; display:flex; align-items:center; gap:4px; margin-bottom:8px;">← Back to Admin</a>
+        <h1 class="app-page-title">✅ Domain Whitelist</h1>
+        <p class="app-page-subtitle">Domains listed here are instantly flagged as Safe for all users.</p>
+      </div>
+      <div class="app-page-header-right">
+        <span class="status-pill pill-safe" style="font-size:0.85rem; padding:6px 12px;">{{ items | length }} Trusted Domains</span>
+      </div>
     </div>
 
     <!-- Add New Domain Form -->
-    <div class="add-form-card mb-8">
-        <h2 class="text-white font-bold text-lg mb-4">➕ Add Domain to Whitelist</h2>
-        <form action="/admin/whitelist" method="POST" class="flex flex-col gap-4 md:flex-row md:items-end">
+    <div class="bb-card fade-up mb-8" style="border-left:4px solid var(--status-safe);">
+        <h2 style="font-size:1.1rem; font-weight:800; color:var(--text); margin:0 0 16px 0;">➕ Add Domain to Whitelist</h2>
+        <form action="/admin/whitelist" method="POST" style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end;">
             <input type="hidden" name="csrf_token" value="{{ request.session.get('csrf_token') }}">
-            <div class="flex-1">
-                <label class="form-label">Domain (e.g. trusted-partner.com)</label>
-                <input
-                    type="text"
-                    name="domain"
-                    id="whitelist-domain-input"
-                    class="form-input w-full"
-                    placeholder="trusted-partner.com"
-                    required
-                    autocomplete="off"
-                    spellcheck="false"
-                >
+            <div style="flex:1; min-width:200px;">
+                <label class="form-label" style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Domain (e.g. google.com)</label>
+                <input type="text" name="domain" id="whitelist-domain-input" class="form-input" placeholder="trusted-site.com" required autocomplete="off" spellcheck="false" style="width:100%;">
             </div>
-            <div class="flex-1">
-                <label class="form-label">Reason (optional)</label>
-                <input
-                    type="text"
-                    name="reason"
-                    id="whitelist-reason-input"
-                    class="form-input w-full"
-                    placeholder="Official partner / Internal tool..."
-                >
+            <div style="flex:1; min-width:200px;">
+                <label class="form-label" style="display:block; font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Reason (optional)</label>
+                <input type="text" name="reason" id="whitelist-reason-input" class="form-input" placeholder="Internal Tool / Partner site..." style="width:100%;">
             </div>
             <div>
-                <button type="submit" id="add-whitelist-btn" class="btn-safe px-6 py-2 w-full md:w-auto">
+                <button type="submit" id="add-whitelist-btn" class="btn" style="background:var(--status-safe); color:#fff; font-weight:700; padding:10px 24px; border:none;">
                     ✅ Whitelist Domain
                 </button>
             </div>
@@ -52,59 +41,45 @@
     </div>
 
     <!-- Search Bar -->
-    <div class="mb-4">
-        <input
-            type="text"
-            id="wl-search"
-            class="form-input"
-            placeholder="🔍 Search whitelisted domains..."
-            oninput="filterWhitelist()"
-            style="max-width:400px;"
-        >
+    <div style="margin-bottom:16px;" class="fade-up-d1">
+        <input type="text" id="wl-search" class="form-input" placeholder="🔍 Search whitelisted domains..." oninput="filterWhitelist()" style="max-width:400px; width:100%;">
     </div>
 
     <!-- Domain Table -->
-    <div class="overflow-x-auto rounded-xl border border-white/5">
-        <table class="w-full text-left text-sm text-gray-300" id="whitelist-table">
-            <thead class="bg-gray-800/60 text-gray-400 uppercase text-xs">
+    <div class="bb-card fade-up-d2 table-container" style="padding:0;">
+        <table class="premium-table" id="whitelist-table">
+            <thead>
                 <tr>
-                    <th class="px-5 py-3">#</th>
-                    <th class="px-5 py-3">Domain</th>
-                    <th class="px-5 py-3">Reason</th>
-                    <th class="px-5 py-3">Added</th>
-                    <th class="px-5 py-3">Action</th>
+                    <th style="width:60px;">#</th>
+                    <th>Domain</th>
+                    <th>Reason</th>
+                    <th>Added</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody id="wl-table-body">
                 {% for item in items %}
-                <tr class="wl-row border-b border-white/5 hover:bg-white/3 transition" data-domain="{{ item.domain }}">
-                    <td class="px-5 py-4 text-gray-600 text-xs">{{ loop.index }}</td>
-                    <td class="px-5 py-4">
-                        <div class="flex items-center gap-2">
-                            <span class="safe-dot"></span>
-                            <span class="font-mono text-green-400 font-semibold">{{ item.domain }}</span>
+                <tr class="wl-row" data-domain="{{ item.domain }}">
+                    <td style="color:var(--text-muted); font-size:0.85rem; font-weight:600;">{{ loop.index }}</td>
+                    <td>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span style="width:8px; height:8px; background:var(--status-safe); border-radius:50%; box-shadow:0 0 6px var(--status-safe);"></span>
+                            <span style="font-family:var(--font-mono); color:var(--status-safe); font-weight:700;">{{ item.domain }}</span>
                         </div>
                     </td>
-                    <td class="px-5 py-4 text-gray-400 text-xs">{{ item.reason or "Trusted domain" }}</td>
-                    <td class="px-5 py-4 text-gray-500 text-xs">
+                    <td style="color:var(--text-muted); font-size:0.85rem;">{{ item.reason or "No reason provided" }}</td>
+                    <td style="color:var(--text-muted); font-size:0.85rem;">
                         {{ item.created_at.strftime('%Y-%m-%d') if item.created_at else '—' }}
                     </td>
-                    <td class="px-5 py-4">
-                        <button
-                            class="remove-btn text-xs px-3 py-1 rounded-lg"
-                            onclick="removeWhitelist({{ item.id }}, '{{ item.domain }}', this)"
-                            id="remove-wl-{{ item.id }}"
-                        >
-                            Remove
-                        </button>
+                    <td>
+                        <button class="btn btn-outline" style="padding:4px 12px; font-size:0.75rem; color:var(--status-danger); border-color:var(--border);" onclick="removeWhitelist({{ item.id }}, '{{ item.domain }}', this)" id="remove-wl-{{ item.id }}">Remove</button>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="5" class="text-center py-12 text-gray-500">
-                        <div style="font-size:2rem;">📋</div>
-                        <div class="mt-2">No domains in the whitelist yet.</div>
-                        <div class="text-xs mt-1">Add trusted domains above to bypass scanning.</div>
+                    <td colspan="5" style="text-align:center; padding:48px 0; color:var(--text-muted);">
+                        <div style="font-size:2rem; margin-bottom:12px;">✅</div>
+                        <div style="font-weight:600;">No domains in the whitelist yet.</div>
                     </td>
                 </tr>
                 {% endfor %}
@@ -112,10 +87,12 @@
         </table>
     </div>
 
-    <!-- Count -->
-    <div class="mt-4 text-xs text-gray-600">
+    <!-- Count badge -->
+    <div style="margin-top:16px; font-size:0.85rem; font-weight:600; color:var(--text-muted); text-align:right;">
         Showing <span id="wl-visible-count">{{ items | length }}</span> of {{ items | length }} domains
     </div>
+
+  </main>
 </div>
 
 <script>
@@ -157,93 +134,4 @@
         }
     }
 </script>
-
-<style>
-    .glass-card {
-        background: rgba(15, 15, 25, 0.7);
-        backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 24px;
-        padding: 32px;
-    }
-    .add-form-card {
-        background: rgba(34, 197, 94, 0.04);
-        border: 1px solid rgba(34, 197, 94, 0.15);
-        border-radius: 16px;
-        padding: 24px;
-    }
-    .form-label {
-        display: block;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        margin-bottom: 6px;
-    }
-    .form-input {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        border-radius: 10px;
-        padding: 10px 14px;
-        color: white;
-        font-size: 0.9rem;
-        width: 100%;
-        outline: none;
-        transition: border-color 0.2s;
-    }
-    .form-input:focus { border-color: rgba(34,197,94,0.4); }
-    .btn-safe {
-        background: linear-gradient(135deg, #16a34a, #15803d);
-        color: white;
-        border: none;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 0.875rem;
-        cursor: pointer;
-        transition: all 0.2s;
-        padding: 10px 20px;
-    }
-    .btn-safe:hover { opacity: 0.9; transform: translateY(-1px); }
-    .remove-btn {
-        background: rgba(239,68,68,0.08);
-        color: #f87171;
-        border: 1px solid rgba(239,68,68,0.15);
-        cursor: pointer;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: all 0.2s;
-    }
-    .remove-btn:hover { background: rgba(239,68,68,0.18); }
-    .remove-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .safe-dot {
-        width: 8px; height: 8px;
-        background: #22c55e;
-        border-radius: 50%;
-        box-shadow: 0 0 8px #22c55e;
-        flex-shrink: 0;
-    }
-    .status-badge {
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        display: flex; align-items: center; gap: 6px;
-    }
-    .status-safe {
-        background: rgba(34, 197, 94, 0.1);
-        color: #4ade80;
-        border: 1px solid rgba(34, 197, 94, 0.25);
-    }
-    .back-link {
-        color: #6366f1;
-        font-size: 0.85rem;
-        font-weight: 600;
-        text-decoration: none;
-        display: inline-flex; align-items: center; gap: 4px;
-    }
-    .back-link:hover { text-decoration: underline; }
-    .hover\:bg-white\/3:hover { background: rgba(255,255,255,0.03); }
-</style>
 {% endblock %}

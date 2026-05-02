@@ -37,6 +37,7 @@ def admin_dashboard(request: Request, db: Session = Depends(get_db), admin: User
     return templates.TemplateResponse("admin.html", {
         "request": request,
         "admin": admin,
+        "user": admin,
         "total_users": total_users,
         "pro_users": pro_users,
         "total_scans": total_scans,
@@ -130,7 +131,7 @@ def suspend_user(user_id: int, db: Session = Depends(get_db), admin: User = Depe
 @router.get("/blacklist", response_class=HTMLResponse)
 def blacklist_page(request: Request, db: Session = Depends(get_db), admin: User = Depends(require_admin)):
     items = db.query(BlacklistDomain).order_by(BlacklistDomain.created_at.desc()).all()
-    return templates.TemplateResponse("admin_blacklist.html", {"request": request, "items": items, "admin": admin})
+    return templates.TemplateResponse("admin_blacklist.html", {"request": request, "items": items, "admin": admin, "user": admin})
 
 @router.post("/blacklist")
 @limiter.limit("10/minute")
@@ -160,7 +161,7 @@ def add_to_blacklist(
 @router.get("/whitelist", response_class=HTMLResponse)
 def whitelist_page(request: Request, db: Session = Depends(get_db), admin: User = Depends(require_admin)):
     items = db.query(WhitelistDomain).order_by(WhitelistDomain.created_at.desc()).all()
-    return templates.TemplateResponse("admin_whitelist.html", {"request": request, "items": items, "admin": admin})
+    return templates.TemplateResponse("admin_whitelist.html", {"request": request, "items": items, "admin": admin, "user": admin})
 
 @router.post("/whitelist")
 @limiter.limit("10/minute")
@@ -219,6 +220,52 @@ def delete_whitelist_domain(
     db.commit()
     return {"ok": True, "message": f"Domain '{item.domain}' removed from whitelist"}
 
+
+# ──────────────────────────────────────────────────────────────
+# MANAGE REPORTS
+# ──────────────────────────────────────────────────────────────
+@router.post("/reports/{report_id}/dismiss")
+def dismiss_report(
+    report_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin)
+):
+    """Dismiss a user report."""
+    report = db.query(UserReport).filter(UserReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+    
+    db.delete(report)
+    db.commit()
+    logger.info(f"Admin {admin.username} DISMISSED report {report_id}")
+    return {"ok": True, "message": "Report dismissed"}
+
+@router.post("/reports/{report_id}/blacklist")
+def blacklist_reported_domain(
+    report_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin)
+):
+    """Blacklist a domain from a user report and dismiss it."""
+    report = db.query(UserReport).filter(UserReport.id == report_id).first()
+    if not report:
+        raise HTTPException(status_code=404, detail="Report not found")
+        
+    domain = report.reported_domain.strip().lower()
+    
+    # Remove from whitelist if exists
+    db.query(WhitelistDomain).filter(WhitelistDomain.domain == domain).delete()
+    
+    # Add to blacklist if not exists
+    existing = db.query(BlacklistDomain).filter(BlacklistDomain.domain == domain).first()
+    if not existing:
+        db.add(BlacklistDomain(domain=domain, reason=f"From User Report: {report.description}"[:255], added_by_user_id=admin.id))
+        
+    # Delete the report
+    db.delete(report)
+    db.commit()
+    logger.info(f"Admin {admin.username} BLACKLISTED domain {domain} from report {report_id}")
+    return {"ok": True, "message": f"Domain {domain} blacklisted"}
 
 # ──────────────────────────────────────────────────────────────
 # EXPORT
