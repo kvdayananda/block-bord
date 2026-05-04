@@ -1,5 +1,18 @@
 // Background Service Worker for Block Bord AI – Full Feature Set
-const API_URL = "https://block-bord.onrender.com";
+let API_URL = "https://block-bord.onrender.com";
+
+// Initialize API_URL from storage
+chrome.storage.local.get(['apiUrl'], (res) => {
+    if (res.apiUrl) API_URL = res.apiUrl.replace(/\/$/, "");
+});
+
+// Listen for settings changes
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.apiUrl) {
+        API_URL = changes.apiUrl.newValue.replace(/\/$/, "");
+        console.log("Block Bord: API URL updated to:", API_URL);
+    }
+});
 
 // ─── Browser-side Cache (Feature #11) ────────────────────────────────────────
 const scanCache = new Map();
@@ -36,8 +49,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         const url = message.url.toLowerCase();
         if ((url.includes("127.0.0.1") || url.includes("localhost")) && !url.includes("/test-")) return;
 
-        chrome.action.setBadgeText({ text: "…", tabId });
-        chrome.action.setBadgeBackgroundColor({ color: "#4a5568", tabId });
+        updateBadge(tabId, "...", "#3B82F6");
 
         // Build enriched content including form signals and page title
         let enrichedContent = `[URL: ${message.url}]\n[TITLE: ${message.title || ""}]\n${message.content || ""}`;
@@ -101,13 +113,24 @@ chrome.tabs.onRemoved.addListener((tabId) => {
 // ─── Core Scan Logic ─────────────────────────────────────────────────────────
 // ─── Core Scan Logic ─────────────────────────────────────────────────────────
 async function processScan(tabId, url, scanData = null) {
+    const isEnriched = !!(scanData && (scanData.content || scanData.telemetry));
+
     if (tabId) {
-        const lastScan = tabCooldowns.get(tabId) || 0;
-        if (Date.now() - lastScan < COOLDOWN_DURATION_MS) {
-            console.log("Block Bord: Scan skipped (cooldown active):", url);
-            return;
+        const lastScan = tabCooldowns.get(tabId) || { ts: 0, enriched: false };
+        const timeSince = Date.now() - lastScan.ts;
+
+        // COOLDOWN LOGIC:
+        // 1. If we already did an enriched scan recently, skip.
+        // 2. If we did a URL-only scan but now have enriched data, PROCEED (bypass).
+        // 3. If we are doing another URL-only scan too quickly, skip.
+        if (timeSince < COOLDOWN_DURATION_MS) {
+            if (!isEnriched || lastScan.enriched) {
+                console.log("Block Bord: Scan skipped (cooldown active):", url);
+                return;
+            }
+            console.log("Block Bord: Bypassing cooldown for enriched content scan...");
         }
-        tabCooldowns.set(tabId, Date.now());
+        tabCooldowns.set(tabId, { ts: Date.now(), enriched: isEnriched });
     }
 
     // scanData can be the full message object from content.js
@@ -146,8 +169,7 @@ async function processScan(tabId, url, scanData = null) {
         if (!response.ok) {
             if (response.status === 401) {
                 console.warn("Block Bord: Unauthorized (401). User probably not logged in.");
-                chrome.action.setBadgeText({ text: "LOCK", tabId });
-                chrome.action.setBadgeBackgroundColor({ color: "#718096", tabId });
+                updateBadge(tabId, "LOCK", "#4B5563");
                 return;
             }
             throw new Error(`HTTP ${response.status}`);
@@ -162,20 +184,25 @@ async function processScan(tabId, url, scanData = null) {
 
     } catch (err) {
         console.error("Block Bord scan failed:", err);
-        chrome.action.setBadgeText({ text: "!", tabId });
-        chrome.action.setBadgeBackgroundColor({ color: "#718096", tabId });
+        updateBadge(tabId, "ERR", "#718096");
+    }
+}
+
+function updateBadge(tabId, text, color) {
+    if (!tabId) return;
+    chrome.action.setBadgeText({ text: text, tabId: tabId });
+    chrome.action.setBadgeBackgroundColor({ color: color, tabId: tabId });
+    // Ensure text is white for better contrast
+    if (chrome.action.setBadgeTextColor) {
+        chrome.action.setBadgeTextColor({ color: "#FFFFFF", tabId: tabId });
     }
 }
 
 // ─── Feature #3/#4: Handle Scan Results ──────────────────────────────────────
 function handleScanResult(tabId, data, url) {
     if (tabId) {
-        if (data.upgrade_required) {
-            chrome.action.setBadgeText({ text: "LIMIT", tabId });
-            chrome.action.setBadgeBackgroundColor({ color: "#718096", tabId });
-        } else if (data.risk_level === 'High') {
-            chrome.action.setBadgeText({ text: "!!!", tabId });
-            chrome.action.setBadgeBackgroundColor({ color: "#e53e3e", tabId });
+        if (data.risk_level === 'High') {
+            updateBadge(tabId, "!!!", "#EF4444");
             chrome.notifications.create(`bb-high-${Date.now()}`, {
                 type: 'basic', iconUrl: 'icons/icon128.png',
                 title: '🚨 Block Bord AI — Dangerous Site!',
@@ -185,8 +212,7 @@ function handleScanResult(tabId, data, url) {
             // Trigger full-page warning overlay via content script
             chrome.tabs.sendMessage(tabId, { action: 'showWarning', data: data }).catch(() => {});
         } else if (data.risk_level === 'Suspicious') {
-            chrome.action.setBadgeText({ text: "!", tabId });
-            chrome.action.setBadgeBackgroundColor({ color: "#e8901e", tabId });
+            updateBadge(tabId, "WARN", "#F59E0B");
             chrome.notifications.create(`bb-susp-${Date.now()}`, {
                 type: 'basic', iconUrl: 'icons/icon128.png',
                 title: '⚠️ Block Bord AI — Suspicious Site',
@@ -195,8 +221,7 @@ function handleScanResult(tabId, data, url) {
             });
             // For suspicious sites, we only show badge/notification, no full overlay
         } else {
-            chrome.action.setBadgeText({ text: "OK", tabId });
-            chrome.action.setBadgeBackgroundColor({ color: "#38a169", tabId });
+            updateBadge(tabId, "SAFE", "#10B981");
         }
     }
 

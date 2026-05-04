@@ -15,7 +15,7 @@ def test_extract_url_features():
     assert features['DomainLength'] > 0
     assert 'NoOfDotsInURL' in features
     assert features['IsBrandInDomain'] == 1
-    assert features['HasHTTPS'] == 0
+    assert features['IsHTTPS'] == 0
 
 def test_calculate_entropy():
     # A string with same characters has entropy 0
@@ -24,15 +24,18 @@ def test_calculate_entropy():
     assert _calculate_entropy("abcdef") > 0.0
 
 def test_calculate_char_continuation():
-    # 'a' repeated 4 times out of 10 chars is 0.4
+    # 'x' repeated 5 times out of 10 chars is 0.5
     cont = _calculate_char_continuation("xaaaaxxxxx")
-    assert pytest.approx(cont) == 0.4
+    assert pytest.approx(cont) == 0.5
 
 def test_tld_legit_score():
     assert _tld_legit_score("com") == 1.0
-    assert _tld_legit_score("xyz") == 0.2
+    assert _tld_legit_score("xyz") == 0.1
     assert _tld_legit_score("unknown") == 0.5
 
 def test_calculate_similarity():
-    # basic similarity adds score
-    assert _calculate_similarity("login.secure.com", "secure.com") > 0.0
+    import tldextract
+    url = "login.secure.com"
+    domain = "secure.com"
+    ext = tldextract.extract(url)
+    assert _calculate_similarity(url, domain, ext) > 0.0

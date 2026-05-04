@@ -30,14 +30,14 @@ _PHISHING_KEYWORDS = [
 ]
 
 
-def _entropy(text: str) -> float:
+def _calculate_entropy(text: str) -> float:
     if not text:
         return 0.0
     probs = [n / len(text) for n in Counter(text).values()]
     return -sum(p * math.log2(p) for p in probs)
 
 
-def _char_continuation_rate(url: str) -> float:
+def _calculate_char_continuation(url: str) -> float:
     """Ratio of max run of repeated chars to URL length."""
     if len(url) < 2:
         return 0.0
@@ -48,7 +48,7 @@ def _char_continuation_rate(url: str) -> float:
     return max_run / len(url)
 
 
-def _tld_legit_prob(suffix: str) -> float:
+def _tld_legit_score(suffix: str) -> float:
     suffix = (suffix or "").lower()
     if suffix in _TRUSTED_TLDS:
         return 1.0
@@ -65,7 +65,7 @@ def _url_char_prob(url: str) -> float:
     return alnum / len(url)
 
 
-def _url_similarity_index(url: str, domain: str, ext) -> float:
+def _calculate_similarity(url: str, domain: str, ext) -> float:
     """
     Measures how similar the URL is to a KNOWN LEGITIMATE site.
     HIGH score (close to 1.0) = looks like a real site.
@@ -139,12 +139,15 @@ def extract_url_features(url: str, page_content: str = "") -> dict:
     f["URLLength"]                 = len(url)
     f["DomainLength"]              = len(domain)
     f["IsDomainIP"]                = 1 if re.match(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", ext.domain or "") else 0
-    f["URLSimilarityIndex"]        = _url_similarity_index(url, domain, ext)
-    f["CharContinuationRate"]      = _char_continuation_rate(url)
-    f["TLDLegitimateProb"]         = _tld_legit_prob(ext.suffix)
+    f["URLSimilarityIndex"]        = _calculate_similarity(url, domain, ext)
+    f["CharContinuationRate"]      = _calculate_char_continuation(url)
+    f["TLDLegitimateProb"]         = _tld_legit_score(ext.suffix)
     f["URLCharProb"]               = _url_char_prob(url)
     f["TLDLength"]                 = len(ext.suffix or "")
     f["NoOfSubDomain"]             = max(0, ext.subdomain.count(".") + 1) if ext.subdomain else 0
+    f["NoOfDotsInURL"]             = url.count(".")
+    f["EntropyOfURL"]              = _calculate_entropy(url)
+    f["IsBrandInDomain"]           = 1 if any(b in (ext.domain or "").lower() for b in _BRANDS) else 0
     f["HasObfuscation"]            = 1 if "%" in url or "0x" in url.lower() else 0
     f["NoOfObfuscatedChar"]        = url.count("%")
     f["ObfuscationRatio"]          = url.count("%") / len(url) if url else 0
@@ -205,6 +208,7 @@ def _zero_features() -> dict:
         "NoOfLettersInURL", "LetterRatioInURL", "NoOfDegitsInURL", "DegitRatioInURL",
         "NoOfEqualsInURL", "NoOfQMarkInURL", "NoOfAmpersandInURL",
         "NoOfOtherSpecialCharsInURL", "SpacialCharRatioInURL", "IsHTTPS",
+        "NoOfDotsInURL", "EntropyOfURL", "IsBrandInDomain",
         "LineOfCode", "LargestLineLength", "HasTitle", "DomainTitleMatchScore",
         "URLTitleMatchScore", "HasFavicon", "Robots", "IsResponsive",
         "NoOfURLRedirect", "NoOfSelfRedirect", "HasDescription", "NoOfPopup",

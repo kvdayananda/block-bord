@@ -26,6 +26,7 @@ from backend.app.models import ScanHistory, User, Feedback, BlacklistDomain, Whi
 from backend.app.services.risk_engine import calculate_risk, _extract_domains
 from backend.app.services.ml_engine import ml_engine
 from backend.app.services.ml_training_service import train_model_from_samples
+from backend.app.utils.common import get_today_scan_count, norm_risk_level
 
 
 logger = logging.getLogger("blockbord.scan")
@@ -59,13 +60,6 @@ class UserReportRequest(BaseModel):
     description: Optional[str] = None
 
 
-def _get_today_scan_count(db: Session, user_id: int) -> int:
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    return (
-        db.query(ScanHistory)
-        .filter(ScanHistory.user_id == user_id, ScanHistory.created_at >= today_start)
-        .count()
-    )
 
 
 def _parse_reasons(raw: str) -> list:
@@ -114,7 +108,7 @@ async def scan_content(
 
     plan = get_user_plan(user)
     limit = PLAN_LIMITS.get(plan)
-    today_count = _get_today_scan_count(db, user.id)
+    today_count = get_today_scan_count(db, user.id)
 
     if limit is not None and today_count >= limit:
         return {

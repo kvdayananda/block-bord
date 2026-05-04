@@ -1,6 +1,18 @@
 // Content Script for Block Bord AI - Advanced Edition
 
-const BB_REPORT_URL = "https://block-bord.onrender.com";
+let BB_REPORT_URL = "https://block-bord.onrender.com";
+
+// Initialize dynamic URL
+chrome.storage.local.get(['apiUrl'], (res) => {
+    if (res.apiUrl) BB_REPORT_URL = res.apiUrl.replace(/\/$/, "");
+});
+
+// Listen for settings changes
+chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'local' && changes.apiUrl) {
+        BB_REPORT_URL = changes.apiUrl.newValue.replace(/\/$/, "");
+    }
+});
 
 // Use functions to get dynamic values for SPAs
 const getCurrentURL = () => window.location.href;

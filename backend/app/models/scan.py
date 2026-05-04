@@ -17,7 +17,7 @@ class ScanHistory(Base):
 
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), index=True)
 
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     user = relationship("User", back_populates="scans")
 
 Index("idx_scans_user_created", ScanHistory.user_id, ScanHistory.created_at)

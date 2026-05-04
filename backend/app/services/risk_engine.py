@@ -11,6 +11,7 @@ import hashlib
 import os
 import contextlib
 import logging
+import asyncio
 from datetime import datetime, timezone
 from urllib.parse import urlparse, unquote, parse_qs
 
@@ -64,8 +65,7 @@ KNOWN_BRANDS = {
 MEGA_TRUSTED_DOMAINS = {
     "google.com", "google.co.in", "github.com", "microsoft.com",
     "apple.com", "netflix.com", "amazon.com", "amazon.in",
-    "play.google.com", "apps.apple.com", "youtube.com", "linkedin.com",
-    "localhost", "127.0.0.1"
+    "play.google.com", "apps.apple.com", "youtube.com", "linkedin.com"
 }
 
 URGENCY_MANIPULATION = {
@@ -281,7 +281,7 @@ async def calculate_risk(text: str, url: str = None, **kwargs):
         s, c = analyze_domain_structure(d)
         heuristic_score += s
         reasons.extend(c)
-        s, c = check_ssl_certificate(d)
+        s, c = await asyncio.to_thread(check_ssl_certificate, d)
         heuristic_score += s
         reasons.extend(c)
 

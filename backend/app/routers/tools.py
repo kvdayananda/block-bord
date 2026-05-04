@@ -180,7 +180,7 @@ async def assistant_api(req: AssistantRequest, request: Request, db: Session = D
         client = genai.Client(api_key=gemini_key)
         
         # Hierarchical fallback chain based on confirmed available models
-        models_to_try = ["gemini-2.0-flash-lite", "gemini-2.5-flash", "gemini-2.0-flash"]
+        models_to_try = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash"]
         last_error = None
         
         system_prompt = (

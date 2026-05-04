@@ -19,29 +19,13 @@ import io
 from backend.app.dependencies import get_db, get_current_user
 from backend.app.services.plan_service import get_user_plan, get_plan_limit, PLAN_LIMITS
 from backend.app.models import ScanHistory, User
+from backend.app.utils.common import get_today_scan_count, norm_risk_level
 
 logger = logging.getLogger("blockbord.dashboard")
 router = APIRouter(tags=["Dashboard"])
 templates = Jinja2Templates(directory="frontend/templates")
 
 
-def _norm(level: str) -> str:
-    """Normalize risk level string to canonical form."""
-    l = (level or "").strip().lower()
-    if "high" in l:
-        return "High"
-    if "susp" in l:
-        return "Suspicious"
-    return "OK"
-
-
-def _get_today_scan_count(db: Session, user_id: int) -> int:
-    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
-    return (
-        db.query(ScanHistory)
-        .filter(ScanHistory.user_id == user_id, ScanHistory.created_at >= today_start)
-        .count()
-    )
 
 
 # ──────────────────────────────────────────────────────────────
@@ -54,7 +38,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse("/login", status_code=302)
 
     plan = get_user_plan(user)
-    today_count = _get_today_scan_count(db, user.id)
+    today_count = get_today_scan_count(db, user.id)
     limit = PLAN_LIMITS.get(plan)
     display_limit = limit if limit is not None else "∞"
 
@@ -68,9 +52,9 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     all_scans = db.query(ScanHistory).filter(ScanHistory.user_id == user.id).all()
     total_scans = len(all_scans)
 
-    high_risk = sum(1 for s in all_scans if _norm(s.risk_level) == "High")
-    suspicious_count = sum(1 for s in all_scans if _norm(s.risk_level) == "Suspicious")
-    safe_count = sum(1 for s in all_scans if _norm(s.risk_level) == "OK")
+    high_risk = sum(1 for s in all_scans if norm_risk_level(s.risk_level) == "High")
+    suspicious_count = sum(1 for s in all_scans if norm_risk_level(s.risk_level) == "Suspicious")
+    safe_count = sum(1 for s in all_scans if norm_risk_level(s.risk_level) == "OK")
 
     # 7-day timeline
     today = datetime.now(timezone.utc).date()
@@ -82,7 +66,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
         if s.created_at:
             date_str = s.created_at.date().strftime("%b %d")
             if date_str in timeline:
-                timeline[date_str][_norm(s.risk_level)] += 1
+                timeline[date_str][norm_risk_level(s.risk_level)] += 1
 
     # Security score
     if total_scans == 0:
@@ -213,9 +197,9 @@ def get_security_stats(request: Request, db: Session = Depends(get_db)):
         raise HTTPException(status_code=401, detail="Unauthorized")
     all_scans = db.query(ScanHistory).filter(ScanHistory.user_id == user.id).all()
     total = len(all_scans)
-    high = sum(1 for s in all_scans if _norm(s.risk_level) == "High")
-    susp = sum(1 for s in all_scans if _norm(s.risk_level) == "Suspicious")
-    safe = sum(1 for s in all_scans if _norm(s.risk_level) == "OK")
+    high = sum(1 for s in all_scans if norm_risk_level(s.risk_level) == "High")
+    susp = sum(1 for s in all_scans if norm_risk_level(s.risk_level) == "Suspicious")
+    safe = sum(1 for s in all_scans if norm_risk_level(s.risk_level) == "OK")
     cats: dict = {}
     for s in all_scans:
         cat = getattr(s, "category", None) or "General"
@@ -248,7 +232,7 @@ def get_threat_analytics(request: Request, db: Session = Depends(get_db)):
         if s.created_at:
             key = s.created_at.date().strftime("%b %d")
             if key in timeline:
-                timeline[key][_norm(s.risk_level)] += 1
+                timeline[key][norm_risk_level(s.risk_level)] += 1
     return {
         "labels": list(timeline.keys()),
         "high": [v["High"] for v in timeline.values()],

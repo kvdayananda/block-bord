@@ -161,6 +161,48 @@
       </div>
     </div>
 
+    <!-- Recent Forensic Analyses -->
+    <div class="bb-card" style="margin-top:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h3 style="font-size:0.9rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">Recent Forensic Analyses</h3>
+        <a href="/history" style="font-size:0.75rem; color:var(--primary); text-decoration:none; font-weight:700;">View All →</a>
+      </div>
+      <div class="table-responsive">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>Target</th>
+              <th>Threat Level</th>
+              <th>Category</th>
+              <th>Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for scan in recent_scans %}
+            <tr>
+              <td>
+                <div style="max-width:300px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-family:var(--font-mono); font-size:0.8rem;">
+                  {{ scan.content[:80] }}
+                </div>
+              </td>
+              <td>
+                <span class="badge" style="background:{% if 'High' in scan.risk_level %}rgba(239, 68, 68, 0.1){% elif 'Susp' in scan.risk_level %}rgba(245, 158, 11, 0.1){% else %}rgba(16, 185, 129, 0.1){% endif %}; color:{% if 'High' in scan.risk_level %}var(--status-danger){% elif 'Susp' in scan.risk_level %}var(--status-warn){% else %}var(--status-safe){% endif %};">
+                  {{ scan.risk_level }}
+                </span>
+              </td>
+              <td style="font-size:0.8rem; color:var(--text-muted);">{{ scan.category or 'General' }}</td>
+              <td style="font-size:0.75rem; color:var(--text-dim);">{{ scan.created_at.strftime('%H:%M') if scan.created_at else 'N/A' }}</td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="4" style="text-align:center; padding:40px; color:var(--text-dim);">No recent activity detected.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Timeline -->
     <div class="bb-card" style="margin-top:24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
