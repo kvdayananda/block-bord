@@ -8,18 +8,22 @@ services:
       - key: ENV
         value: production
       - key: DATABASE_URL
-        fromDatabase:
-          name: block-bord-db
-          property: connectionString
+        sync: false # Set this in Render Dashboard to your Neon URL
       - key: SESSION_SECRET
         generateValue: true
       - key: BACKEND_URL
-        value: https://block-bord-api.onrender.com
+        sync: false # Set this to your Render URL (e.g., https://block-bord-api.onrender.com)
+      - key: GOOGLE_SAFE_BROWSING_KEY
+        sync: false # Set this in Render Dashboard
+      - key: GEMINI_API_KEY
+        sync: false # Set this in Render Dashboard
       - key: RAZORPAY_KEY_ID
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
-      - key: GOOGLE_SAFE_BROWSING_KEY
-        value: YOUR_PLACEHOLDER_KEY
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: CORS_ORIGIN_REGEX
+        value: https?://.*\.onrender\.com
 
 
