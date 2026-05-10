@@ -1,5 +1,5 @@
 // Background Service Worker for Block Bord AI – Full Feature Set
-let API_URL = "https://blockbord.onrender.com";
+let API_URL = "https://block-bord-ai-pro.onrender.com";
 
 // Initialize API_URL from storage
 chrome.storage.local.get(['apiUrl'], (res) => {
