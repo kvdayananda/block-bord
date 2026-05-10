@@ -14,12 +14,14 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: BACKEND_URL
-        value: https://block-bord-api.onrender.com
+        value: https://blockbord.onrender.com
       - key: RAZORPAY_KEY_ID
         sync: false
       - key: RAZORPAY_KEY_SECRET
         sync: false
       - key: GOOGLE_SAFE_BROWSING_KEY
-        value: YOUR_PLACEHOLDER_KEY
+        value: AIzaSyDZ7sRRy-n1jegdOVueqz8quUvzoHAIgQo
+      - key: GEMINI_API_KEY
+        value: AIzaSyD_chnY-RjTOHys3ut3aCyN7BzwjJ2ae5k
 
 

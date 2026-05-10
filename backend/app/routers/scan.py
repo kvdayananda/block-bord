@@ -19,7 +19,7 @@ from pydantic import BaseModel
 from backend.app.utils.limiter import limiter
 from sqlalchemy.orm import Session
 
-from backend.app.dependencies import get_db, get_current_user, validate_csrf
+from backend.app.dependencies import get_db, get_current_user, require_user, validate_csrf
 from backend.app.services.plan_service import get_user_plan, PLAN_LIMITS
 from backend.app.services.email_service import send_high_risk_alert
 from backend.app.models import ScanHistory, User, Feedback, BlacklistDomain, WhitelistDomain, UserReport
@@ -100,11 +100,9 @@ async def scan_content(
     data: ScanRequest,
     request: Request,
     db: Session = Depends(get_db),
+    user: User = Depends(require_user),
     _csrf: None = Depends(validate_csrf),
 ):
-    user = get_current_user(request, db)
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthorized")
 
     plan = get_user_plan(user)
     limit = PLAN_LIMITS.get(plan)
@@ -204,7 +202,7 @@ async def scan_content(
         f"| level={result['risk_level']} | url={data.url or 'text'}"
     )
 
-    return {
+    final_resp = {
         "risk_score": result["risk_score"],
         "risk_level": result["risk_level"],
         "reasons": result.get("reasons", []),
@@ -329,30 +327,17 @@ async def check_link(
     request: Request,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
+    user: Optional[User] = Depends(get_current_user),
 ):
     url = (data.url or "").strip()
     if not url:
         raise HTTPException(status_code=400, detail="URL is required")
 
-    # API key auth
-    current_user = None
-    auth_header = request.headers.get("Authorization", "")
-    if auth_header.startswith("Bearer bb_live_"):
-        api_key = auth_header[7:]
-        current_user = db.query(User).filter(User.api_key == api_key).first()
-        if not current_user:
-            raise HTTPException(status_code=401, detail="Invalid API key")
-
-    if not current_user:
-        uid = request.session.get("user_id")
-        if uid:
-            current_user = db.query(User).filter(User.id == uid).first()
-
     text_to_scan = data.content if data.content else url
     result = await calculate_risk(text=text_to_scan, url=url)
 
-    if current_user and result.get("risk_level") == "High":
-        background_tasks.add_task(send_high_risk_alert, current_user.email, url, result)
+    if user and result.get("risk_level") == "High":
+        background_tasks.add_task(send_high_risk_alert, user.email, url, result)
 
     return {
         "url": url, "source": data.source,

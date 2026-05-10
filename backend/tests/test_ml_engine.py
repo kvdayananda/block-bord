@@ -9,6 +9,8 @@ def mock_ml_engine():
             # Create a mock model
             mock_model = MagicMock()
             mock_model.predict_proba.return_value = [[0.2, 0.8]]
+            # Ensure get_booster() returns None so it uses feature_names_in_
+            mock_model.get_booster.return_value = None
             mock_model.feature_names_in_ = ['URLLength', 'DomainLength', 'IsBrandInDomain']
             mock_load.return_value = mock_model
             

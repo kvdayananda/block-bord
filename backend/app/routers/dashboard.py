@@ -136,7 +136,7 @@ def settings_page(request: Request, db: Session = Depends(get_db)):
     if not user:
         return RedirectResponse("/login", status_code=302)
     plan = get_user_plan(user)
-    today_count = _get_today_scan_count(db, user.id)
+    today_count = get_today_scan_count(db, user.id)
     limit = PLAN_LIMITS.get(plan)
     return templates.TemplateResponse("settings.html", {
         "request": request, "user": user, "plan": plan,

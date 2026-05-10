@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     cors_origin_regex: str = r"https?://(localhost|127\.0\.0\.1)(:\d+)?"
 
     # ── Database ──
+    # Default to SQLite for local dev, but REQUIRES PostgreSQL (e.g. Neon) for production.
     database_url: str = "sqlite:///./blockbord.db"
 
     # ── Razorpay ──
