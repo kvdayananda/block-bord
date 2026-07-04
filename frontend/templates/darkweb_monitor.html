@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+{% block title %}Dark Web Monitor — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+.dwm-container { max-width: 860px; margin: 20px auto; padding: 0 16px; }
+
+.dwm-hero-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 52px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+}
+.dwm-hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #ef4444, #f97316, #ef4444);
+  background-size: 200% 100%;
+  animation: shiftGrad 3s linear infinite;
+}
+@keyframes shiftGrad {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 200% 0%; }
+}
+
+/* Pulsing icon */
+.dwm-icon-wrap {
+  width: 76px; height: 76px;
+  border-radius: 20px;
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px;
+  font-size: 2rem;
+  position: relative;
+}
+.dwm-icon-wrap::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 26px;
+  border: 1.5px solid rgba(239,68,68,0.2);
+  animation: pulse-ring 2s ease-in-out infinite;
+}
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0; transform: scale(0.9); }
+  50%       { opacity: 1; transform: scale(1.05); }
+}
+
+.dwm-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 12px;
+  background: linear-gradient(135deg, #f8fafc 30%, #fca5a5 70%, #ef4444 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.dwm-subtitle {
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto 36px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+
+/* Input row */
+.dwm-form {
+  display: flex;
+  gap: 12px;
+  max-width: 560px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+.dwm-input {
+  flex: 1;
+  min-width: 220px;
+  background: rgba(6,8,20,0.7);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px 20px;
+  font-size: 0.95rem;
+  color: var(--text);
+  font-family: var(--font-sans);
+  transition: var(--transition);
+}
+.dwm-input:focus {
+  outline: none;
+  border-color: rgba(239,68,68,0.5);
+  box-shadow: 0 0 18px rgba(239,68,68,0.2);
+}
+.dwm-btn {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: var(--radius);
+  padding: 0 28px;
+  min-height: 52px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(239,68,68,0.35);
+  transition: var(--transition);
+}
+.dwm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(239,68,68,0.5);
+  filter: brightness(1.08);
+}
+.dwm-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Loading spinner */
+.dwm-spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Result panel */
+.dwm-result { margin-top: 36px; display: none; animation: slideUp 0.35s ease; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dwm-result-card {
+  border-radius: var(--radius);
+  padding: 32px;
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  text-align: left;
+}
+.dwm-result-icon { font-size: 2.4rem; line-height: 1; flex-shrink: 0; }
+.dwm-result-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; }
+.dwm-result-desc { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
+
+/* Sources grid */
+.dwm-sources { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: 10px; margin-top: 20px; }
+.dwm-source-pill {
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--status-danger);
+}
+
+/* Pro lock card */
+.pro-gate-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 72px 40px;
+  text-align: center;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+}
+.pro-lock-icon {
+  width: 80px; height: 80px;
+  border-radius: 20px;
+  background: rgba(99,102,241,0.12);
+  border: 1px solid rgba(99,102,241,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px;
+  font-size: 2.4rem;
+}
+.pro-gate-title { font-family: var(--font-display); font-size: 1.8rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 12px; }
+.pro-gate-sub { color: var(--text-muted); max-width: 420px; margin: 0 auto 32px; line-height: 1.7; font-size: 0.95rem; }
+.pro-upgrade-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--primary-grad);
+  color: #fff; font-weight: 800; font-size: 0.95rem;
+  padding: 14px 36px; border-radius: var(--radius);
+  text-decoration: none; box-shadow: var(--shadow-primary);
+  transition: var(--transition);
+}
+.pro-upgrade-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+
+.pro-features { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 32px; }
+.pro-feature-pill {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 8px 18px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  display: flex; align-items: center; gap: 6px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    <div class="dwm-container">
+
+      <!-- Page Header -->
+      <div class="app-page-header">
+        <div class="app-page-header-left">
+          <span class="app-page-tag">MONITORING · PRO</span>
+          <h1 class="app-page-title">Dark Web Monitor</h1>
+          <p class="app-page-subtitle">Continuous surveillance of dark web forums, paste sites, and data dumps for your personal information.</p>
+        </div>
+      </div>
+
+      {% if plan in ['pro','enterprise'] %}
+      <!-- Pro User: Active Monitor Form -->
+      <div class="dwm-hero-card">
+        <div class="dwm-icon-wrap">🕵️</div>
+        <h2 class="dwm-title">Monitor Dark Web for Your Data</h2>
+        <p class="dwm-subtitle">Add an email address to instantly search dark web forums, Telegram breach dumps, and paste sites for your credentials.</p>
+
+        <form id="dwForm" class="dwm-form">
+          <input type="email" id="dwEmail" class="dwm-input" placeholder="email@example.com" required autocomplete="off">
+          <button type="submit" class="dwm-btn" id="dwBtn">Scan Now</button>
+        </form>
+
+        <div id="dwResult" class="dwm-result"></div>
+      </div>
+
+      <script>
+      document.getElementById('dwForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('dwEmail').value;
+        const btn = document.getElementById('dwBtn');
+        const res = document.getElementById('dwResult');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="dwm-spinner"></span> Scanning...';
+        res.style.display = 'none';
+
+        try {
+          const r = await fetch('/tools/api/darkweb-scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content },
+            body: JSON.stringify({ email })
+          });
+          const d = await r.json();
+
+          if (d.found) {
+            res.innerHTML = `
+              <div class="dwm-result-card" style="background:rgba(239,68,68,0.06);border:1.5px solid rgba(239,68,68,0.2);">
+                <div class="dwm-result-icon">⚠️</div>
+                <div>
+                  <div class="dwm-result-title" style="color:var(--status-danger);">Exposure Detected in ${d.count} Source${d.count !== 1 ? 's' : ''}</div>
+                  <div class="dwm-result-desc">${d.message || 'Your email was found in dark web data dumps. Change your passwords immediately and enable 2FA.'}</div>
+                  ${d.sources && d.sources.length ? `<div class="dwm-sources">${d.sources.map(s => `<div class="dwm-source-pill">⚠ ${s}</div>`).join('')}</div>` : ''}
+                </div>
+              </div>`;
+          } else {
+            res.innerHTML = `
+              <div class="dwm-result-card" style="background:rgba(16,185,129,0.06);border:1.5px solid rgba(16,185,129,0.2);">
+                <div class="dwm-result-icon">🛡️</div>
+                <div>
+                  <div class="dwm-result-title" style="color:var(--status-safe);">No Dark Web Exposure Found</div>
+                  <div class="dwm-result-desc">${d.message || 'Great news — your email was not found in any dark web data sources we monitor. Stay safe and keep monitoring regularly.'}</div>
+                </div>
+              </div>`;
+          }
+          res.style.display = 'block';
+        } catch(err) {
+          alert('Scan failed. Please try again.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Scan Now';
+        }
+      });
+      </script>
+
+      {% else %}
+      <!-- Free User: Upgrade Gate -->
+      <div class="pro-gate-card">
+        <div class="pro-lock-icon">🔒</div>
+        <h2 class="pro-gate-title">Pro Feature Unlocked on Upgrade</h2>
+        <p class="pro-gate-sub">Dark Web Monitoring continuously watches forums, Telegram groups, and data breach dumps for your information — get alerted the moment your data appears.</p>
+        <a href="/pricing" class="pro-upgrade-btn">
+          <span>💎</span> Upgrade to Pro
+        </a>
+        <div class="pro-features">
+          <div class="pro-feature-pill">🔄 Real-time Monitoring</div>
+          <div class="pro-feature-pill">🌐 100+ Sources Scanned</div>
+          <div class="pro-feature-pill">📧 Instant Email Alerts</div>
+          <div class="pro-feature-pill">🕵️ Telegram Breach Dumps</div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+{% endblock %}

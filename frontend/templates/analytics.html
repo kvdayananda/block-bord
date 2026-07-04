@@ -28,21 +28,21 @@
       <!-- Risk Doughnut -->
       <div class="bb-card" style="display:flex;flex-direction:column;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Global Distribution</h3>
+          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text);">Global Distribution</h3>
           <span class="badge badge-primary">LIVE FETCH</span>
         </div>
         <div style="flex:1;position:relative;min-height:300px;">
           <canvas id="riskChart"></canvas>
         </div>
         <div style="display:flex;justify-content:center;gap:24px;margin-top:24px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text);font-weight:600;">
-            <span style="width:12px;height:12px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 8px #10b981;"></span>Safe
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);font-weight:700;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 8px #10b981;"></span>Safe
           </div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text);font-weight:600;">
-            <span style="width:12px;height:12px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 8px #f59e0b;"></span>Suspicious
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);font-weight:700;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 8px #f59e0b;"></span>Suspicious
           </div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:0.85rem;color:var(--text);font-weight:600;">
-            <span style="width:12px;height:12px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 8px #ef4444;"></span>Malicious
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);font-weight:700;">
+            <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 8px #ef4444;"></span>Malicious
           </div>
         </div>
       </div>
@@ -50,11 +50,11 @@
       <!-- Categories breakdown -->
       <div class="bb-card" style="display:flex;flex-direction:column;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Threat Categories</h3>
+          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text);">Threat Categories</h3>
         </div>
         <div id="categoryContainer" style="display:flex;flex-direction:column;gap:16px;">
           <!-- Fetched via JS -->
-          <div style="color:var(--text-muted);font-size:0.9rem;text-align:center;padding:40px 0;">Loading telemetry...</div>
+          <div style="color:var(--text-dim);font-size:0.9rem;text-align:center;padding:40px 0;">Loading telemetry...</div>
         </div>
       </div>
     </div>
@@ -62,7 +62,7 @@
     <!-- Timeline -->
     <div class="bb-card" style="margin-top:32px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
-        <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">30-Day Threat Intelligence Timeline</h3>
+        <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text);">30-Day Threat Intelligence Timeline</h3>
       </div>
       <div style="height:350px;width:100%;">
         <canvas id="timelineChart"></canvas>
@@ -75,8 +75,8 @@
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', async () => {
-  const gridColor = 'rgba(15,23,42,0.05)';
-  const textColor = '#94a3b8';
+  const gridColor = 'rgba(255,255,255,0.04)';
+  const textColor = '#64748b';
   
   try {
     // 1. Fetch Stats for Risk Distribution
@@ -92,7 +92,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           datasets: [{
             data: [stats.safe, stats.suspicious, stats.high_risk],
             backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-            borderWidth: 0,
+            borderColor: ['rgba(16,185,129,0.3)', 'rgba(245,158,11,0.3)', 'rgba(239,68,68,0.3)'],
+            borderWidth: 1,
             hoverOffset: 12
           }]
         },
@@ -118,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             catContainer.innerHTML += `
               <div>
                  <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.875rem;">
-                   <span style="font-weight:700;">${Math.round((count/stats.total_scans)*100)}% - ${cat}</span>
+                   <span style="font-weight:700; color:var(--text);">${Math.round((count/stats.total_scans)*100)}% - ${cat}</span>
                    <span style="color:var(--text-muted);">${count} logs</span>
                  </div>
                  <div style="height:8px; background:var(--bg-alt); border-radius:4px; overflow:hidden;">
@@ -128,7 +129,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         });
     } else {
-        catContainer.innerHTML = '<div style="color:var(--text-muted);font-size:0.9rem;text-align:center;padding:40px 0;">No category telemetry available.</div>';
+        catContainer.innerHTML = '<div style="color:var(--text-dim);font-size:0.9rem;text-align:center;padding:40px 0;">No category telemetry available.</div>';
     }
 
 
@@ -147,25 +148,32 @@ document.addEventListener('DOMContentLoaded', async () => {
               label: 'Threats Blocked',
               data: analytics.high,
               borderColor: '#ef4444',
-              backgroundColor: 'rgba(239,68,68,0.1)',
-              fill: true, tension: 0.4, pointRadius: 3, borderWidth: 3
+              backgroundColor: 'rgba(239,68,68,0.08)',
+              fill: true, tension: 0.45, pointRadius: 3, borderWidth: 2,
+              pointBackgroundColor: '#ef4444',
+              pointBorderColor: 'transparent'
             },
             {
               label: 'Safe Content',
               data: analytics.safe,
               borderColor: '#10b981',
-              backgroundColor: 'rgba(16,185,129,0.1)',
-              fill: true, tension: 0.4, pointRadius: 3, borderWidth: 3
+              backgroundColor: 'rgba(16,185,129,0.08)',
+              fill: true, tension: 0.45, pointRadius: 3, borderWidth: 2,
+              pointBackgroundColor: '#10b981',
+              pointBorderColor: 'transparent'
             }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: { 
+            legend: { display: true, labels: { color: textColor, usePointStyle: true, pointStyle: 'circle', boxWidth: 8 } },
+            tooltip: { backgroundColor: 'rgba(6,8,20,0.9)', borderColor: 'rgba(99,102,241,0.3)', borderWidth: 1, padding: 12 }
+          },
           scales: {
-            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 12 } } },
-            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 12 } } }
+            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
+            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 }, maxTicksLimit: 7 } }
           }
         }
       });

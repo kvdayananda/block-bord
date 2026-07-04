@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Phishing Simulator — Block Bord AI{% endblock %}
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">AI TOOL · PRO</span>
+        <h1 class="app-page-title">Phishing Simulator</h1>
+        <p class="app-page-subtitle">AI-generated phishing awareness training — learn to spot red flags before attackers fool you.</p>
+      </div>
+    </div>
+
+    {% if plan in ['pro','enterprise'] %}
+    <div class="bb-card" style="max-width:900px;margin:40px auto;padding:48px;">
+      <div style="text-align:center;margin-bottom:36px;">
+        <div style="width:64px;height:64px;border-radius:16px;background:rgba(239,68,68,0.15);color:#ef4444;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2rem;">🎣</div>
+        <h2 style="font-size:1.8rem;font-weight:900;margin-bottom:10px;">Can You Spot the Phish?</h2>
+        <p style="color:var(--text-muted);max-width:500px;margin:0 auto;">Our AI generates realistic phishing scenarios. Identify the red flags and learn to protect yourself.</p>
+      </div>
+      <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:32px;">
+        <button onclick="loadScenario('email')" class="btn btn-outline" style="padding:10px 24px;">📧 Email Phishing</button>
+        <button onclick="loadScenario('sms')" class="btn btn-outline" style="padding:10px 24px;">📱 SMS Smishing</button>
+        <button onclick="loadScenario('website')" class="btn btn-outline" style="padding:10px 24px;">🌐 Fake Website</button>
+      </div>
+      <div id="scenarioBox" style="background:var(--bg-alt);border:1px solid var(--border);border-radius:14px;padding:28px;min-height:200px;display:flex;align-items:center;justify-content:center;">
+        <p style="color:var(--text-dim);">Select a scenario type above to start training.</p>
+      </div>
+      <div id="answerBox" style="margin-top:20px;display:none;">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;margin-bottom:12px;">What are the red flags?</div>
+        <div id="redFlags" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;"></div>
+        <button onclick="showAnswer()" class="btn btn-primary" style="padding:10px 28px;">Reveal Answer</button>
+      </div>
+    </div>
+    {% else %}
+    {% include "partials/pro_gate.html" ignore missing %}
+    <div class="bb-card" style="max-width:600px;margin:60px auto;padding:56px;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:20px;">🔒</div>
+      <h2 style="font-size:1.6rem;font-weight:900;margin-bottom:12px;">Pro Feature</h2>
+      <p style="color:var(--text-muted);max-width:400px;margin:0 auto 28px;line-height:1.6;">The Phishing Simulator is available on Pro and Enterprise plans. Upgrade to access AI-powered security awareness training.</p>
+      <a href="/pricing" class="btn btn-primary" style="padding:14px 32px;">Upgrade to Pro</a>
+    </div>
+    {% endif %}
+  </main>
+</div>
+<script>
+const scenarios = {
+  email: { content: `<div style="background:#fff;color:#111;border-radius:10px;padding:24px;font-family:Arial,sans-serif;"><div style="border-bottom:1px solid #eee;padding-bottom:12px;margin-bottom:16px;"><strong>From:</strong> security-alert@paypa1.com<br><strong>Subject:</strong> 🚨 URGENT: Your account has been compromised</div><p>Dear Valued Customer,</p><p>We have detected <strong>suspicious activity</strong> on your PayPal account. Your account has been <span style="color:red">temporarily limited</span>. Click below to verify your identity within 24 hours or your account will be permanently suspended.</p><a style="display:inline-block;background:#0070ba;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;margin:16px 0;" href="#">Verify My Account Now</a><p style="font-size:0.8em;color:#666;">PayPal Security Team<br>This is an automated message. Do not reply.</p></div>`,
+    flags: ['❌ Misspelled domain (paypa1.com)', '❌ Creates artificial urgency', '❌ Threats of account suspension', '❌ Generic greeting "Valued Customer"', '❌ Suspicious link destination'] },
+  sms: { content: `<div style="background:#1a1a2e;border-radius:14px;padding:20px;"><div style="background:#25d366;color:#fff;border-radius:18px 18px 0 18px;padding:14px 18px;max-width:80%;margin-left:auto;font-size:0.9rem;line-height:1.5;">HDFC BANK ALERT: Your account will be blocked in 2 hrs. Complete KYC now: bit.ly/hdfc-kyc-update2024 Reply STOP to opt out.</div><div style="font-size:0.7rem;color:#555;text-align:right;margin-top:4px;">Delivered 12:34 PM</div></div>`,
+    flags: ['❌ Unknown sender number (not official short code)', '❌ Shortened URL hides real destination', '❌ "2 hrs" creates false urgency', '❌ Banks never ask KYC via SMS links', '❌ Opt-out instructions to seem legitimate'] },
+  website: { content: `<div style="background:#0a0a0f;border-radius:10px;overflow:hidden;border:1px solid #333;"><div style="background:#1a1a2e;padding:10px 16px;display:flex;align-items:center;gap:8px;"><div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div><div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div><div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div><div style="background:#2a2a3e;border-radius:6px;padding:4px 14px;flex:1;font-size:0.75rem;color:#888;font-family:monospace;">🔓 http://www.google-security-check.tk/login</div></div><div style="background:#fff;padding:32px;text-align:center;"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/200px-Google_2015_logo.svg.png" style="height:40px;margin-bottom:24px;" alt=""><p style="color:#202124;font-size:0.9rem;margin-bottom:20px;">Sign in to continue to Google Account Security</p><input placeholder="Email" style="width:100%;padding:10px;border:1px solid #dadce0;border-radius:4px;margin-bottom:12px;box-sizing:border-box;"><input type="password" placeholder="Password" style="width:100%;padding:10px;border:1px solid #dadce0;border-radius:4px;margin-bottom:16px;box-sizing:border-box;"><button style="background:#1a73e8;color:#fff;border:none;padding:10px 24px;border-radius:4px;cursor:pointer;">Sign In</button></div></div>`,
+    flags: ['❌ HTTP (not HTTPS) — no padlock', '❌ Fake domain (.tk is free/suspicious)', '❌ "google-security-check" is not google.com', '❌ Asks for password on suspicious page', '❌ Cloned Google branding to deceive'] }
+};
+function loadScenario(type) {
+  const s = scenarios[type];
+  document.getElementById('scenarioBox').innerHTML = s.content;
+  const flags = document.getElementById('redFlags');
+  flags.innerHTML = s.flags.map(f=>`<span style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);padding:6px 14px;border-radius:999px;font-size:0.8rem;font-weight:700;color:var(--text-muted);cursor:pointer;" onclick="this.style.color='var(--status-danger)';this.style.borderColor='rgba(239,68,68,0.5)';">${f}</span>`).join('');
+  document.getElementById('answerBox').style.display='block';
+}
+function showAnswer() {
+  document.querySelectorAll('#redFlags span').forEach(s=>{s.style.color='var(--status-danger)';s.style.borderColor='rgba(239,68,68,0.5)';});
+}
+</script>
+{% endblock %}

@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+{% block title %}Domain Inspector — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+.di-container { max-width: 960px; margin: 20px auto; padding: 0 16px; }
+
+.di-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+}
+.di-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #8b5cf6, #6366f1, #06b6d4);
+}
+
+.di-icon-wrap {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  background: rgba(139,92,246,0.12);
+  border: 1px solid rgba(139,92,246,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 2rem;
+  box-shadow: 0 0 24px rgba(139,92,246,0.2);
+}
+
+.di-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, #f8fafc 30%, #c4b5fd 70%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.di-subtitle {
+  color: var(--text-muted);
+  max-width: 480px;
+  margin: 0 auto 36px;
+  font-size: 0.93rem;
+  line-height: 1.7;
+}
+
+/* Input Row */
+.di-form {
+  display: flex;
+  gap: 12px;
+  max-width: 580px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+.di-input {
+  flex: 1;
+  min-width: 220px;
+  background: rgba(6,8,20,0.7);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px 20px;
+  font-size: 0.95rem;
+  color: var(--text);
+  font-family: var(--font-mono);
+  transition: var(--transition);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.di-input:focus {
+  outline: none;
+  border-color: rgba(139,92,246,0.5);
+  box-shadow: 0 0 20px rgba(139,92,246,0.2), inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.di-btn {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  border: none; color: #fff;
+  font-weight: 800; font-size: 0.9rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border-radius: var(--radius);
+  padding: 0 28px; min-height: 52px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(139,92,246,0.35);
+  transition: var(--transition);
+  display: flex; align-items: center; gap: 8px;
+}
+.di-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(139,92,246,0.5);
+  filter: brightness(1.08);
+}
+.di-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.di-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* Result Layout */
+.di-result { margin-top: 40px; display: none; animation: slideUp 0.35s ease; text-align: left; }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.di-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.di-meta-tile {
+  background: rgba(15,23,42,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: var(--transition);
+}
+.di-meta-tile:hover { border-color: var(--border-bright); }
+.di-meta-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.di-meta-value {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.di-dns-panel {
+  background: rgba(6,8,20,0.7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.di-dns-header {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.di-dns-record {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--primary-light);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  line-height: 1.6;
+}
+.di-dns-record:last-child { border-bottom: none; }
+
+/* Risk badge */
+.di-risk-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    <div class="di-container">
+
+      <div class="app-page-header">
+        <div class="app-page-header-left">
+          <span class="app-page-tag">NETWORK TOOL</span>
+          <h1 class="app-page-title">Domain Inspector</h1>
+          <p class="app-page-subtitle">Deep-dive analysis of any domain — WHOIS, DNS records, SSL certificate, and threat reputation score.</p>
+        </div>
+      </div>
+
+      <div class="di-card">
+        <div class="di-icon-wrap">🏷️</div>
+        <h2 class="di-title">Inspect Any Domain</h2>
+        <p class="di-subtitle">Query registrar details, nameservers, SSL chain, geolocation, and blacklist standing for any address.</p>
+
+        <form id="domainForm" class="di-form">
+          <input type="text" id="domainInp" class="di-input" placeholder="e.g. suspicious-domain.xyz" required autocomplete="off">
+          <button type="submit" class="di-btn" id="domainBtn">
+            <span id="dBtnText">Inspect</span>
+          </button>
+        </form>
+
+        <div id="domainResult" class="di-result"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+document.getElementById('domainForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const domain = document.getElementById('domainInp').value.trim();
+  const btn = document.getElementById('domainBtn');
+  const btnText = document.getElementById('dBtnText');
+  const res = document.getElementById('domainResult');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="di-spinner"></span> Inspecting...';
+  res.style.display = 'none';
+
+  try {
+    const r = await fetch(`/tools/api/domain-inspect?domain=${encodeURIComponent(domain)}`, {
+      headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content }
+    });
+    const d = await r.json();
+
+    // Risk badge color
+    const riskColors = {
+      'Safe': ['rgba(16,185,129,0.12)', 'rgba(16,185,129,0.3)', 'var(--status-safe)'],
+      'Suspicious': ['rgba(245,158,11,0.12)', 'rgba(245,158,11,0.3)', 'var(--status-warn)'],
+      'Dangerous': ['rgba(239,68,68,0.12)', 'rgba(239,68,68,0.3)', 'var(--status-danger)'],
+    };
+    const [rbg, rbdr, rcol] = riskColors[d.risk_level] || riskColors['Safe'];
+    const riskBadge = `<span class="di-risk-badge" style="background:${rbg};border:1px solid ${rbdr};color:${rcol};">${d.risk_level || 'Unknown'}</span>`;
+
+    const metaTiles = [
+      ['🏢 Registrar', d.registrar || 'Unknown'],
+      ['📅 Created', d.created || 'Unknown'],
+      ['⏳ Expires', d.expires || 'Unknown'],
+      ['🔒 SSL Issuer', d.ssl_issuer || 'None'],
+      ['🌍 IP Address', d.ip || 'Unknown'],
+      ['⚡ Threat Level', riskBadge],
+    ];
+
+    const dnsRecords = d.dns && d.dns.length
+      ? d.dns.map(rec => `<div class="di-dns-record">${rec}</div>`).join('')
+      : '<div class="di-dns-record" style="color:var(--text-dim);">No DNS records returned.</div>';
+
+    res.innerHTML = `
+      <div class="di-meta-grid">
+        ${metaTiles.map(([label, val]) => `
+          <div class="di-meta-tile">
+            <div class="di-meta-label">${label}</div>
+            <div class="di-meta-value">${val}</div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="di-dns-panel">
+        <div class="di-dns-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          DNS Records
+        </div>
+        ${dnsRecords}
+      </div>
+    `;
+    res.style.display = 'block';
+  } catch(err) {
+    alert('Inspection failed. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span id="dBtnText">Inspect</span>';
+  }
+});
+</script>
+{% endblock %}

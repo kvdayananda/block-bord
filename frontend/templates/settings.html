@@ -22,8 +22,7 @@
 
         <!-- Profile Card -->
         <div class="bb-card">
-          <h3
-            style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
+          <h3 style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
@@ -34,13 +33,11 @@
           <div style="display:flex; flex-direction:column; gap:20px;">
             <div class="input-group">
               <label>Username</label>
-              <input type="text" value="{{ user.username }}" disabled
-                style="background:var(--bg-alt); cursor:not-allowed; border-color:var(--border);">
+              <input type="text" value="{{ user.username }}" disabled style="background:var(--bg-alt); cursor:not-allowed; border-color:var(--border); color:var(--text-muted);">
             </div>
             <div class="input-group">
               <label>Email Address</label>
-              <input type="email" value="{{ user.email }}" disabled
-                style="background:var(--bg-alt); cursor:not-allowed; border-color:var(--border);">
+              <input type="email" value="{{ user.email }}" disabled style="background:var(--bg-alt); cursor:not-allowed; border-color:var(--border); color:var(--text-muted);">
             </div>
 
             <div style="display:flex; gap:12px; margin-top:8px;">
@@ -57,8 +54,7 @@
 
         <!-- Security Card -->
         <div class="bb-card">
-          <h3
-            style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
+          <h3 style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
             </svg>
@@ -66,28 +62,25 @@
           </h3>
 
           <div style="display:flex; flex-direction:column; gap:12px;">
-            <div
-              style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid var(--border);">
               <div>
-                <div style="font-weight:700; font-size:0.95rem;">Two-Factor Authentication</div>
+                <div style="font-weight:700; font-size:0.95rem; color:var(--text);">Two-Factor Authentication</div>
                 <div style="font-size:0.85rem; color:var(--text-muted);">Secure account with TOTP protection.</div>
               </div>
               <input type="checkbox" style="width:44px; height:24px; cursor:pointer;">
             </div>
 
-            <div
-              style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid var(--border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:1px solid var(--border);">
               <div>
-                <div style="font-weight:700; font-size:0.95rem;">Edge Shield Sync</div>
-                <div style="font-size:0.85rem; color:var(--text-muted);">Sync cloud history with browser extensions.
-                </div>
+                <div style="font-weight:700; font-size:0.95rem; color:var(--text);">Edge Shield Sync</div>
+                <div style="font-size:0.85rem; color:var(--text-muted);">Sync cloud history with browser extensions.</div>
               </div>
               <input type="checkbox" checked style="width:44px; height:24px; cursor:pointer;">
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <div>
-                <div style="font-weight:700; font-size:0.95rem;">Strict AI Heuristics</div>
+                <div style="font-weight:700; font-size:0.95rem; color:var(--text);">Strict AI Heuristics</div>
                 <div style="font-size:0.85rem; color:var(--text-muted);">Aggressive phishing detection mode.</div>
               </div>
               <input type="checkbox" checked style="width:44px; height:24px; cursor:pointer;">
@@ -100,10 +93,9 @@
       <!-- RIGHT COL -->
       <div style="display:flex; flex-direction:column; gap:24px;">
 
-        <!-- Subscription Card -->
+        <!-- Plan & Utilization Card -->
         <div class="bb-card">
-          <h3
-            style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
+          <h3 style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polygon points="12 2 2 7 12 22 22 7 12 2" />
               <polyline points="2 7 12 7 22 7" />
@@ -114,39 +106,31 @@
 
           <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:32px;">
             <div>
-              <div
-                style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:4px;">
-                Active Tier</div>
-              <div style="font-size:1.5rem; font-weight:900; color:var(--primary); text-transform:capitalize;">{{ plan
-                }} Plan</div>
+              <div style="font-size:0.75rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em; font-weight:800; margin-bottom:4px;">Active Tier</div>
+              <div style="font-size:1.5rem; font-weight:900; color:var(--primary-light); text-transform:capitalize;">{{ plan }} Plan</div>
             </div>
             <a href="/pricing" class="btn btn-outline" style="padding:6px 14px; font-size:0.75rem;">Manage Plan</a>
           </div>
 
           <div>
             <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.875rem;">
-              <span style="font-weight:600;">Daily Usage</span>
-              <span style="color:var(--text-muted);">{{ today_count }} / {{ plan_limit if plan_limit != '∞' else
-                'Unlimited' }} Scans</span>
+              <span style="font-weight:600; color:var(--text);">Daily Usage</span>
+              <span style="color:var(--text-muted);">{{ today_count }} / {{ plan_limit if plan_limit != '∞' else 'Unlimited' }} Scans</span>
             </div>
             <div style="height:8px; background:var(--bg-alt); border-radius:4px; overflow:hidden;">
               {% if plan_limit != '∞' %}
-              <div
-                style="height:100%; width:{{ [100, (today_count / plan_limit * 100)]|min if plan_limit > 0 else 100 }}%; background:var(--primary-grad); border-radius:4px;">
-              </div>
+              <div style="height:100%; width:{{ [100, (today_count / plan_limit * 100)]|min if plan_limit > 0 else 100 }}%; background:var(--primary-grad); border-radius:4px;"></div>
               {% else %}
               <div style="height:100%; width:5%; background:var(--primary-grad); border-radius:4px;"></div>
               {% endif %}
             </div>
-            <p style="font-size:0.75rem; color:var(--text-dim); margin-top:12px;">Your daily scan quota resets at
-              midnight UTC.</p>
+            <p style="font-size:0.75rem; color:var(--text-dim); margin-top:12px;">Your daily scan quota resets at midnight UTC.</p>
           </div>
         </div>
 
         <!-- API Access Card -->
         <div class="bb-card" style="position:relative; overflow:hidden;">
-          <h3
-            style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
+          <h3 style="font-size:0.9rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:24px; display:flex; align-items:center; gap:10px;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
               <polyline points="16 18 22 12 16 6" />
               <polyline points="8 6 2 12 8 18" />
@@ -159,8 +143,7 @@
             <div class="input-group">
               <label>API Key</label>
               <div style="display:flex; gap:10px;">
-                <input type="text" id="apiKeyInp" value="{{ api_key if api_key else '••••••••••••••••' }}" readonly
-                  style="font-family:var(--font-mono); font-size:0.8rem; letter-spacing:0.05em; background:var(--bg-alt);">
+                <input type="text" id="apiKeyInp" value="{{ api_key if api_key else '••••••••••••••••' }}" readonly style="font-family:var(--font-mono); font-size:0.8rem; letter-spacing:0.05em; background:var(--bg-alt); color:var(--text-muted); border-color:var(--border);">
                 <button class="btn btn-outline" onclick="copyKey()" style="padding:0 12px; flex-shrink:0;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -169,32 +152,27 @@
                 </button>
               </div>
             </div>
-            <button class="btn btn-primary btn-full" onclick="rotateKey()" style="padding:12px;">Rotate Key
-              Environment</button>
-            <p style="font-size:0.75rem; color:var(--text-dim); line-height:1.5;">Integrate Block Bord AI into your
-              production pipelines. Use <code>Bearer</code> authentication for all requests.</p>
+            <button class="btn btn-primary btn-full" onclick="rotateKey()" style="padding:12px;">Rotate Key Environment</button>
+            <p style="font-size:0.75rem; color:var(--text-dim); line-height:1.5;">Integrate Block Bord AI into your production pipelines. Use <code>Bearer</code> authentication for all requests.</p>
           </div>
           {% else %}
-          <div style="filter:blur(3px); pointer-events:none; user-select:none;">
+          <div style="filter:blur(3px); pointer-events:none; user-select:none; display:flex; flex-direction:column; gap:16px;">
             <div class="input-group">
               <label>API Key</label>
-              <input type="text" value="bb_sk_test_••••••••" readonly style="font-family:var(--font-mono);">
+              <input type="text" value="bb_sk_test_••••••••" readonly style="font-family:var(--font-mono); background:var(--bg-alt); border-color:var(--border);">
             </div>
             <button class="btn btn-primary btn-full" style="margin-top:10px;">Generate Key</button>
           </div>
-          <!-- Overlay -->
-          <div
-            style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px;">
-            <div
-              style="width:40px; height:40px; border-radius:50%; background:var(--bg-alt); display:flex; align-items:center; justify-content:center; margin-bottom:12px; border:1px solid var(--border);">
+          <!-- Overlay (Dark glass theme) -->
+          <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(6, 8, 20, 0.85); backdrop-filter:blur(6px); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px;">
+            <div style="width:40px; height:40px; border-radius:50%; background:var(--bg-alt); display:flex; align-items:center; justify-content:center; margin-bottom:12px; border:1px solid var(--border); box-shadow:0 0 15px rgba(99,102,241,0.2);">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
             </div>
-            <h4 style="font-weight:800; margin-bottom:4px;">Pro Integration</h4>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px; max-width:220px;">Unlock API
-              access to scan links via your own applications.</p>
+            <h4 style="font-weight:800; margin-bottom:4px; color:var(--text);">Pro Integration</h4>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px; max-width:220px;">Unlock API access to scan links via your own applications.</p>
             <a href="/pricing" class="btn btn-primary" style="padding:8px 20px; font-size:0.8125rem;">Upgrade Now</a>
           </div>
           {% endif %}

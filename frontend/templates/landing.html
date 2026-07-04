@@ -5,6 +5,42 @@
 {% block extra_head %}
 <meta name="description" content="Block Bord AI — Enterprise-grade cyber threat intelligence. Scan URLs, detect scams, and protect your digital assets with real-time AI analysis.">
 <style>
+  /* ── Cyber Grid Background ── */
+  .cyber-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+
+  /* ── Animated Glowing Orbs ── */
+  .glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .glow-orb-1 {
+    width: 500px; height: 500px;
+    top: -150px; right: -100px;
+    background: radial-gradient(circle, rgba(99,102,241,0.25) 0%, transparent 70%);
+    animation-delay: 0s;
+  }
+  .glow-orb-2 {
+    width: 400px; height: 400px;
+    bottom: -100px; left: -80px;
+    background: radial-gradient(circle, rgba(217,70,239,0.20) 0%, transparent 70%);
+    animation-delay: -4s;
+  }
+  @keyframes orbFloat {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-30px) scale(1.05); }
+  }
+
   /* ── Marquee ── */
   .marquee-wrapper { overflow: hidden; position: relative; }
   .marquee-track {
@@ -19,31 +55,45 @@
     content: '';
     position: absolute;
     top: 0; bottom: 0;
-    width: 100px;
+    width: 120px;
     z-index: 1;
   }
-  .marquee-wrapper::before { left: 0;  background: linear-gradient(to right,  #f8faff, transparent); }
-  .marquee-wrapper::after  { right: 0; background: linear-gradient(to left,   #f8faff, transparent); }
+  .marquee-wrapper::before { left: 0;  background: linear-gradient(to right, var(--bg), transparent); }
+  .marquee-wrapper::after  { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-  /* ── Feature cards ── */
+  /* ── Feature Cards ── */
   .features-grid {
     display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 24px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
   }
   .feature-card {
-    background: #fff;
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 36px 28px;
+    padding: 32px 24px;
     transition: var(--transition);
     cursor: default;
+    position: relative;
+    overflow: hidden;
   }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--primary-grad);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ease);
+  }
+  .feature-card:hover::before { transform: scaleX(1); }
   .feature-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 8px 32px rgba(99,102,241,0.12);
-    transform: translateY(-4px);
+    border-color: var(--border-bright);
+    box-shadow: 0 0 30px rgba(99,102,241,0.2);
+    transform: translateY(-6px);
   }
   .feature-icon {
     width: 52px; height: 52px;
@@ -54,9 +104,15 @@
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
+    transition: var(--transition);
+    box-shadow: 0 0 20px rgba(99,102,241,0.2);
   }
-  .feature-card h3 { font-size: 1.0625rem; margin-bottom: 10px; }
-  .feature-card p  { font-size: 0.9375rem; color: var(--text-muted); line-height: 1.7; }
+  .feature-card:hover .feature-icon {
+    box-shadow: 0 0 30px rgba(99,102,241,0.4);
+    background: rgba(99,102,241,0.2);
+  }
+  .feature-card h3 { font-size: 1rem; margin-bottom: 10px; color: var(--text); }
+  .feature-card p  { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; }
 
   @media (max-width: 900px)  { .features-grid { grid-template-columns: repeat(2,1fr); } }
   @media (max-width: 580px)  { .features-grid { grid-template-columns: 1fr; } }
@@ -68,7 +124,8 @@
     gap: 24px;
   }
   .testimonial-card {
-    background: #fff;
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 32px;
@@ -77,8 +134,8 @@
     gap: 20px;
     transition: var(--transition);
   }
-  .testimonial-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
-  .t-stars { color: #f59e0b; font-size: 0.9rem; letter-spacing: 2px; }
+  .testimonial-card:hover { box-shadow: 0 0 25px rgba(99,102,241,0.2); transform: translateY(-4px); border-color: var(--border-bright); }
+  .t-stars { color: #f59e0b; font-size: 0.9rem; letter-spacing: 2px; text-shadow: 0 0 10px rgba(245,158,11,0.4); }
   .t-quote { font-size: 0.9375rem; color: var(--text-muted); line-height: 1.7; flex: 1; }
   .t-author { display: flex; align-items: center; gap: 12px; }
   .t-avatar {
@@ -92,28 +149,30 @@
     font-weight: 800;
     font-size: 0.9rem;
     flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(99,102,241,0.4);
   }
-  .t-name  { font-weight: 700; font-size: 0.9rem; }
+  .t-name  { font-weight: 700; font-size: 0.9rem; color: var(--text); }
   .t-role  { font-size: 0.8rem; color: var(--text-dim); }
 
   @media (max-width: 900px)  { .testimonials-grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 580px)  { .testimonials-grid { grid-template-columns: 1fr; } }
 
-  /* hero dashboard mockup */
+  /* ── Live Demo mockup ── */
   .hero-mockup {
-    max-width: 760px;
+    max-width: 800px;
     margin: 56px auto 0;
-    background: #fff;
-    border: 1px solid var(--border);
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(99,102,241,0.3);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 60px rgba(99,102,241,0.15);
     overflow: hidden;
     animation: fadeUp 0.8s var(--ease) 0.4s both;
   }
   .mockup-bar {
-    background: var(--bg-alt);
-    border-bottom: 1px solid var(--border);
-    padding: 12px 20px;
+    background: rgba(6, 8, 20, 0.9);
+    border-bottom: 1px solid rgba(99,102,241,0.2);
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -121,8 +180,8 @@
   .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
   .mockup-url {
     flex: 1;
-    background: #fff;
-    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 8px;
     height: 28px;
     margin: 0 12px;
@@ -136,7 +195,7 @@
   .mockup-body { padding: 28px 24px; }
   .mockup-scanbar {
     height: 3px;
-    background: var(--primary-soft);
+    background: rgba(99,102,241,0.15);
     border-radius: 3px;
     margin-bottom: 24px;
     position: relative;
@@ -151,24 +210,156 @@
     background: var(--primary-grad);
     border-radius: 3px;
     animation: scanLine 2.4s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(99,102,241,0.6);
   }
   .mockup-row { display: flex; gap: 12px; margin-bottom: 12px; }
-  .mockup-skeleton { height: 12px; border-radius: 6px; background: var(--bg-deep); }
+  .mockup-skeleton { height: 10px; border-radius: 6px; background: rgba(99,102,241,0.12); }
   .mockup-skeleton.w30 { width: 30%; }
   .mockup-skeleton.w60 { width: 60%; }
   .mockup-skeleton.w80 { width: 80%; }
   .mockup-skeleton.w45 { width: 45%; }
+
+  /* ── Trust strip ── */
+  .trust-section {
+    padding: 40px 0;
+    background: var(--bg-alt);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Neon Badge ── */
+  .neon-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: var(--primary-light);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: var(--radius-pill);
+    margin-bottom: 28px;
+    animation: fadeDown 0.6s var(--ease) both;
+    box-shadow: 0 0 20px rgba(99,102,241,0.2);
+    letter-spacing: 0.03em;
+  }
+  .neon-badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 8px #10b981;
+    animation: statusPulse 2s ease-in-out infinite;
+  }
+
+  /* ── Stats strip override ── */
+  .bb-stats-strip {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
+  }
+  .bb-stat-item {
+    background: transparent;
+    border-right-color: var(--border);
+  }
+  .bb-stat-item:hover { background: rgba(99,102,241,0.05); }
+
+  /* ── Tools Preview Grid ── */
+  .tools-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .tool-preview-card {
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 16px;
+    text-align: center;
+    transition: var(--transition);
+    cursor: default;
+  }
+  .tool-preview-card:hover {
+    border-color: var(--border-bright);
+    box-shadow: 0 0 20px rgba(99,102,241,0.15);
+    transform: translateY(-4px);
+  }
+  .tool-preview-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    box-shadow: 0 0 15px rgba(99,102,241,0.2);
+  }
+  .tool-preview-card h4 { font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .tool-preview-card p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.4; }
+
+  @media (max-width: 900px)  { .tools-preview-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 580px)  { .tools-preview-grid { grid-template-columns: 1fr 1fr; } }
+
+  /* ── Animated counter ── */
+  .stat-counter { display: inline-block; }
+
+  /* ── Security layers section ── */
+  .layers-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .layer-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .layer-item:last-child { border-bottom: none; }
+  .layer-num {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    border: 1px solid rgba(99,102,241,0.3);
+    color: var(--primary);
+    font-weight: 800;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(99,102,241,0.2);
+  }
+  .layer-text h4 { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .layer-text p { font-size: 0.875rem; color: var(--text-muted); line-height: 1.6; }
+  .layer-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-top: 6px;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <!-- ═══════════ HERO ═══════════ -->
 <section class="bb-hero">
+  <div class="cyber-grid-bg"></div>
+  <div class="glow-orb glow-orb-1"></div>
+  <div class="glow-orb glow-orb-2"></div>
+
   <div class="bb-container bb-hero-content">
-    <span class="bb-hero-badge">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      AI-Powered Cyber Intelligence · v3.0
-    </span>
+    <div class="neon-badge">
+      <span class="neon-badge-dot"></span>
+      AI-Powered Cyber Intelligence · v3.0 · Live Threat Feed Active
+    </div>
 
     <h1 class="bb-title">
       Protect the<br><span>Next Billion</span> Users
@@ -184,7 +375,7 @@
       {% else %}
       <a href="/register" class="btn btn-primary btn-hero">Get started free</a>
       {% endif %}
-      <a href="#features" class="btn btn-outline btn-hero">
+      <a href="#features" class="btn btn-outline btn-hero" style="border-color:var(--border-bright); color:var(--text-muted);">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         See features
       </a>
@@ -193,34 +384,43 @@
     <!-- Dashboard mockup -->
     <div class="hero-mockup">
       <div class="mockup-bar">
-        <div class="mockup-dot" style="background:#ef4444;"></div>
-        <div class="mockup-dot" style="background:#f59e0b;"></div>
-        <div class="mockup-dot" style="background:#10b981;"></div>
-        <div class="mockup-url">https://blockbord.ai/app — Threat Analyzer</div>
+        <div class="mockup-dot" style="background:#ef4444; box-shadow:0 0 6px #ef4444;"></div>
+        <div class="mockup-dot" style="background:#f59e0b; box-shadow:0 0 6px #f59e0b;"></div>
+        <div class="mockup-dot" style="background:#10b981; box-shadow:0 0 6px #10b981;"></div>
+        <div class="mockup-url">https://blockbord.ai/app — Threat Analyzer · 3-Layer AI Engine</div>
       </div>
       <div class="mockup-body">
         <div class="mockup-scanbar"></div>
-        <div class="mockup-row"><div class="mockup-skeleton w30"></div><div class="mockup-skeleton w60"></div></div>
-        <div class="mockup-row"><div class="mockup-skeleton w80"></div><div class="mockup-skeleton w45"></div></div>
-        <div class="mockup-row"><div class="mockup-skeleton w45"></div><div class="mockup-skeleton w30"></div></div>
-        <div style="display:flex; gap:12px; margin-top:20px;">
-          <div style="flex:1; height:60px; background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(139,92,246,0.06)); border-radius:12px; border:1px solid rgba(99,102,241,0.12);"></div>
-          <div style="flex:1; height:60px; background: rgba(5,150,105,0.06); border-radius:12px; border:1px solid rgba(5,150,105,0.12);"></div>
-          <div style="flex:1; height:60px; background: rgba(220,38,38,0.05); border-radius:12px; border:1px solid rgba(220,38,38,0.1);"></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+          <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:0.65rem;color:#10b981;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Protected</div>
+            <div style="font-size:1.4rem;font-weight:900;color:#10b981;font-family:var(--font-display);">2,841</div>
+          </div>
+          <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:0.65rem;color:#ef4444;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Blocked</div>
+            <div style="font-size:1.4rem;font-weight:900;color:#ef4444;font-family:var(--font-display);">147</div>
+          </div>
+          <div style="background:rgba(99,102,241,0.1);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:0.65rem;color:#6366f1;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Score</div>
+            <div style="font-size:1.4rem;font-weight:900;color:#6366f1;font-family:var(--font-display);">98</div>
+          </div>
         </div>
+        <div class="mockup-row"><div class="mockup-skeleton w80"></div><div class="mockup-skeleton w30"></div></div>
+        <div class="mockup-row"><div class="mockup-skeleton w30"></div><div class="mockup-skeleton w60"></div></div>
+        <div class="mockup-row"><div class="mockup-skeleton w45"></div><div class="mockup-skeleton w45"></div></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ═══════════ TRUST STRIP ═══════════ -->
-<section style="padding: 40px 0; background:#fff; border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+<section class="trust-section">
   <div class="bb-container">
-    <p style="text-align:center; font-size:0.8rem; font-weight:600; color:var(--text-dim); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:28px;">Trusted by security teams at</p>
+    <p style="text-align:center; font-size:0.75rem; font-weight:600; color:var(--text-dim); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:24px;">Trusted by security teams worldwide</p>
     <div class="marquee-wrapper">
       <div class="marquee-track">
-        {% for brand in ['Vector Financial','Apex Digital','Kratos Sec','NightWatch Labs','InfraShield','BluePeak Tech','Orion Cyber','RiskSense Pro','Vector Financial','Apex Digital','Kratos Sec','NightWatch Labs','InfraShield','BluePeak Tech','Orion Cyber','RiskSense Pro'] %}
-        <span style="font-weight:700; font-size:0.95rem; color:var(--text-dim); flex-shrink:0;">{{ brand }}</span>
+        {% for brand in ['Vector Financial','Apex Digital','Kratos Sec','NightWatch Labs','InfraShield','BluePeak Tech','Orion Cyber','RiskSense Pro','ZeroDay Intel','CipherCore','Vector Financial','Apex Digital','Kratos Sec','NightWatch Labs','InfraShield','BluePeak Tech','Orion Cyber','RiskSense Pro','ZeroDay Intel','CipherCore'] %}
+        <span style="font-weight:700; font-size:0.9rem; color:var(--text-dim); flex-shrink:0; letter-spacing:0.02em;">{{ brand }}</span>
         {% endfor %}
       </div>
     </div>
@@ -228,11 +428,11 @@
 </section>
 
 <!-- ═══════════ STATS ═══════════ -->
-<section style="padding: 80px 0; background: var(--bg-alt);">
+<section style="padding: 80px 0; background: var(--bg);">
   <div class="bb-container">
     <div class="bb-stats-strip">
       <div class="bb-stat-item">
-        <div class="bb-stat-num">2M+</div>
+        <div class="bb-stat-num"><span class="stat-counter" data-target="2000000">2M+</span></div>
         <div class="bb-stat-label">Threats Blocked</div>
       </div>
       <div class="bb-stat-item">
@@ -251,42 +451,45 @@
   </div>
 </section>
 
-<!-- ═══════════ HOW IT WORKS ═══════════ -->
-<section id="workflow" class="bb-section">
+<!-- ═══════════ 3-LAYER ENGINE ═══════════ -->
+<section id="workflow" class="bb-section" style="background:var(--bg-alt);">
   <div class="bb-container">
     <div class="bb-section-head">
-      <span class="bb-overline">How it works</span>
-      <h2 class="bb-section-title">Simple. Secure. Automated.</h2>
-      <p class="bb-section-subtitle">Three steps from input to actionable threat intelligence.</p>
+      <span class="bb-overline">Detection Technology</span>
+      <h2 class="bb-section-title">3-Layer AI Detection Engine</h2>
+      <p class="bb-section-subtitle">Triple-validated threat intelligence combining real-time databases, machine learning, and expert rules.</p>
     </div>
-    <div class="bb-workflow-grid">
-      <div class="workflow-card bb-card">
-        <div class="workflow-card-ico">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <div class="layers-timeline">
+      <div class="layer-item">
+        <div class="layer-num">1</div>
+        <div class="layer-text">
+          <h4>Google Safe Browsing API</h4>
+          <p>Instantly checks every URL against Google's global, continuously-updated database of phishing, malware, and social engineering sites.</p>
+          <span class="layer-badge" style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);">~99% Known Threats</span>
         </div>
-        <h3>1. Ingest Assets</h3>
-        <p>Paste any URL, domain, text, or documentation into our secure sandbox. Immediate ingestion with zero friction.</p>
       </div>
-      <div class="workflow-card bb-card">
-        <div class="workflow-card-ico">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <div class="layer-item">
+        <div class="layer-num">2</div>
+        <div class="layer-text">
+          <h4>XGBoost Machine Learning Model</h4>
+          <p>Trained on 235,000+ labeled URLs with 54 structural, lexical, and behavioral features — catches zero-day and previously unseen phishing patterns.</p>
+          <span class="layer-badge" style="background:rgba(99,102,241,0.15);color:#818cf8;border:1px solid rgba(99,102,241,0.3);">97%+ Accuracy</span>
         </div>
-        <h3>2. AI-Forensics</h3>
-        <p>Our ensemble engine runs multi-layered checks — heuristics, signatures, ML models, and zero-day pattern matching.</p>
       </div>
-      <div class="workflow-card bb-card">
-        <div class="workflow-card-ico">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <div class="layer-item">
+        <div class="layer-num">3</div>
+        <div class="layer-text">
+          <h4>80+ Heuristic Rules Engine</h4>
+          <p>Custom-built rules covering SSL checks, WHOIS domain age, brand impersonation, UPI fraud patterns, Fast-Flux DNS, and more.</p>
+          <span class="layer-badge" style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);">Zero-Day Detection</span>
         </div>
-        <h3>3. Resolve Risks</h3>
-        <p>Receive a full explainable risk report. Make confident decisions in under 3 seconds — no black boxes.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ═══════════ FEATURES ═══════════ -->
-<section id="features" class="bb-section bb-section-alt">
+<section id="features" class="bb-section" style="background:var(--bg);">
   <div class="bb-container">
     <div class="bb-section-head">
       <span class="bb-overline">Core Capabilities</span>
@@ -297,39 +500,95 @@
       <div class="feature-card">
         <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
         <h3>URL & Domain Scanner</h3>
-        <p>Instantly analyze any URL or domain against our real-time threat intelligence database and ML models.</p>
+        <p>Instantly analyze any URL or domain against real-time threat intelligence databases and ensemble ML models.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
-        <h3>Email Leak Detection</h3>
-        <p>Check if your email address or credentials have been exposed in known data breaches worldwide.</p>
+        <h3>Email Phishing Analyzer</h3>
+        <p>Detect spoofing, analyze headers, links, attachments, and verify SPF, DKIM, DMARC records automatically.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/><path d="M2 12h20"/></svg></div>
         <h3>Global Threat Map</h3>
-        <p>Visualize active threat origins on an interactive global map — updated in real time with community data.</p>
+        <p>Visualize active threat origins on an interactive global map updated in real time with community intelligence.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
         <h3>Browser Extension</h3>
-        <p>Real-time protection as you browse — Block Bord Edge Shield automatically scans every page you visit.</p>
+        <p>Real-time protection as you browse — Edge Shield automatically scans every page and blocks threats before they load.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
         <h3>Risk Analytics Dashboard</h3>
-        <p>Track your threat exposure over time with rich charts, timelines, and a personalized security score.</p>
+        <p>Track threat exposure over time with rich charts, timelines, and a personalized AI-computed security score.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
         <h3>Community Block List</h3>
-        <p>Access and contribute to a shared database of known malicious domains, URLs, and threat actors.</p>
+        <p>Access and contribute to a shared database of known malicious domains, URLs, and threat actors globally.</p>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ═══════════ TOOLS PREVIEW ═══════════ -->
+<section class="bb-section" style="background:var(--bg-alt);">
+  <div class="bb-container">
+    <div class="bb-section-head">
+      <span class="bb-overline">Security Toolkit</span>
+      <h2 class="bb-section-title">19+ Free Security Tools</h2>
+      <p class="bb-section-subtitle">Enterprise-grade security scanners, free to use — no account required.</p>
+    </div>
+    <div class="tools-preview-grid">
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+        <h4>URL Scanner</h4>
+        <p>WHOIS, SSL, DNS</p>
+      </div>
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon" style="background:rgba(239,68,68,0.12);color:#ef4444;box-shadow:0 0 15px rgba(239,68,68,0.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <h4>Email Phishing</h4>
+        <p>SPF, DKIM, DMARC</p>
+      </div>
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon" style="background:rgba(16,185,129,0.12);color:#10b981;box-shadow:0 0 15px rgba(16,185,129,0.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <h4>Password Strength</h4>
+        <p>Entropy, Crack Time</p>
+      </div>
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;box-shadow:0 0 15px rgba(245,158,11,0.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h4>SSL Checker</h4>
+        <p>Certificate, Expiry</p>
+      </div>
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon" style="background:rgba(217,70,239,0.12);color:#d946ef;box-shadow:0 0 15px rgba(217,70,239,0.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+        <h4>AI Scam Detector</h4>
+        <p>WhatsApp, SMS, Telegram</p>
+      </div>
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon" style="background:rgba(59,130,246,0.12);color:#3b82f6;box-shadow:0 0 15px rgba(59,130,246,0.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div>
+        <h4>IP Reputation</h4>
+        <p>ASN, VPN, TOR</p>
+      </div>
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8"/><path d="M12 8v8"/></svg></div>
+        <h4>QR Code Scanner</h4>
+        <p>Decode & analyze</p>
+      </div>
+      <div class="tool-preview-card">
+        <div class="tool-preview-icon" style="background:rgba(239,68,68,0.12);color:#ef4444;box-shadow:0 0 15px rgba(239,68,68,0.2);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+        <h4>Malware Scanner</h4>
+        <p>PDF, EXE, ZIP</p>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:32px;">
+      <a href="/tools" class="btn btn-outline" style="padding:12px 32px;">View All 19 Tools →</a>
+    </div>
+  </div>
+</section>
+
 <!-- ═══════════ TESTIMONIALS ═══════════ -->
-<section class="bb-section">
+<section class="bb-section" style="background:var(--bg);">
   <div class="bb-container">
     <div class="bb-section-head">
       <span class="bb-overline">Trusted by security professionals</span>
@@ -374,7 +633,9 @@
 </section>
 
 <!-- ═══════════ CTA BANNER ═══════════ -->
-<section class="bb-cta-section">
+<section class="bb-cta-section" style="background:linear-gradient(135deg,#0c0f24,#1e1254,#1a0c2e);">
+  <div class="cyber-grid-bg" style="opacity:0.3;"></div>
+  <div class="glow-orb" style="width:300px;height:300px;top:50%;left:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 70%);position:absolute;animation:orbFloat 6s ease-in-out infinite;"></div>
   <div class="bb-container" style="position:relative; z-index:1;">
     <h2 class="bb-cta-title" style="font-size:clamp(1.5rem, 5vw, 2.5rem);">Ready to secure your digital assets?</h2>
     <p class="bb-cta-sub">Join 50,000+ security professionals who trust Block Bord AI every day.</p>
@@ -385,4 +646,38 @@
     {% endif %}
   </div>
 </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+
+// Intersection Observer for fade-in animations
+const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.feature-card, .tool-preview-card, .testimonial-card, .layer-item').forEach((el, i) => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(24px)';
+  el.style.transition = `opacity 0.5s ease ${i * 0.05}s, transform 0.5s ease ${i * 0.05}s`;
+  observer.observe(el);
+});
+</script>
 {% endblock %}

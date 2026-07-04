@@ -7,7 +7,7 @@
 <style>
   .contact-hero {
     padding: 120px 0 64px;
-    background: linear-gradient(160deg, #f8faff 0%, #edf2ff 100%);
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg-alt) 100%);
     text-align: center;
     border-bottom: 1px solid var(--border);
   }
@@ -32,12 +32,14 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(99,102,241,0.2);
   }
   .info-content h4 { margin: 0 0 6px; font-weight: 700; font-size: 1rem; }
   .info-content p { margin: 0; font-size: 0.9375rem; color: var(--text-muted); line-height: 1.6; }
   
   .contact-form-card {
-    background: #fff;
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
@@ -67,12 +69,12 @@
     
     <!-- Support Quick Link -->
     <div style="display: flex; justify-content: center; margin-bottom: 48px;">
-      <div class="bb-card flex-stack-mobile" style="padding: 24px 32px; display: flex; align-items: center; gap: 24px; width: 100%; max-width: 600px; background: var(--bg-alt);">
-        <div class="info-icon" style="background: var(--primary); color: #fff; width: 48px; height: 48px;">
+      <div class="bb-card flex-stack-mobile" style="padding: 24px 32px; display: flex; align-items: center; gap: 24px; width: 100%; max-width: 600px; background: var(--bg-alt); border-color: var(--border);">
+        <div class="info-icon" style="background: var(--primary); color: #fff; width: 48px; height: 48px; box-shadow:0 0 15px rgba(99,102,241,0.4);">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         </div>
         <div style="flex: 1;">
-          <h4 style="margin: 0; font-weight: 800; font-size: 1rem;">Direct Technical Support</h4>
+          <h4 style="margin: 0; font-weight: 800; font-size: 1rem; color: var(--text);">Direct Technical Support</h4>
           <p style="margin: 2px 0 0; font-size: 0.85rem; color: var(--text-muted);">Get help with configuration or troubleshooting.</p>
         </div>
         <a href="mailto:support@blockbord.ai" class="btn btn-outline btn-sm btn-full-mobile">Email Support</a>
@@ -82,41 +84,41 @@
     <!-- Main Contact Form -->
     <div class="contact-form-card" style="max-width: 700px; margin: 0 auto;">
       <div style="text-align: center; margin-bottom: 40px;">
-        <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 8px;">Send us a message</h3>
+        <h3 style="font-size: 1.5rem; font-weight: 900; margin-bottom: 8px; color: var(--text);">Send us a message</h3>
         <p style="color: var(--text-muted); font-size: 0.95rem;">Have a question or feedback? We'd love to hear from you.</p>
       </div>
       
       <form onsubmit="event.preventDefault(); alert('Message sent! Our team will contact you soon.'); this.reset();" style="display: flex; flex-direction: column; gap: 24px;">
         <div class="grid-stack-mobile" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
           <div class="input-group">
-            <label>First Name</label>
-            <input type="text" placeholder="John" required>
+            <label style="color: var(--text-muted);">First Name</label>
+            <input type="text" placeholder="John" required style="background:var(--bg-alt); border:1.5px solid var(--border); color:var(--text); transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
           </div>
           <div class="input-group">
-            <label>Last Name</label>
-            <input type="text" placeholder="Doe" required>
+            <label style="color: var(--text-muted);">Last Name</label>
+            <input type="text" placeholder="Doe" required style="background:var(--bg-alt); border:1.5px solid var(--border); color:var(--text); transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
           </div>
         </div>
         
         <div class="input-group">
-          <label>Work Email</label>
-          <input type="email" placeholder="john@company.com" required>
+          <label style="color: var(--text-muted);">Work Email</label>
+          <input type="email" placeholder="john@company.com" required style="background:var(--bg-alt); border:1.5px solid var(--border); color:var(--text); transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
         </div>
         
         <div class="input-group">
-          <label>Inquiry Type</label>
-          <select required style="appearance: none; background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMTQ4LCAxNjMsIDE4NCwgMC44KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjYgOSAxMiAxNSAxOCA5Ij48L3BvbHlsaW5lPjwvc3ZnPg==') no-repeat right 16px center / 16px;">
-            <option value="" disabled selected>Select an option</option>
-            <option>General Inquiry</option>
-            <option>Technical Support</option>
-            <option>Feedback & Suggestions</option>
-            <option>Security Report</option>
+          <label style="color: var(--text-muted);">Inquiry Type</label>
+          <select required style="appearance: none; background: var(--bg-alt) url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9InJnYmEoMTQ4LCAxNjMsIDE4NCwgMC44KSIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjxwb2x5bGluZSBwb2ludHM9IjYgOSAxMiAxNSAxOCA5Ij48L3BvbHlsaW5lPjwvc3ZnPg==') no-repeat right 16px center / 16px; border:1.5px solid var(--border); color:var(--text); transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+            <option value="" disabled selected style="background: var(--bg-alt);">Select an option</option>
+            <option style="background: var(--bg-alt);">General Inquiry</option>
+            <option style="background: var(--bg-alt);">Technical Support</option>
+            <option style="background: var(--bg-alt);">Feedback & Suggestions</option>
+            <option style="background: var(--bg-alt);">Security Report</option>
           </select>
         </div>
         
         <div class="input-group">
-          <label>Message</label>
-          <textarea rows="5" placeholder="How can we help?" required></textarea>
+          <label style="color: var(--text-muted);">Message</label>
+          <textarea rows="5" placeholder="How can we help?" required style="background:var(--bg-alt); border:1.5px solid var(--border); color:var(--text); transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'"></textarea>
         </div>
         
         <button type="submit" class="btn btn-primary btn-full" style="padding: 18px; font-weight: 800; font-size: 1rem; margin-top: 8px;">

@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}Network Port Scanner — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+.ps-container { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+
+.ps-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+}
+.ps-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #06b6d4, #6366f1, #d946ef);
+}
+
+.ps-icon-wrap {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  background: rgba(6,182,212,0.12);
+  border: 1px solid rgba(6,182,212,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 2rem;
+  box-shadow: 0 0 24px rgba(6,182,212,0.2);
+}
+.ps-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px;
+  background: linear-gradient(135deg, #f8fafc 30%, #67e8f9 70%, #6366f1 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.ps-subtitle { color: var(--text-muted); max-width: 460px; margin: 0 auto 36px; font-size: 0.93rem; line-height: 1.7; }
+
+.ps-form { display: flex; gap: 12px; max-width: 560px; margin: 0 auto; flex-wrap: wrap; }
+.ps-input {
+  flex: 1; min-width: 220px;
+  background: rgba(6,8,20,0.7);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px 20px;
+  font-size: 0.95rem; color: var(--text);
+  font-family: var(--font-mono);
+  transition: var(--transition);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.ps-input:focus {
+  outline: none;
+  border-color: rgba(6,182,212,0.5);
+  box-shadow: 0 0 20px rgba(6,182,212,0.2), inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.ps-btn {
+  background: linear-gradient(135deg, #06b6d4, #6366f1);
+  border: none; color: #fff;
+  font-weight: 800; font-size: 0.9rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border-radius: var(--radius); padding: 0 28px; min-height: 52px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(6,182,212,0.35);
+  transition: var(--transition);
+  display: flex; align-items: center; gap: 8px;
+}
+.ps-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+.ps-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.ps-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.ps-result { margin-top: 40px; display: none; animation: slideUp 0.35s ease; text-align: left; }
+@keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.ps-summary {
+  background: rgba(15,23,42,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex; align-items: center; gap: 16px;
+  margin-bottom: 16px;
+}
+.ps-summary-icon { font-size: 2rem; flex-shrink: 0; }
+.ps-summary-title { font-family: var(--font-display); font-size: 1rem; font-weight: 800; margin-bottom: 3px; }
+.ps-summary-sub { font-size: 0.82rem; color: var(--text-muted); }
+
+.ps-ports-list { display: flex; flex-direction: column; gap: 8px; }
+.ps-port-row {
+  background: rgba(239,68,68,0.05);
+  border: 1px solid rgba(239,68,68,0.18);
+  border-radius: var(--radius-sm);
+  padding: 14px 20px;
+  display: grid;
+  grid-template-columns: 80px 100px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+.ps-port-num { font-family: var(--font-mono); font-weight: 900; font-size: 1rem; color: var(--status-danger); }
+.ps-port-service { font-weight: 700; font-size: 0.88rem; }
+.ps-port-desc { font-size: 0.8rem; color: var(--text-muted); }
+
+.ps-clean { color: var(--status-safe); text-align: center; padding: 24px; font-weight: 700; font-size: 1rem; }
+
+/* Pro gate */
+.pro-gate-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 72px 40px; text-align: center; box-shadow: var(--shadow-lg); backdrop-filter: var(--glass-blur); }
+.pro-lock-icon { width: 80px; height: 80px; border-radius: 20px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; font-size: 2.4rem; }
+.pro-upgrade-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--primary-grad); color: #fff; font-weight: 800; font-size: 0.95rem; padding: 14px 36px; border-radius: var(--radius); text-decoration: none; box-shadow: var(--shadow-primary); transition: var(--transition); }
+.pro-upgrade-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    <div class="ps-container">
+
+      <div class="app-page-header">
+        <div class="app-page-header-left">
+          <span class="app-page-tag">NETWORK · PRO</span>
+          <h1 class="app-page-title">Network Port Scanner</h1>
+          <p class="app-page-subtitle">Identify open ports, exposed services, and attack surface of any IP or domain.</p>
+        </div>
+      </div>
+
+      {% if plan in ['pro','enterprise'] %}
+      <div class="ps-card">
+        <div class="ps-icon-wrap">🔌</div>
+        <h2 class="ps-title">Scan Network Ports</h2>
+        <p class="ps-subtitle">Enter an IP address or domain to scan common ports and map exposed services and potential attack vectors.</p>
+
+        <form id="portForm" class="ps-form">
+          <input type="text" id="portTarget" class="ps-input" placeholder="e.g. 192.168.1.1 or example.com" required autocomplete="off">
+          <button type="submit" class="ps-btn" id="portBtn">
+            <span id="portBtnText">Scan Ports</span>
+          </button>
+        </form>
+
+        <div id="portResult" class="ps-result"></div>
+      </div>
+
+      <script>
+      document.getElementById('portForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const target = document.getElementById('portTarget').value.trim();
+        const btn = document.getElementById('portBtn');
+        const res = document.getElementById('portResult');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="ps-spinner"></span> Scanning ports...';
+        res.style.display = 'none';
+
+        try {
+          const r = await fetch(`/tools/api/port-scan?target=${encodeURIComponent(target)}`, {
+            headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content }
+          });
+          const d = await r.json();
+          const openPorts = (d.ports || []).filter(p => p.state === 'open');
+          const riskIcon = openPorts.length > 5 ? '⚠️' : openPorts.length > 0 ? '🔍' : '✅';
+          const riskColor = openPorts.length > 5 ? 'var(--status-danger)' : openPorts.length > 0 ? 'var(--status-warn)' : 'var(--status-safe)';
+
+          res.innerHTML = `
+            <div class="ps-summary">
+              <div class="ps-summary-icon">${riskIcon}</div>
+              <div>
+                <div class="ps-summary-title" style="color:${riskColor};">${openPorts.length} Open Port${openPorts.length !== 1 ? 's' : ''} Detected</div>
+                <div class="ps-summary-sub">Target: <code style="font-family:var(--font-mono);color:var(--primary-light);">${target}</code> · ${d.total_scanned || 0} common ports scanned</div>
+              </div>
+            </div>
+            <div class="ps-ports-list">
+              ${openPorts.length > 0
+                ? openPorts.map(p => `
+                  <div class="ps-port-row">
+                    <div class="ps-port-num">${p.port}</div>
+                    <div class="ps-port-service">${p.service || 'Unknown'}</div>
+                    <div class="ps-port-desc">${p.description || ''}</div>
+                  </div>
+                `).join('')
+                : `<div class="ps-clean">✅ No open ports detected — target appears locked down.</div>`
+              }
+            </div>
+          `;
+          res.style.display = 'block';
+        } catch(err) {
+          alert('Port scan failed. Please try again.');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<span id="portBtnText">Scan Ports</span>';
+        }
+      });
+      </script>
+
+      {% else %}
+      <div class="pro-gate-card">
+        <div class="pro-lock-icon">🔒</div>
+        <h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:900;letter-spacing:-0.03em;margin-bottom:12px;">Pro Feature</h2>
+        <p style="color:var(--text-muted);max-width:420px;margin:0 auto 32px;line-height:1.7;font-size:0.95rem;">Network Port Scanning is available on Pro and Enterprise plans. Map open ports and exposed services on any target.</p>
+        <a href="/pricing" class="pro-upgrade-btn"><span>💎</span> Upgrade to Pro</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+{% endblock %}

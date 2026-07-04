@@ -1,0 +1,640 @@
+{% extends "base.html" %}
+{% block title %}URL Scanner — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* ── Core Layout & Styling ── */
+  .scanner-container {
+    max-width: 960px;
+    margin: 20px auto;
+    padding: 0 16px;
+  }
+
+  .scanner-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: var(--glass-blur);
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition);
+  }
+
+  .scanner-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: var(--primary-grad);
+  }
+
+  /* ── Custom Console Input ── */
+  .cyber-search-wrapper {
+    position: relative;
+    max-width: 680px;
+    margin: 32px auto 24px;
+    display: flex;
+    gap: 12px;
+  }
+
+  .cyber-input {
+    width: 100%;
+    background: rgba(6, 8, 20, 0.7);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px 16px 52px;
+    font-size: 1.05rem;
+    color: var(--text);
+    font-family: var(--font-sans);
+    transition: var(--transition);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .cyber-input:focus {
+    border-color: var(--border-bright);
+    outline: none;
+    box-shadow: 0 0 20px var(--primary-glow), inset 0 2px 8px rgba(0, 0, 0, 0.4);
+  }
+
+  .cyber-search-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--primary);
+    filter: drop-shadow(0 0 4px var(--primary-glow));
+    pointer-events: none;
+  }
+
+  .scan-btn {
+    background: var(--primary-grad);
+    border: none;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: var(--radius);
+    padding: 0 32px;
+    cursor: pointer;
+    box-shadow: var(--shadow-primary);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .scan-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.5);
+    filter: brightness(1.1);
+  }
+
+  .scan-btn:active {
+    transform: translateY(0);
+  }
+
+  .scan-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* ── Recommendations ── */
+  .quick-links {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: 12px;
+  }
+  .quick-links a {
+    color: var(--primary-light);
+    text-decoration: none;
+    margin: 0 6px;
+    font-family: var(--font-mono);
+    border-bottom: 1px dashed rgba(165, 180, 252, 0.4);
+    transition: var(--transition);
+  }
+  .quick-links a:hover {
+    color: #fff;
+    border-bottom-color: #fff;
+  }
+
+  /* ── Interactive Loading & Terminal Console ── */
+  .scanning-console {
+    background: #03040a;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-top: 32px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    text-align: left;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: inset 0 2px 16px rgba(0, 0, 0, 0.8);
+    display: none;
+  }
+
+  .console-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .dot-r { background: #ef4444; }
+  .dot-y { background: #f59e0b; }
+  .dot-g { background: #10b981; }
+
+  .console-title {
+    color: var(--primary-light);
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .terminal-line {
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .terminal-line.active {
+    color: #fff;
+  }
+
+  .terminal-line.success {
+    color: var(--status-safe);
+  }
+
+  .terminal-line.info {
+    color: var(--status-info);
+  }
+
+  .terminal-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--primary-soft);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
+
+  /* ── Results Gauge & Panels ── */
+  .result-wrapper {
+    margin-top: 40px;
+    display: none;
+    animation: slideUp 0.4s var(--ease-spring);
+  }
+
+  .result-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+  }
+
+  @media (max-width: 768px) {
+    .result-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .gauge-panel {
+    background: rgba(6, 8, 20, 0.4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  /* Circular Gauge */
+  .gauge-circle {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .gauge-circle svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .gauge-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 10;
+  }
+
+  .gauge-fill {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-dasharray: 440;
+    stroke-dashoffset: 440;
+    transition: stroke-dashoffset 1s ease-in-out;
+  }
+
+  .score-val {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .score-lbl {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  .verdict-badge {
+    padding: 6px 20px;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Details Panel */
+  .details-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .info-strip {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+
+  .info-strip-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .checks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+
+  .check-item {
+    background: rgba(6, 8, 20, 0.5);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .check-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .check-status {
+    font-size: 0.85rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .flags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .flag-item {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1.5px dashed rgba(239, 68, 68, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: var(--status-danger);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+  }
+
+  /* ── Animations ── */
+  @keyframes spin {
+    100% { transform: rotate(360deg); }
+  }
+
+  @keyframes slideUp {
+    0% { transform: translateY(16px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Status Colors */
+  .status-safe-text { color: var(--status-safe); }
+  .status-safe-stroke { stroke: var(--status-safe); filter: drop-shadow(0 0 6px rgba(16,185,129,0.4)); }
+  .status-safe-bg { background: var(--status-safe-bg); border: 1.5px solid rgba(16,185,129,0.3); color: var(--status-safe); }
+
+  .status-warn-text { color: var(--status-warn); }
+  .status-warn-stroke { stroke: var(--status-warn); filter: drop-shadow(0 0 6px rgba(245,158,11,0.4)); }
+  .status-warn-bg { background: var(--status-warn-bg); border: 1.5px solid rgba(245,158,11,0.3); color: var(--status-warn); }
+
+  .status-danger-text { color: var(--status-danger); }
+  .status-danger-stroke { stroke: var(--status-danger); filter: drop-shadow(0 0 6px rgba(239,68,68,0.4)); }
+  .status-danger-bg { background: var(--status-danger-bg); border: 1.5px solid rgba(239,68,68,0.3); color: var(--status-danger); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    <div class="scanner-container">
+      
+      <!-- Page Header -->
+      <div class="app-page-header">
+        <div class="app-page-header-left">
+          <span class="app-page-tag">SECURITY INTEL</span>
+          <h1 class="app-page-title">URL / Link Scanner</h1>
+          <p class="app-page-subtitle">Instantly analyze any web address using local machine learning heuristics and safe browsing data.</p>
+        </div>
+      </div>
+
+      <!-- Main Scan Card -->
+      <div class="scanner-card">
+        <div style="width:64px;height:64px;border-radius:16px;background:rgba(99,102,241,0.15);color:var(--primary);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:1.8rem;box-shadow: 0 0 20px rgba(99,102,241,0.25);">🔗</div>
+        <h2 style="font-family:var(--font-display);font-size:1.6rem;font-weight:900;letter-spacing:-0.03em;margin-bottom:10px;">URL Integrity Verification</h2>
+        <p style="color:var(--text-muted);max-width:520px;margin:0 auto;font-size:0.92rem;line-height:1.6;">Scan links, domain names, or addresses before visiting them to shield against scams and identity harvesting.</p>
+
+        <!-- Search Bar -->
+        <form id="urlForm" class="cyber-search-wrapper">
+          <svg class="cyber-search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          <input type="url" id="urlInp" class="cyber-input" placeholder="Paste link here (e.g. https://paypal-secure-verify.xyz)..." required autocomplete="off">
+          <button type="submit" class="scan-btn" id="scanBtn">
+            <span id="btnText">Scan URL</span>
+          </button>
+        </form>
+
+        <div class="quick-links">
+          <span>Suggestions:</span>
+          <a href="#" onclick="fillSample('http://phishing-test-site.xyz')">phishing-test-site.xyz</a>
+          <a href="#" onclick="fillSample('https://google.com')">google.com</a>
+        </div>
+
+        <!-- Terminal Console (Active Scanning State) -->
+        <div class="scanning-console" id="scanningConsole">
+          <div class="console-header">
+            <div class="dots">
+              <div class="dot dot-r"></div>
+              <div class="dot dot-y"></div>
+              <div class="dot dot-g"></div>
+            </div>
+            <div class="console-title">Verification Terminal v2.0</div>
+          </div>
+          <div id="consoleLogs">
+            <!-- Simulated logs injected via JS -->
+          </div>
+        </div>
+
+        <!-- Results Display Panel -->
+        <div class="result-wrapper" id="urlResult">
+          <!-- Rendered dynamically by JS -->
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function fillSample(url) {
+  document.getElementById('urlInp').value = url;
+  document.getElementById('urlForm').dispatchEvent(new Event('submit'));
+}
+
+document.getElementById('urlForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const urlInp = document.getElementById('urlInp');
+  const url = urlInp.value.trim();
+  const btn = document.getElementById('scanBtn');
+  const btnText = document.getElementById('btnText');
+  const consoleEl = document.getElementById('scanningConsole');
+  const logsEl = document.getElementById('consoleLogs');
+  const resEl = document.getElementById('urlResult');
+
+  // Reset display
+  btn.disabled = true;
+  btnText.textContent = 'Analyzing...';
+  resEl.style.display = 'none';
+  consoleEl.style.display = 'block';
+  logsEl.innerHTML = '';
+
+  // Helper to add terminal lines with custom delay
+  const addLog = (text, type = '', delay = 350) => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const line = document.createElement('div');
+        line.className = `terminal-line ${type}`;
+        
+        let prefix = '[INFO]';
+        if (type === 'active') prefix = '<span class="terminal-spinner"></span>';
+        if (type === 'success') prefix = '[✓]';
+        if (type === 'info') prefix = '[SYS]';
+        
+        line.innerHTML = `<span style="opacity:0.5; margin-right:8px;">${prefix}</span> ${text}`;
+        
+        // Remove previous active spinners
+        const spinners = logsEl.querySelectorAll('.terminal-spinner');
+        spinners.forEach(s => s.parentNode.innerHTML = `<span style="opacity:0.5; margin-right:8px;">[SYS]</span> ${s.parentNode.textContent.replace('[SYS]', '').trim()}`);
+
+        logsEl.appendChild(line);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+        resolve();
+      }, delay);
+    });
+  };
+
+  try {
+    // 1. Start simulation log sequence (makes the page feel alive and high-tech)
+    await addLog('Initializing multi-layer security parser...', 'info', 0);
+    await addLog(`Parsing target structure: ${url.substring(0, 45)}${url.length > 45 ? '...' : ''}`, 'info', 250);
+    await addLog('Layer 1: Querying Google Safe Browsing API databases...', 'active', 400);
+
+    // Call actual scan API
+    const scanPromise = fetch('/tools/api/url-scan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+      },
+      body: JSON.stringify({ url })
+    });
+
+    const [response] = await Promise.all([
+      scanPromise,
+      new Promise(r => setTimeout(r, 1200)) // Ensure logs show for at least 1.2s for visual pacing
+    ]);
+
+    if (!response.ok) throw new Error('API failed');
+    const data = await response.json();
+
+    await addLog('Google Safe Browsing validation complete.', 'success', 200);
+    await addLog('Layer 2: Extracting 50 URL structural features (entropy, length, TLD weight)...', 'active', 300);
+    await new Promise(r => setTimeout(r, 600));
+
+    await addLog('Layer 3: Running local XGBoost Machine Learning prediction...', 'active', 300);
+    await new Promise(r => setTimeout(r, 600));
+    await addLog('Model classification finalized. Computing heuristic threat score...', 'success', 200);
+
+    // Render results based on response data
+    const safe = data.risk_level === 'Safe';
+    const warn = data.risk_level === 'Suspicious';
+    
+    let statusClass = 'status-safe';
+    let statusText = 'SAFE';
+    let icon = '✓';
+
+    if (warn) {
+      statusClass = 'status-warn';
+      statusText = 'SUSPICIOUS';
+      icon = '⚠';
+    } else if (data.risk_level === 'Dangerous') {
+      statusClass = 'status-danger';
+      statusText = 'DANGEROUS';
+      icon = '☠';
+    }
+
+    // SVG dashoffset calculation: circle circumference is ~440 (2 * pi * 70)
+    const strokeDashoffset = 440 - (440 * data.threat_score) / 100;
+
+    resEl.innerHTML = `
+      <div class="result-grid">
+        <!-- Circular Threat Gauge Column -->
+        <div class="gauge-panel">
+          <div class="gauge-circle">
+            <svg>
+              <circle class="gauge-bg" cx="75" cy="75" r="70" />
+              <circle class="gauge-fill ${statusClass}-stroke" cx="75" cy="75" r="70" 
+                      style="stroke-dashoffset: ${strokeDashoffset};" />
+            </svg>
+            <div style="text-align: center; z-index: 2;">
+              <span class="score-val ${statusClass}-text">${data.threat_score}</span>
+              <div class="score-lbl">Risk Score</div>
+            </div>
+          </div>
+          <div class="verdict-badge ${statusClass}-bg">
+            <span style="font-size:1.1rem; line-height:1;">${icon}</span>
+            <span>${statusText}</span>
+          </div>
+        </div>
+
+        <!-- Details and Checklist Column -->
+        <div class="details-panel">
+          
+          <!-- Key Checks -->
+          <div class="info-strip">
+            <div class="info-strip-title">Structural Verifications</div>
+            <div class="checks-grid">
+              ${Object.entries(data.checks || {}).map(([key, val]) => {
+                const displayName = key.replace(/_/g, ' ');
+                return `
+                  <div class="check-item">
+                    <span class="check-name">${displayName}</span>
+                    <span class="check-status" style="color: ${val ? 'var(--status-safe)' : 'var(--status-danger)'};">
+                      <span style="font-size: 1.1rem;">${val ? '✓' : '✗'}</span>
+                      <span>${val ? 'Clean' : 'Flagged'}</span>
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Flagged Indicators -->
+          ${data.flags && data.flags.length > 0 ? `
+            <div class="info-strip">
+              <div class="info-strip-title" style="color: var(--status-danger);">Threat Indicator Flags</div>
+              <div class="flags-list">
+                ${data.flags.map(flag => `
+                  <div class="flag-item">
+                    <span style="font-size: 1.2rem; line-height: 1;">⚠</span>
+                    <span>${flag}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : `
+            <div class="info-strip" style="background: rgba(16, 185, 129, 0.02); border-color: rgba(16, 185, 129, 0.15);">
+              <div class="info-strip-title" style="color: var(--status-safe);">Threat Indicator Flags</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                <span style="color: var(--status-safe); font-size: 1.1rem;">✓</span>
+                No malicious flags or typosquatting patterns detected for this address.
+              </div>
+            </div>
+          `}
+
+        </div>
+      </div>
+    `;
+
+    // Hide console loader and display dashboard results
+    consoleEl.style.display = 'none';
+    resEl.style.display = 'block';
+
+  } catch(err) {
+    consoleEl.style.display = 'none';
+    alert('Analysis failed. Make sure your local server is running and try again.');
+  } finally {
+    btn.disabled = false;
+    btnText.textContent = 'Scan URL';
+  }
+});
+</script>
+{% endblock %}

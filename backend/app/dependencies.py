@@ -69,6 +69,14 @@ def require_admin(request: Request, db: Session = Depends(get_db)) -> User:
     return user
 
 
+def require_pro(request: Request, db: Session = Depends(get_db)) -> User:
+    """Raises 403 if user is not authenticated or not a Pro user."""
+    user = get_current_user(request, db)
+    if not user or not user.is_pro:
+        raise HTTPException(status_code=403, detail="Pro Plan Required")
+    return user
+
+
 # ──────────────────────────────────────────────────────────────
 # CSRF VALIDATION DEPENDENCY
 # ──────────────────────────────────────────────────────────────

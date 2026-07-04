@@ -21,10 +21,10 @@
   }
   
   .status-card {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255, 0.6);
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
     padding: 48px;
@@ -50,6 +50,7 @@
     align-items: center; 
     justify-content: center; 
     flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(16,185,129,0.25);
   }
 
   .status-item {
@@ -145,14 +146,14 @@
         </div>
         <div class="status-indicator indicator-safe">
           <span class="indicator-dot"></span>
-          <span style="color:var(--text)">Operational</span>
+          <span style="color:var(--text-muted)">Operational</span>
         </div>
       </div>
       {% endfor %}
     </div>
 
     <div style="margin-top:48px; padding-top:32px; border-top:1px solid var(--border); text-align:center; font-size:0.875rem; color:var(--text-dim); font-weight:600;">
-      <p style="display:flex; align-items:center; justify-content:center; gap:8px;">
+      <p style="display:flex; align-items:center; justify-content:center; gap:8px; margin:0;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         Checked a few seconds ago · Systems verify automatically every 60 seconds
       </p>

@@ -273,3 +273,24 @@ def export_scans_csv(request: Request, db: Session = Depends(get_db)):
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=blockbord_scans.csv"},
     )
+
+
+# ──────────────────────────────────────────────────────────────
+# API: EXTENSION STATUS FOR PREMIUM FLOWS
+# ──────────────────────────────────────────────────────────────
+@router.get("/api/ext/status")
+def get_extension_status(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return {"logged_in": False, "username": None, "plan": "free", "is_pro": False, "today_count": 0, "limit": 10}
+    plan = get_user_plan(user)
+    limit = get_plan_limit(plan)
+    today_count = get_today_scan_count(db, user.id)
+    return {
+        "logged_in": True,
+        "username": user.username,
+        "plan": plan,
+        "is_pro": user.is_pro,
+        "today_count": today_count,
+        "limit": limit if limit is not None else -1
+    }

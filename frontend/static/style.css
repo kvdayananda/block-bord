@@ -1,6 +1,6 @@
 /* ============================================================
-   BLOCK BORD AI — Modern SaaS Design System v4.0
-   Light Mode Only · No Dark Mode
+   BLOCK BORD AI — Cyber Dark Design System v5.0
+   Cyber Neon · Glassmorphism · Dark Mode · Premium SaaS
    ============================================================ */
 
 /* ── Google Fonts ── */
@@ -8,40 +8,40 @@
 
 /* ── Design Tokens ── */
 :root {
-  /* Palette */
-  --bg:            #ffffff;
-  --bg-alt:        #f8fafc;
-  --bg-deep:       #f1f5f9;
+  /* Palette - Modern Cyber Dark */
+  --bg:            #060814;
+  --bg-alt:        #0c0f24;
+  --bg-deep:       #03040a;
 
-  --text:          #0f172a;
-  --text-muted:    #475569;
-  --text-dim:      #94a3b8;
+  --text:          #f8fafc;
+  --text-muted:    #94a3b8;
+  --text-dim:      #64748b;
 
-  --surface:       #ffffff;
-  --surface-alt:   #f8fafc;
-  --surface-raised:#ffffff;
+  --surface:       rgba(15, 23, 42, 0.55);
+  --surface-alt:   rgba(30, 41, 59, 0.35);
+  --surface-raised:rgba(30, 41, 59, 0.65);
 
-  --border:        rgba(15, 23, 42, 0.08);
-  --border-bright: rgba(15, 23, 42, 0.16);
+  --border:        rgba(99, 102, 241, 0.16);
+  --border-bright: rgba(139, 92, 246, 0.35);
 
-  /* Brand */
+  /* Brand - Cyber Indigo to Pink */
   --primary:        #6366f1;
   --primary-dark:   #4f46e5;
   --primary-light:  #a5b4fc;
-  --primary-hover:  #4f46e5;
-  --primary-glow:   rgba(99, 102, 241, 0.20);
-  --primary-grad:   linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-  --primary-soft:   rgba(99, 102, 241, 0.08);
+  --primary-hover:  #818cf8;
+  --primary-glow:   rgba(99, 102, 241, 0.35);
+  --primary-grad:   linear-gradient(135deg, #6366f1 0%, #d946ef 100%);
+  --primary-soft:   rgba(99, 102, 241, 0.12);
 
-  /* Status */
-  --status-safe:    #059669;
-  --status-safe-bg: rgba(5, 150, 105, 0.08);
-  --status-warn:    #d97706;
-  --status-warn-bg: rgba(217, 119, 6, 0.08);
-  --status-danger:  #dc2626;
-  --status-danger-bg: rgba(220, 38, 38, 0.08);
-  --status-info:    #2563eb;
-  --status-info-bg: rgba(37, 99, 235, 0.08);
+  /* Status - Glowing Cyber Alerts */
+  --status-safe:    #10b981;
+  --status-safe-bg: rgba(16, 185, 129, 0.15);
+  --status-warn:    #f59e0b;
+  --status-warn-bg: rgba(245, 158, 11, 0.15);
+  --status-danger:  #ef4444;
+  --status-danger-bg: rgba(239, 68, 68, 0.15);
+  --status-info:    #3b82f6;
+  --status-info-bg: rgba(59, 130, 246, 0.15);
 
   /* Typography */
   --font-sans:    'Inter', system-ui, -apple-system, sans-serif;
@@ -63,21 +63,21 @@
   --radius-lg:   24px;
   --radius-pill: 9999px;
 
-  /* Shadows */
-  --shadow-xs: 0 1px 2px rgba(15,23,42,0.05);
-  --shadow-sm: 0 2px 8px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
-  --shadow:    0 4px 16px rgba(15,23,42,0.08), 0 2px 4px rgba(15,23,42,0.04);
-  --shadow-lg: 0 12px 40px rgba(15,23,42,0.12), 0 4px 8px rgba(15,23,42,0.06);
-  --shadow-xl: 0 24px 64px rgba(15,23,42,0.14), 0 8px 16px rgba(15,23,42,0.08);
-  --shadow-primary: 0 8px 24px rgba(99,102,241,0.28);
+  /* Shadows - Dark Glowing Ambient */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-sm: 0 4px 12px rgba(0,0,0,0.5);
+  --shadow:    0 8px 32px rgba(0,0,0,0.6);
+  --shadow-lg: 0 16px 48px rgba(0,0,0,0.7);
+  --shadow-xl: 0 24px 64px rgba(0,0,0,0.8);
+  --shadow-primary: 0 8px 24px rgba(99,102,241,0.35);
 
   /* Motion */
   --ease:       cubic-bezier(0.4, 0, 0.2, 1);
   --ease-spring:cubic-bezier(0.34, 1.56, 0.64, 1);
-  --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Misc */
-  --glass-blur: blur(12px);
+  --glass-blur: blur(16px);
   --navbar-h:   68px;
   --sidebar-w:  260px;
 }
@@ -206,6 +206,8 @@ h1, h2, h3, h4, h5 {
 .card,
 .bb-card {
   background: var(--surface);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 32px;
@@ -217,8 +219,8 @@ h1, h2, h3, h4, h5 {
 .card:hover,
 .bb-card:hover {
   border-color: var(--border-bright);
-  box-shadow: var(--shadow);
-  transform: translateY(-2px);
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.2);
+  transform: translateY(-4px);
 }
 
 /* ── Badges / Pills ── */
@@ -270,8 +272,8 @@ h1, h2, h3, h4, h5 {
 .form-textarea:focus,
 .form-select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
-  background: #fff;
+  box-shadow: 0 0 0 3px var(--primary-soft), 0 0 16px rgba(99,102,241,0.15);
+  background: rgba(15,23,42,0.8);
 }
 
 .form-input::placeholder,
@@ -330,8 +332,8 @@ h1, h2, h3, h4, h5 {
 .input-group textarea:focus,
 .input-group select:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
-  background: #fff;
+  box-shadow: 0 0 0 3px var(--primary-soft), 0 0 16px rgba(99,102,241,0.15);
+  background: rgba(15,23,42,0.8);
 }
 
 /* ============================================================
@@ -341,7 +343,7 @@ h1, h2, h3, h4, h5 {
   position: sticky;
   top: 0;
   height: var(--navbar-h);
-  background: rgba(255,255,255,0.92);
+  background: var(--surface);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--border);
@@ -426,7 +428,7 @@ h1, h2, h3, h4, h5 {
   .main-navbar {
     padding: 0 16px;
     height: 64px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--surface);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
@@ -436,7 +438,7 @@ h1, h2, h3, h4, h5 {
     top: 76px;
     left: 12px;
     right: 12px;
-    background: #fff;
+    background: var(--bg-alt);
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     flex-direction: column;
@@ -622,7 +624,7 @@ h1, h2, h3, h4, h5 {
 
 /* ── Hero ── */
 .bb-hero {
-  background: linear-gradient(160deg, #f8faff 0%, #eef2ff 60%, #f3f0ff 100%);
+  background: linear-gradient(160deg, #060814 0%, #0c0f24 60%, #120c2b 100%);
   padding: 120px 0 80px;
   position: relative;
   overflow: hidden;
@@ -1004,7 +1006,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .auth-form-panel {
-  background: #fff;
+  background: var(--bg);
   padding: 60px 56px;
   display: flex;
   flex-direction: column;
@@ -1149,9 +1151,9 @@ h1, h2, h3, h4, h5 {
 }
 
 .bb-plan-pro {
-  background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 100%);
+  background: linear-gradient(160deg, rgba(99,102,241,0.12) 0%, rgba(139,92,246,0.18) 100%);
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft), var(--shadow-lg);
+  box-shadow: 0 0 0 3px var(--primary-soft), 0 0 40px rgba(99,102,241,0.2);
   transform: scale(1.03);
   position: relative;
 }
@@ -1290,7 +1292,9 @@ h1, h2, h3, h4, h5 {
   height: 100vh;
   position: sticky;
   top: 0;
-  background: #fff;
+  background: var(--bg-alt);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
@@ -1468,7 +1472,7 @@ h1, h2, h3, h4, h5 {
   width: 100%;
   min-height: 200px;
   padding: 20px 24px;
-  background: #fff;
+  background: var(--surface-alt);
   border: none;
   outline: none;
   resize: vertical;
@@ -1744,12 +1748,12 @@ h1, h2, h3, h4, h5 {
   right: 0;
   width: 380px;
   height: 520px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(12,15,36,0.97);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(99,102,241,0.25);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(99,102,241,0.15);
   display: none;
   flex-direction: column;
   overflow: hidden;
@@ -1800,7 +1804,7 @@ h1, h2, h3, h4, h5 {
 }
 
 .bot-msg { 
-  background: #fff; 
+  background: var(--surface-alt); 
   border: 1px solid var(--border); 
   color: var(--text); 
   border-radius: 16px 16px 16px 4px;
@@ -1824,7 +1828,7 @@ h1, h2, h3, h4, h5 {
 
 .ai-chat-input-area {
   padding: 14px 16px;
-  background: #fff;
+  background: var(--bg-alt);
   border-top: 1px solid var(--border);
   display: flex;
   gap: 8px;
@@ -1863,9 +1867,10 @@ h1, h2, h3, h4, h5 {
    MISC CONTENT PAGES (about, contact, privacy, terms)
    ============================================================ */
 .content-page-hero {
-  background: linear-gradient(160deg, #f8faff 0%, #eef2ff 100%);
+  background: linear-gradient(160deg, var(--bg) 0%, var(--bg-alt) 100%);
   padding: 80px 0 60px;
   text-align: center;
+  border-bottom: 1px solid var(--border);
 }
 
 .content-page-body {

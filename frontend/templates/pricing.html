@@ -6,7 +6,7 @@
 <style>
   .bb-price-page { background: var(--bg-alt); min-height: calc(100vh - 68px); }
   .price-hero {
-    background: linear-gradient(160deg, #f8faff 0%, #eef2ff 100%);
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg-alt) 100%);
     padding: 80px 0 64px;
     text-align: center;
     border-bottom: 1px solid var(--border);
@@ -14,7 +14,7 @@
   .price-hero h1 { font-size: clamp(1.75rem, 4vw, 2.5rem); margin-bottom: 12px; }
   .price-hero p  { font-size: 1.0625rem; color: var(--text-muted); }
 
-  .plans-section { padding: 64px 0; }
+  .plans-section { padding: 64px 0; background: var(--bg); }
 
   .bb-price-grid4 {
     display: grid;
@@ -24,7 +24,8 @@
   }
 
   .bb-plan {
-    background: #fff;
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
     border: 1.5px solid var(--border);
     border-radius: var(--radius-lg);
     padding: 32px 28px;
@@ -39,7 +40,7 @@
   .bb-plan-pro {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-soft), var(--shadow-lg);
-    background: linear-gradient(160deg, #f5f3ff, #ede9fe);
+    background: linear-gradient(160deg, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0.18) 100%);
   }
   .bb-plan-pro:hover { transform: translateY(-6px); }
 
@@ -256,7 +257,7 @@
 </section>
 
 <!-- FAQ -->
-<section style="background:#fff; border-top:1px solid var(--border); padding: 80px 0;">
+<section style="background:var(--bg-alt); border-top:1px solid var(--border); padding: 80px 0;">
   <div class="faq-wrap">
     <div class="faq-title">
       <span class="bb-overline">Got questions?</span>

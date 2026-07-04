@@ -23,7 +23,7 @@ from backend.app.middleware.csrf import CSRFTokenMiddleware
 from backend.app.database.connection import engine, Base
 from backend.app.utils.limiter import limiter
 from backend.app.routers import (
-    auth, public, dashboard, scan, admin, payments, tools
+    auth, public, dashboard, scan, admin, payments, tools, security_tools, ai_tools
 )
 from backend.app import models # Ensure models are registered for Base.metadata.create_all
 
@@ -159,3 +159,5 @@ app.include_router(scan.router)
 app.include_router(admin.router)
 app.include_router(payments.router)
 app.include_router(tools.router)
+app.include_router(security_tools.router)
+app.include_router(ai_tools.router)

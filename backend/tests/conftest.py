@@ -45,6 +45,11 @@ def client(db):
             pass
     
     app.dependency_overrides[get_db] = override_get_db
+    
+    # Disable rate limiting for testing
+    if hasattr(app.state, "limiter"):
+        app.state.limiter.enabled = False
+        
     with TestClient(app) as c:
         yield c
     app.dependency_overrides.clear()

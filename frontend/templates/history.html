@@ -4,7 +4,7 @@
 {% block content %}
 <style>
   .history-table-container { 
-    background: #fff; 
+    background: var(--surface); 
     border-radius: var(--radius);
     overflow-x: auto;
   }
@@ -50,7 +50,7 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
           {{ scans|length }} Records
         </div>
-        <a href="/app" class="btn btn-outline" style="padding:8px 18px;font-size:0.8125rem;">New Scan</a>
+        <a href="/app" class="btn btn-primary btn-sm">New Scan</a>
       </div>
     </div>
 
@@ -58,9 +58,9 @@
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
       <div style="position:relative;flex:1;min-width:220px;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="historySearch" placeholder="Search history…" oninput="filterHistory()" style="width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--border-bright);border-radius:var(--radius-sm);background:#fff;font-size:0.875rem;outline:none;transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border-bright)'">
+        <input type="text" id="historySearch" placeholder="Search history…" oninput="filterHistory()" style="width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:0.875rem;outline:none;transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
       </div>
-      <select id="riskFilter" onchange="filterHistory()" style="padding:10px 14px;border:1.5px solid var(--border-bright);border-radius:var(--radius-sm);background:#fff;font-size:0.875rem;color:var(--text);outline:none;cursor:pointer;">
+      <select id="riskFilter" onchange="filterHistory()" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:0.875rem;color:var(--text);outline:none;cursor:pointer;transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
         <option value="">All risk levels</option>
         <option value="High">High risk</option>
         <option value="Suspicious">Suspicious</option>
@@ -104,7 +104,7 @@
                   {{ scan.risk_score|int }}%
                 </span>
               </td>
-              <td style="color:var(--text-muted); font-size:0.8125rem; white-space:nowrap;">
+              <td style="color:var(--text-muted); font-size:0.8125rem; white-space:nowrap; font-family:var(--font-mono);">
                 {{ scan.created_at.strftime('%b %d, %H:%M') }}
               </td>
               <td style="padding-right:24px;">
@@ -149,6 +149,60 @@ function filterHistory() {
     const matchR = !risk || row.dataset.risk === risk;
     row.style.display = matchQ && matchR ? '' : 'none';
   });
+}
+
+function viewScan(id) {
+  const detailDiv = document.getElementById('scanDetail');
+  const contentDiv = document.getElementById('scanDetailContent');
+  
+  contentDiv.innerHTML = '<div style="color:var(--text-muted);">Loading forensic metrics...</div>';
+  detailDiv.classList.remove('hidden');
+  detailDiv.scrollIntoView({ behavior: 'smooth' });
+
+  fetch(`/api/scan/${id}`)
+    .then(r => {
+      if (!r.ok) throw new Error("Forensic payload not loaded.");
+      return r.json();
+    })
+    .then(data => {
+      let reasonsHTML = "";
+      if (data.reasons && data.reasons.length > 0) {
+        reasonsHTML = data.reasons.map(r => `<div style="padding: 8px 12px; background:rgba(99,102,241,0.05); margin-bottom: 6px; border-radius: 6px; border-left: 3px solid var(--primary);">${r}</div>`).join('');
+      } else {
+        reasonsHTML = `<div style="color:var(--text-dim);">No heuristic flags tripped.</div>`;
+      }
+      
+      contentDiv.innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 16px;">
+          <div>
+            <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Threat Level</div>
+            <div style="font-size:1.2rem; font-weight:800; color:${data.risk_level === 'High' ? 'var(--status-danger)' : (data.risk_level === 'Suspicious' ? 'var(--status-warn)' : 'var(--status-safe)')}">${data.risk_level} (${data.risk_score}%)</div>
+          </div>
+          <div>
+            <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Category</div>
+            <div style="font-weight:700; color:var(--text);">${data.category || 'General'}</div>
+          </div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Scanned Content</div>
+          <div style="background:var(--bg-alt); padding: 12px; border-radius:6px; border: 1px solid var(--border); word-break: break-all;">${data.content}</div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Detected Anomalies</div>
+          <div>${reasonsHTML}</div>
+        </div>
+        <div>
+          <a href="/scan/${data.id}" class="btn btn-primary btn-sm">Open Deep Insights Page →</a>
+        </div>
+      `;
+    })
+    .catch(err => {
+      contentDiv.innerHTML = `<div style="color:var(--status-danger);">${err.message}</div>`;
+    });
+}
+
+function closeScanDetail() {
+  document.getElementById('scanDetail').classList.add('hidden');
 }
 </script>
 {% endblock %}

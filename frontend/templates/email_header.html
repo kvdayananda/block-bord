@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+{% block title %}Email Header Analyser — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+.eh-container { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+
+.eh-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+}
+.eh-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #f59e0b, #ef4444, #f59e0b);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+}
+@keyframes gradShift { 100% { background-position: 200% 0; } }
+
+.eh-card-top { text-align: center; margin-bottom: 36px; }
+.eh-icon-wrap {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  background: rgba(245,158,11,0.12);
+  border: 1px solid rgba(245,158,11,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 2rem;
+  box-shadow: 0 0 24px rgba(245,158,11,0.2);
+}
+.eh-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px;
+  background: linear-gradient(135deg, #f8fafc 30%, #fde68a 70%, #f59e0b 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.eh-subtitle { color: var(--text-muted); max-width: 480px; margin: 0 auto; font-size: 0.93rem; line-height: 1.7; }
+
+/* Textarea */
+.eh-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(6,8,20,0.7);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text);
+  resize: vertical;
+  min-height: 180px;
+  transition: var(--transition);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+  line-height: 1.6;
+}
+.eh-textarea:focus {
+  outline: none;
+  border-color: rgba(245,158,11,0.4);
+  box-shadow: 0 0 18px rgba(245,158,11,0.15), inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.eh-analyse-btn {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  border: none; color: #fff;
+  font-weight: 800; font-size: 0.95rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border-radius: var(--radius); padding: 14px 40px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(245,158,11,0.35);
+  transition: var(--transition);
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.eh-analyse-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+.eh-analyse-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.eh-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.eh-result { margin-top: 40px; display: none; animation: slideUp 0.35s ease; }
+@keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+/* Auth tiles */
+.eh-auth-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+@media (max-width: 600px) { .eh-auth-grid { grid-template-columns: 1fr; } }
+
+.eh-auth-tile {
+  border-radius: var(--radius);
+  padding: 24px;
+  text-align: center;
+}
+.eh-auth-icon { font-size: 2rem; margin-bottom: 8px; }
+.eh-auth-name { font-weight: 900; font-size: 1rem; margin-bottom: 4px; }
+.eh-auth-status { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Hop path */
+.eh-hops-panel {
+  background: rgba(6,8,20,0.7);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.eh-hops-header { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 14px; }
+.eh-hop-row {
+  display: flex;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  align-items: flex-start;
+}
+.eh-hop-row:last-child { border-bottom: none; }
+.eh-hop-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(99,102,241,0.15);
+  color: var(--primary-light);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.eh-hop-text { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    <div class="eh-container">
+
+      <div class="app-page-header">
+        <div class="app-page-header-left">
+          <span class="app-page-tag">ANALYSIS TOOL</span>
+          <h1 class="app-page-title">Email Header Analyser</h1>
+          <p class="app-page-subtitle">Trace the origin of any email, detect spoofing attempts, and verify SPF, DKIM, and DMARC authentication.</p>
+        </div>
+      </div>
+
+      <div class="eh-card">
+        <div class="eh-card-top">
+          <div class="eh-icon-wrap">📧</div>
+          <h2 class="eh-title">Decode Email Headers</h2>
+          <p class="eh-subtitle">Copy the full email headers from your email client and paste them below for deep forensic analysis.</p>
+        </div>
+
+        <form id="headerForm">
+          <textarea id="headerInp" class="eh-textarea"
+            placeholder="Paste full email headers here (From:, Received:, DKIM-Signature:, etc.)..." required></textarea>
+          <div style="display:flex;justify-content:center;margin-top:20px;">
+            <button type="submit" class="eh-analyse-btn" id="analyseBtn">
+              <span id="aeBtnText">Analyse Headers</span>
+            </button>
+          </div>
+        </form>
+
+        <div id="headerResult" class="eh-result"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+document.getElementById('headerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const headers = document.getElementById('headerInp').value;
+  const btn = document.getElementById('analyseBtn');
+  const res = document.getElementById('headerResult');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="eh-spinner"></span> Analysing...';
+  res.style.display = 'none';
+
+  try {
+    const r = await fetch('/tools/api/email-header', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content },
+      body: JSON.stringify({ headers })
+    });
+    const d = await r.json();
+
+    const authChecks = [
+      { name: 'SPF', val: d.spf },
+      { name: 'DKIM', val: d.dkim },
+      { name: 'DMARC', val: d.dmarc },
+    ];
+
+    const hopsHtml = (d.hops || []).length > 0
+      ? d.hops.map((hop, i) => `
+          <div class="eh-hop-row">
+            <div class="eh-hop-num">${i + 1}</div>
+            <div class="eh-hop-text">${hop}</div>
+          </div>
+        `).join('')
+      : '<div class="eh-hop-text" style="color:var(--text-dim);">No hop data available in provided headers.</div>';
+
+    res.innerHTML = `
+      <div class="eh-auth-grid">
+        ${authChecks.map(({ name, val }) => {
+          const pass = val === 'pass';
+          return `
+            <div class="eh-auth-tile" style="background:${pass ? 'rgba(16,185,129,0.07)' : 'rgba(239,68,68,0.07)'};border:1.5px solid ${pass ? 'rgba(16,185,129,0.22)' : 'rgba(239,68,68,0.22)'};">
+              <div class="eh-auth-icon">${pass ? '✅' : '❌'}</div>
+              <div class="eh-auth-name">${name}</div>
+              <div class="eh-auth-status" style="color:${pass ? 'var(--status-safe)' : 'var(--status-danger)'};">${val || 'fail'}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div class="eh-hops-panel">
+        <div class="eh-hops-header">📡 Email Hop Path (Routing)</div>
+        ${hopsHtml}
+      </div>
+    `;
+    res.style.display = 'block';
+  } catch(err) {
+    alert('Analysis failed. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<span id="aeBtnText">Analyse Headers</span>';
+  }
+});
+</script>
+{% endblock %}

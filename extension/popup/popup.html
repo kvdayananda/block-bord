@@ -52,6 +52,12 @@
     .result-level { font-size: 0.85rem; font-weight: 700; margin-top: 4px; }
     .result-domain { font-size: 0.75rem; color: var(--muted); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; opacity: 0.8; }
     .result-category { font-size: 0.7rem; margin-top: 8px; padding: 4px 10px; border-radius: 20px; display: inline-block; background: var(--bg-alt); color: var(--text); font-weight: 600; border: 1px solid var(--border); }
+    
+    .status-icon { position: absolute; top: 18px; right: 18px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; }
+    .status-icon.safe { color: var(--safe); background: rgba(16, 185, 129, 0.1); }
+    .status-icon.suspicious { color: var(--warn); background: rgba(245, 158, 11, 0.1); }
+    .status-icon.high { color: var(--danger); background: rgba(239, 68, 68, 0.1); }
+    .status-icon.scanning { color: var(--primary); background: rgba(99, 102, 241, 0.1); }
 
     /* Unified Button Pattern */
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 0.85rem; padding: 10px 16px; border-radius: var(--radius-sm); border: none; cursor: pointer; transition: all 0.2s; font-family: inherit; }
@@ -100,7 +106,10 @@
     <header class="bb-header">
       <div class="bb-logo">
         <img src="../icons/icon48.png" alt="Logo" style="width: 20px; height: 20px;">
-        <a href="/" class="logo-link" style="text-decoration: none; color: inherit;">Block <span class="bb-logo-blue">Bord</span> AI</a>
+        <span style="text-decoration: none; color: inherit; display: flex; align-items: center;">
+          Block <span class="bb-logo-blue" style="margin-left: 4px; color: var(--primary);">Bord</span>
+          <span id="user-tier-badge" style="display:none; font-size: 0.58rem; padding: 1px 5px; border-radius: 4px; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; margin-left: 6px;">FREE</span>
+        </span>
       </div>
       <div class="badge-status offline" id="status-badge">● Offline</div>
     </header>
@@ -112,6 +121,9 @@
       <div class="result-level" id="result-level">Scanning…</div>
       <div class="result-domain" id="result-domain">Loading…</div>
       <div class="result-category" id="result-category"></div>
+      <div id="status-icon" class="status-icon scanning">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+      </div>
     </div>
 
     <!-- Scan Details Toggle -->

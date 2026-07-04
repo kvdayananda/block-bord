@@ -27,7 +27,7 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("evaluate_model")
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 MODEL_PATH   = os.path.join(PROJECT_ROOT, "backend", "ml", "models", "xgboost_phishing_v1.joblib")
 CSV_PATH     = os.path.join(PROJECT_ROOT, "ml_data", "PhiUSIIL_Phishing_URL_Dataset.csv")
 REPORT_DIR   = os.path.join(PROJECT_ROOT, "backend", "ml", "reports")

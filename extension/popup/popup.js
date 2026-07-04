@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const detailsToggle  = document.getElementById('details-toggle');
     const scanDetails    = document.getElementById('scan-details');
     const detailsList    = document.getElementById('details-list');
+    const statusIcon     = document.getElementById('status-icon');
 
     let currentUrl = "";
 
@@ -52,8 +53,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (r.ok) {
             statusBadge.className = 'badge-status online';
             statusBadge.textContent = '● Online';
+            updateExtStatus();
         } else throw new Error();
-    } catch {
+    } catch (err) {
         statusBadge.className = 'badge-status offline';
         statusBadge.textContent = '● Offline';
         btnScan.disabled = true;
@@ -189,6 +191,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultCategory.textContent = category || "";
         resultCategory.style.display = category ? "inline-block" : "none";
         
+        // Update Icon
+        statusIcon.className = `status-icon ${validCls}`;
+        if (validCls === 'safe') {
+            statusIcon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 12 14 15 8"></polyline></svg>';
+        } else if (validCls === 'suspicious') {
+            statusIcon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+        } else if (validCls === 'high') {
+            statusIcon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+        } else {
+            statusIcon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
+        }
+        
         // Make "Upgrade your plan" act like a button
         if (category && category.includes("Upgrade")) {
             resultCategory.style.cursor = "pointer";
@@ -235,6 +249,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
+    }
+
+    // Retrieve user premium and stats status
+    async function updateExtStatus() {
+        const tierBadge = document.getElementById('user-tier-badge');
+        try {
+            const res = await fetch(`${API_URL}/api/ext/status`, { credentials: 'include' });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.logged_in) {
+                    tierBadge.style.display = 'inline-block';
+                    tierBadge.textContent = data.plan.toUpperCase();
+                    if (data.is_pro) {
+                        tierBadge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                    } else {
+                        tierBadge.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
+                    }
+                    const footerVer = document.querySelector('.bb-footer-ver');
+                    if (footerVer) {
+                        footerVer.textContent = `@${data.username}`;
+                    }
+                } else {
+                    tierBadge.style.display = 'none';
+                }
+            }
+        } catch (e) {
+            console.warn("Could not check extension auth status", e);
+            tierBadge.style.display = 'none';
+        }
     }
 
     // Load stats from local scan history

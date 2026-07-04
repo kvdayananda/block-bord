@@ -1,25 +1,15 @@
 // ===============================
-// THEME (Light / Dark)
+// THEME — Cyber Dark (Permanent)
 // ===============================
 (function initTheme() {
-    const savedTheme = localStorage.getItem('bb-theme');
-    // Default to light (white) theme; user can switch via toggle
-    document.documentElement.setAttribute('data-theme', savedTheme || 'light');
+    // Block Bord AI v5 is Cyber Dark by design.
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('bb-theme', 'dark');
 })();
 
+// Legacy stub — kept for compatibility
 function toggleTheme() {
-    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('bb-theme', newTheme);
-    
-    // Optional: Add a subtle feedback animation if a toggle exists
-    const btn = document.querySelector('.theme-toggle-btn');
-    if (btn) {
-        btn.classList.add('switching');
-        setTimeout(() => btn.classList.remove('switching'), 500);
-    }
+    // No-op: theme is fixed to dark in v5
 }
 
 // ===============================

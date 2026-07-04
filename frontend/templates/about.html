@@ -3,34 +3,42 @@
 {% block title %}About Us — Block Bord AI{% endblock %}
 
 {% block extra_head %}
-<meta name="description" content="Block Bord AI is a leading cyber intelligence platform dedicated to protecting the next billion users from digital threats using real-time ML.">
+<meta name="description"
+  content="Block Bord AI is a leading cyber intelligence platform dedicated to protecting the next billion users from digital threats using real-time ML.">
 <style>
   .about-hero {
     padding: 120px 0 80px;
-    background: linear-gradient(160deg, #f8faff 0%, #f0f4ff 100%);
+    background: linear-gradient(160deg, var(--bg) 0%, var(--bg-alt) 100%);
     border-bottom: 1px solid var(--border);
   }
+
   .about-grid {
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
     gap: 80px;
     align-items: center;
   }
+
   .about-visual {
     position: relative;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 0 50px rgba(99, 102, 241, 0.25);
     transform: perspective(1000px) rotateY(-8deg);
     border: 1px solid var(--border-bright);
   }
-  .about-visual img { width: 100%; display: block; }
-  
+
+  .about-visual img {
+    width: 100%;
+    display: block;
+  }
+
   .mission-box {
     padding: 80px 0;
     text-align: center;
-    background: #fff;
+    background: var(--bg);
   }
+
   .founder-quote {
     max-width: 800px;
     margin: 0 auto;
@@ -40,10 +48,12 @@
     color: var(--text);
     position: relative;
   }
+
   .founder-quote::before {
     content: '"';
     position: absolute;
-    top: -40px; left: 50%;
+    top: -40px;
+    left: 50%;
     transform: translateX(-50%);
     font-size: 5rem;
     color: var(--primary-soft);
@@ -51,8 +61,17 @@
   }
 
   @media (max-width: 900px) {
-    .about-grid { grid-template-columns: 1fr; text-align: center; gap: 48px; }
-    .about-visual { transform: none; max-width: 500px; margin: 0 auto; }
+    .about-grid {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 48px;
+    }
+
+    .about-visual {
+      transform: none;
+      max-width: 500px;
+      margin: 0 auto;
+    }
   }
 </style>
 {% endblock %}
@@ -67,33 +86,46 @@
         Protecting the<br><span>Next Billion</span> Users
       </h1>
       <p class="bb-subtitle" style="text-align:left; margin-left:0; max-width: 540px;">
-        Block Bord AI is the world's most advanced phishing detection platform, powered by real-time heuristics and explainable machine learning. We bridge the gap between complex cyber threats and everyday users.
+        Block Bord AI is the world's most advanced phishing detection platform, powered by real-time heuristics and
+        explainable machine learning. We bridge the gap between complex cyber threats and everyday users.
       </p>
-      
+
       <div style="display:flex; flex-direction:column; gap:24px; margin-top:40px;">
         <div style="display:flex; gap:20px;">
-          <div style="width:48px; height:48px; border-radius:12px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <div
+            style="width:48px; height:48px; border-radius:12px; background:var(--primary-soft); color:var(--primary); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 0 15px rgba(99,102,241,0.2);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
           </div>
           <div>
             <h4 style="margin:0 0 4px; font-weight:700;">Zero-Day Readiness</h4>
-            <p style="margin:0; font-size:0.9rem; color:var(--text-muted); line-height:1.5;">Our AI identifies malicious patterns the second they appear in the wild, no site reports required.</p>
+            <p style="margin:0; font-size:0.9rem; color:var(--text-muted); line-height:1.5;">Our AI identifies malicious
+              patterns the second they appear in the wild, no site reports required.</p>
           </div>
         </div>
         <div style="display:flex; gap:20px;">
-          <div style="width:48px; height:48px; border-radius:12px; background:rgba(139, 92, 246, 0.1); color:rgb(139, 92, 246); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <div
+            style="width:48px; height:48px; border-radius:12px; background:rgba(139, 92, 246, 0.1); color:rgb(139, 92, 246); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 0 15px rgba(139,92,246,0.2);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path
+                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+              <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+              <line x1="12" y1="22.08" x2="12" y2="12" />
+            </svg>
           </div>
           <div>
             <h4 style="margin:0 0 4px; font-weight:700;">Explainable AI</h4>
-            <p style="margin:0; font-size:0.9rem; color:var(--text-muted); line-height:1.5;">We don't just block — we explain why. Transparency is the core of our forensic results.</p>
+            <p style="margin:0; font-size:0.9rem; color:var(--text-muted); line-height:1.5;">We don't just block — we
+              explain why. Transparency is the core of our forensic results.</p>
           </div>
         </div>
       </div>
     </div>
-    
+
     <div class="about-visual">
-       <img src="/static/about_shield_hero.png" alt="Block Bord Security Shield">
+      <img src="/static/about_shield_hero.png" alt="Block Bord Security Shield"
+        onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 400 400\' fill=\'%230c0f24\'><rect width=\'100%\' height=\'100%\'/><path d=\'M200 80 L300 130 L300 240 C300 310 200 360 200 360 C200 360 100 310 100 240 L100 130 Z\' fill=\'none\' stroke=\'%236366f1\' stroke-width=\'8\'/></svg>'">
     </div>
   </div>
 </section>
@@ -102,13 +134,17 @@
 <section class="mission-box">
   <div class="bb-container">
     <div class="founder-quote">
-      "The internet needs a guardian. Block Bord AI is our contribution to a safer, more transparent digital future for everyone."
+      "The internet needs a guardian. Block Bord AI is our contribution to a safer, more transparent digital future for
+      everyone."
     </div>
     <div style="margin-top:40px; display:flex; align-items:center; justify-content:center; gap:16px;">
-      <div style="width:56px; height:56px; border-radius:50%; background:var(--primary-grad); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem;">BB</div>
+      <div
+        style="width:56px; height:56px; border-radius:50%; background:var(--primary-grad); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; box-shadow:0 0 15px rgba(99,102,241,0.4);">
+        BB</div>
       <div style="text-align:left;">
-        <div style="font-weight:700; font-size:1rem;">K V DAYANANDA</div>
-        <div style="font-size:0.8rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em;">Founder, Block Bord AI</div>
+        <div style="font-weight:700; font-size:1rem;">Team Block Bord</div>
+        <div style="font-size:0.8rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.05em;">Founder,
+          Block Bord AI</div>
       </div>
     </div>
   </div>
@@ -124,28 +160,34 @@
     <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px;">
       <div class="bb-card" style="padding:32px;">
         <h3 style="font-size:1.1rem; margin-bottom:12px;">Privacy First</h3>
-        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Your data is your own. We anonymize threat signals and never log personal browsing history.</p>
+        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Your data is your own. We anonymize
+          threat signals and never log personal browsing history.</p>
       </div>
       <div class="bb-card" style="padding:32px;">
         <h3 style="font-size:1.1rem; margin-bottom:12px;">Radical Transparency</h3>
-        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Our detection models are explainable, providing users with the 'why' behind every alert.</p>
+        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Our detection models are explainable,
+          providing users with the 'why' behind every alert.</p>
       </div>
       <div class="bb-card" style="padding:32px;">
         <h3 style="font-size:1.1rem; margin-bottom:12px;">Global Accessibility</h3>
-        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Security shouldn't be a luxury. We provide powerful protection free for the community.</p>
+        <p style="font-size:0.9rem; color:var(--text-muted); line-height:1.6;">Security shouldn't be a luxury. We
+          provide powerful protection free for the community.</p>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ═══════════ CTA ═══════════ -->
-<section class="bb-cta-section">
+<section class="bb-cta-section" style="background:linear-gradient(135deg,#0c0f24,#1e1254,#1a0c2e);">
   <div class="bb-container">
     <h2 class="bb-cta-title" style="color:#fff;">Join the mission</h2>
-    <p class="bb-cta-sub" style="color:rgba(255,255,255,0.8);">Help us secure the next billion users. Start protecting your digital assets today.</p>
+    <p class="bb-cta-sub" style="color:rgba(255,255,255,0.8);">Help us secure the next billion users. Start protecting
+      your digital assets today.</p>
     <div style="display:flex; justify-content:center; gap:16px; margin-top:32px; flex-wrap:wrap;">
       <a href="/register" class="btn-cta-white">Get Started Free</a>
-      <a href="/contact" class="btn" style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2);">Contact Sales</a>
+      <a href="/contact" class="btn"
+        style="background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); backdrop-filter:blur(10px);">Contact
+        Sales</a>
     </div>
   </div>
 </section>

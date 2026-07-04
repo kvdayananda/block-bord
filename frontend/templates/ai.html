@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+
+{% block title %}AI Threat Hub — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .tools-nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border);
+  }
+  .tool-tab-btn {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tool-tab-btn:hover {
+    border-color: var(--primary);
+    color: var(--text);
+  }
+  .tool-tab-btn.active {
+    background: var(--primary-grad);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 0 15px rgba(99,102,241,0.3);
+  }
+  .tool-panel {
+    display: none;
+    animation: fadeIn 0.4s ease-in-out forwards;
+  }
+  .tool-panel.active {
+    display: block;
+  }
+  .result-box {
+    margin-top: 24px;
+    background: rgba(10, 15, 30, 0.6);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: none;
+  }
+  .pro-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .gated-overlay {
+    position: relative;
+  }
+  .gated-blur {
+    filter: blur(5px);
+    pointer-events: none;
+    user-select: none;
+  }
+  .gated-lock-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(6, 8, 20, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 12px;
+    z-index: 10;
+    padding: 40px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+  }
+  .gated-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(245, 158, 11, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+  }
+  .gated-title {
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .gated-desc {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Chat styles */
+  .chat-container {
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.2);
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .chat-msg {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .chat-msg.user {
+    align-self: flex-end;
+    background: var(--primary);
+    color: #fff;
+    border-bottom-right-radius: 2px;
+  }
+  .chat-msg.assistant {
+    align-self: flex-start;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-bottom-left-radius: 2px;
+  }
+  .chat-input-row {
+    display: flex;
+    gap: 10px;
+  }
+  .chat-input-row input {
+    flex-grow: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    color: var(--text);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+
+  <main class="app-main-content">
+    <div class="app-page-header">
+      <div class="app-page-header-left">
+        <span class="app-page-tag">LLM Cognitive Engine</span>
+        <h1 class="app-page-title">AI Threat Hub</h1>
+        <p class="app-page-subtitle">Deep learning models and conversational forensic assistance.</p>
+      </div>
+    </div>
+
+    <!-- Tab navigation -->
+    <div class="tools-nav-tabs">
+      <button class="tool-tab-btn active" onclick="switchTab('scam-detector')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Scam Detector
+      </button>
+      <button class="tool-tab-btn" onclick="switchTab('assistant')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Security Assistant
+      </button>
+      <button class="tool-tab-btn" onclick="switchTab('risk-explainer')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Risk Explainer {% if plan == 'free' %}<span class="pro-badge">Pro</span>{% endif %}
+      </button>
+    </div>
+
+    <!-- 1. SCAM DETECTOR -->
+    <div class="tool-panel active" id="panel-scam-detector">
+      <div class="bb-card">
+        <h3>🚨 Scam & Phishing Heuristic Scan</h3>
+        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Describe or paste a message, URL, SMS text or email query to analyze using LLM reasoning models.</p>
+        <form onsubmit="detectScam(event)">
+          <div class="input-group">
+            <label>Scan Subject Text</label>
+            <textarea id="scam-input" placeholder="Paste the SMS, URL, or email content here..." required style="width: 100%; min-height: 120px; background:var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: inherit; resize: vertical;"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Run LLM Evaluation</button>
+        </form>
+        <div class="result-box" id="result-scam-detector"></div>
+      </div>
+    </div>
+
+    <!-- 2. SECURITY ASSISTANT -->
+    <div class="tool-panel" id="panel-assistant">
+      <div class="bb-card">
+        <h3>🛡️ Interactive Cyber Forensics Chat</h3>
+        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Converse with our dedicated AI agent regarding vulnerabilities, threat indicators, and defensive suggestions.</p>
+        <div class="chat-container" id="chat-container">
+          <div class="chat-msg assistant">
+            Hello! I am your cyber security assistant. You can ask me anything about phishing indicators, network scans, or how to secure your accounts.
+          </div>
+        </div>
+        <form onsubmit="sendMessage(event)">
+          <div class="chat-input-row">
+            <input type="text" id="chat-input" placeholder="Ask a security question..." required autocomplete="off">
+            <button type="submit" class="btn btn-primary" style="padding: 0 24px;">Send</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. RISK EXPLAINER (GATED) -->
+    <div class="tool-panel" id="panel-risk-explainer">
+      <div class="bb-card {% if plan == 'free' %}gated-overlay{% endif %}">
+        {% if plan == 'free' %}
+        <div class="gated-lock-screen">
+          <div class="gated-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="gated-title">Pro Feature Required</div>
+          <div class="gated-desc">Unlock advanced AI breakdown analysis for threat engines. Upgrade now to get risk logs explanation.</div>
+          <a href="/pricing" class="btn btn-primary">Upgrade Plan</a>
+        </div>
+        {% endif %}
+        <div class="{% if plan == 'free' %}gated-blur{% endif %}">
+          <h3>⚡ Cognitive Threat Risk Explainer</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Provide a diagnostic threat structure JSON payload, and get a clear narrative explanation of risk vectors.</p>
+          <form onsubmit="explainRisk(event)">
+            <div class="input-group">
+              <label>Risk Engine JSON Payload</label>
+              <textarea id="risk-payload" placeholder='{"domain": "phish-bank.com", "ssl_valid": false, "abuse_score": 85}' {% if plan != 'free' %}required{% endif %} style="width: 100%; min-height: 120px; background:var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; color: var(--text); font-family: var(--font-mono); font-size: 0.85rem; resize: vertical;"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top:16px;">Deconstruct Risks</button>
+          </form>
+          <div class="result-box" id="result-risk-explainer"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.tool-tab-btn').forEach(btn => btn.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+
+    document.querySelectorAll('.tool-panel').forEach(panel => panel.classList.remove('active'));
+    document.getElementById('panel-' + tabId).classList.add('active');
+  }
+
+  // Conversation history for AI assistant
+  let chatHistory = [];
+
+  async function detectScam(event) {
+    event.preventDefault();
+    const inputField = document.getElementById('scam-input');
+    const resultBox = document.getElementById('result-scam-detector');
+    
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div style="width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;"></div> Scanning content safety with AI...</div>';
+
+    try {
+      const response = await fetch('/ai/api/scam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input_text: inputField.value })
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text() || 'Diagnostic error ' + response.status);
+      }
+
+      const data = await response.json();
+      const scoreColor = data.score >= 50 ? 'var(--status-danger)' : (data.score >= 20 ? 'var(--status-warning)' : 'var(--status-success)');
+      
+      resultBox.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; border-bottom:1px solid var(--border); padding-bottom:12px;">
+          <div>
+            <h4 style="margin:0; font-size:1.1rem; font-weight:800; color:${scoreColor};">${data.verdict}</h4>
+            <span style="font-size:0.75rem; color:var(--text-muted);">AI Evaluation</span>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:1.5rem; font-weight:900; color:${scoreColor};">${data.score}%</div>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Risk Confidence</span>
+          </div>
+        </div>
+        <p style="margin:0; font-size:0.9rem; line-height:1.6; color:var(--text);">${data.reason}</p>
+      `;
+    } catch(err) {
+      resultBox.innerHTML = '<div style="color:var(--status-danger);font-weight:700;">Evaluation failed: ' + err.message + '</div>';
+    }
+  }
+
+  async function sendMessage(event) {
+    event.preventDefault();
+    const inputField = document.getElementById('chat-input');
+    const container = document.getElementById('chat-container');
+    const messageText = inputField.value.trim();
+    if (!messageText) return;
+
+    // User bubble
+    const userBubble = document.createElement('div');
+    userBubble.className = 'chat-msg user';
+    userBubble.textContent = messageText;
+    container.appendChild(userBubble);
+    container.scrollTop = container.scrollHeight;
+
+    inputField.value = '';
+
+    // Typing bubble
+    const typingBubble = document.createElement('div');
+    typingBubble.className = 'chat-msg assistant';
+    typingBubble.innerHTML = '<div style="display:flex;gap:4px;"><span style="animation: bounce 1.2s infinite; font-size:1.2rem;">•</span><span style="animation: bounce 1.2s infinite 0.2s; font-size:1.2rem;">•</span><span style="animation: bounce 1.2s infinite 0.4s; font-size:1.2rem;">•</span></div>';
+    container.appendChild(typingBubble);
+    container.scrollTop = container.scrollHeight;
+
+    try {
+      const response = await fetch('/ai/api/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: messageText, history: chatHistory })
+      });
+
+      if (!response.ok) {
+        throw new Error("Chat connection error " + response.status);
+      }
+
+      const data = await response.json();
+      typingBubble.textContent = data.answer;
+      
+      // Update history
+      chatHistory.push({ role: 'user', content: messageText });
+      chatHistory.push({ role: 'assistant', content: data.answer });
+    } catch(err) {
+      typingBubble.textContent = 'Forensics Assistant error: ' + err.message;
+    }
+    container.scrollTop = container.scrollHeight;
+  }
+
+  async function explainRisk(event) {
+    event.preventDefault();
+    const payloadField = document.getElementById('risk-payload');
+    const resultBox = document.getElementById('result-risk-explainer');
+    
+    resultBox.style.display = 'block';
+    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div style="width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;"></div> Translating risk matrices...</div>';
+
+    let jsonPayload = {};
+    try {
+      jsonPayload = JSON.parse(payloadField.value);
+    } catch(e) {
+      resultBox.innerHTML = '<div style="color:var(--status-danger);font-weight:700;">Invalid JSON format. Please correct it and resubmit.</div>';
+      return;
+    }
+
+    try {
+      const response = await fetch('/ai/api/risk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ payload: jsonPayload })
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text() || 'HTTP error ' + response.status);
+      }
+
+      const data = await response.json();
+      resultBox.innerHTML = `
+        <h4 style="margin-top:0;margin-bottom:12px;color:var(--primary-light);">Risk Deconstruction Summary:</h4>
+        <div style="font-size:0.9rem; line-height:1.7; color:var(--text); white-space: pre-wrap;">${data.explanation}</div>
+      `;
+    } catch(err) {
+      resultBox.innerHTML = '<div style="color:var(--status-danger);font-weight:700;">Risk explanation failed: ' + err.message + '</div>';
+    }
+  }
+</script>
+
+<style>
+  @keyframes bounce {
+    0%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-5px); }
+  }
+</style>
+{% endblock %}

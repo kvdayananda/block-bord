@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% block title %}Social Media Profile Scanner — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+.ss-container { max-width: 900px; margin: 20px auto; padding: 0 16px; }
+
+.ss-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: var(--glass-blur);
+}
+.ss-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #d946ef, #6366f1, #d946ef);
+  background-size: 200% 100%;
+  animation: gradShift 4s linear infinite;
+}
+@keyframes gradShift { 100% { background-position: 200% 0; } }
+
+.ss-icon-wrap {
+  width: 72px; height: 72px;
+  border-radius: 18px;
+  background: rgba(217,70,239,0.12);
+  border: 1px solid rgba(217,70,239,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+  font-size: 2rem;
+  box-shadow: 0 0 24px rgba(217,70,239,0.2);
+}
+.ss-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 900; letter-spacing: -0.03em; margin-bottom: 10px;
+  background: linear-gradient(135deg, #f8fafc 30%, #f0abfc 70%, #d946ef 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.ss-subtitle { color: var(--text-muted); max-width: 460px; margin: 0 auto 36px; font-size: 0.93rem; line-height: 1.7; }
+
+.ss-form { display: flex; gap: 12px; max-width: 600px; margin: 0 auto; flex-wrap: wrap; }
+.ss-input {
+  flex: 1; min-width: 240px;
+  background: rgba(6,8,20,0.7);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px 20px;
+  font-size: 0.95rem; color: var(--text);
+  font-family: var(--font-sans);
+  transition: var(--transition);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.ss-input:focus {
+  outline: none;
+  border-color: rgba(217,70,239,0.5);
+  box-shadow: 0 0 20px rgba(217,70,239,0.2), inset 0 2px 8px rgba(0,0,0,0.3);
+}
+.ss-btn {
+  background: linear-gradient(135deg, #d946ef, #6366f1);
+  border: none; color: #fff;
+  font-weight: 800; font-size: 0.9rem;
+  letter-spacing: 0.05em; text-transform: uppercase;
+  border-radius: var(--radius); padding: 0 28px; min-height: 52px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(217,70,239,0.35);
+  transition: var(--transition);
+  display: flex; align-items: center; gap: 8px;
+}
+.ss-btn:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); }
+.ss-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.ss-spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.ss-result { margin-top: 40px; display: none; animation: slideUp 0.35s ease; text-align: left; }
+@keyframes slideUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+
+.ss-profile-header {
+  background: rgba(15,23,42,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.ss-platform { font-weight: 800; font-size: 1rem; margin-bottom: 3px; }
+.ss-username { font-size: 0.82rem; color: var(--text-muted); font-family: var(--font-mono); }
+.ss-risk-pill {
+  padding: 6px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.ss-indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 12px;
+}
+.ss-indicator-tile {
+  background: rgba(15,23,42,0.5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  transition: var(--transition);
+}
+.ss-indicator-tile:hover { border-color: rgba(217,70,239,0.3); }
+.ss-ind-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-dim); margin-bottom: 8px; }
+.ss-ind-status { font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+
+/* Pro gate */
+.pro-gate-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 72px 40px; text-align: center; box-shadow: var(--shadow-lg); backdrop-filter: var(--glass-blur); }
+.pro-lock-icon { width: 80px; height: 80px; border-radius: 20px; background: rgba(99,102,241,0.12); border: 1px solid rgba(99,102,241,0.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; font-size: 2.4rem; }
+.pro-upgrade-btn { display: inline-flex; align-items: center; gap: 10px; background: var(--primary-grad); color: #fff; font-weight: 800; font-size: 0.95rem; padding: 14px 36px; border-radius: var(--radius); text-decoration: none; box-shadow: var(--shadow-primary); transition: var(--transition); }
+.pro-upgrade-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="app-page-wrapper">
+  {% include "sidebar.html" %}
+  <main class="app-main-content">
+    <div class="ss-container">
+
+      <div class="app-page-header">
+        <div class="app-page-header-left">
+          <span class="app-page-tag">IDENTITY · PRO</span>
+          <h1 class="app-page-title">Social Media Profile Scanner</h1>
+          <p class="app-page-subtitle">Detect impersonation, fake accounts, and suspicious social media profiles before you interact with them.</p>
+        </div>
+      </div>
+
+      {% if plan in ['pro','enterprise'] %}
+      <div class="ss-card">
+        <div class="ss-icon-wrap">👤</div>
+        <h2 class="ss-title">Scan Social Profile</h2>
+        <p class="ss-subtitle">Enter a profile URL to check for fake account signals, impersonation tactics, and suspicious behavioral patterns.</p>
+
+        <form id="socialForm" class="ss-form">
+          <input type="url" id="socialInp" class="ss-input" placeholder="https://twitter.com/username or Instagram URL" required autocomplete="off">
+          <button type="submit" class="ss-btn" id="socialBtn">
+            <span id="sBtnText">Scan Profile</span>
+          </button>
+        </form>
+
+        <div id="socialResult" class="ss-result"></div>
+      </div>
+
+      <script>
+      document.getElementById('socialForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const url = document.getElementById('socialInp').value;
+        const btn = document.getElementById('socialBtn');
+        const res = document.getElementById('socialResult');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="ss-spinner"></span> Scanning...';
+        res.style.display = 'none';
+
+        try {
+          const r = await fetch('/tools/api/social-scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content },
+            body: JSON.stringify({ profile_url: url })
+          });
+          const d = await r.json();
+          const risk = d.risk_level || 'Unknown';
+          const riskColors = {
+            High: ['rgba(239,68,68,0.12)', 'rgba(239,68,68,0.3)', 'var(--status-danger)'],
+            Medium: ['rgba(245,158,11,0.12)', 'rgba(245,158,11,0.3)', 'var(--status-warn)'],
+            Low: ['rgba(16,185,129,0.12)', 'rgba(16,185,129,0.3)', 'var(--status-safe)'],
+          };
+          const [rbg, rbdr, rcol] = riskColors[risk] || riskColors.Low;
+
+          res.innerHTML = `
+            <div class="ss-profile-header">
+              <div>
+                <div class="ss-platform">${d.platform || 'Unknown Platform'}</div>
+                <div class="ss-username">@${d.username || url}</div>
+              </div>
+              <div class="ss-risk-pill" style="background:${rbg};border:1px solid ${rbdr};color:${rcol};">${risk} Risk</div>
+            </div>
+            <div class="ss-indicators-grid">
+              ${Object.entries(d.indicators || {}).map(([key, val]) => `
+                <div class="ss-indicator-tile">
+                  <div class="ss-ind-label">${key.replace(/_/g, ' ')}</div>
+                  <div class="ss-ind-status" style="color:${val ? 'var(--status-safe)' : 'var(--status-danger)'};">
+                    <span style="font-size:1.1rem;">${val ? '✓' : '✗'}</span>
+                    <span>${val ? 'OK' : 'Suspicious'}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+          res.style.display = 'block';
+        } catch(err) {
+          alert('Scan failed. Please try again.');
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = '<span id="sBtnText">Scan Profile</span>';
+        }
+      });
+      </script>
+
+      {% else %}
+      <div class="pro-gate-card">
+        <div class="pro-lock-icon">🔒</div>
+        <h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:900;letter-spacing:-0.03em;margin-bottom:12px;">Pro Feature</h2>
+        <p style="color:var(--text-muted);max-width:420px;margin:0 auto 32px;line-height:1.7;font-size:0.95rem;">Social Media Profile Scanning is available on Pro and Enterprise plans. Spot fake and impersonator accounts instantly.</p>
+        <a href="/pricing" class="pro-upgrade-btn"><span>💎</span> Upgrade to Pro</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </main>
+</div>
+{% endblock %}
