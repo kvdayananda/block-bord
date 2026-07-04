@@ -28,7 +28,12 @@
     backdrop-filter: var(--glass-blur);
     border: 1.5px solid var(--border);
     border-radius: var(--radius-lg);
+    animation: fadeInUp 0.6s ease-out;
+    animation-fill-mode: backwards;
     padding: 32px 28px;
+    /* Staggered animation delays for each plan card */
+    /* nth-child starts at 1 */
+    /* Apply via additional selectors after the block */
     display: flex;
     flex-direction: column;
     transition: var(--transition);
@@ -113,6 +118,20 @@
 
   @media (max-width: 1000px) { .bb-price-grid4 { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 580px)  { .bb-price-grid4 { grid-template-columns: 1fr; } }
+  /* Staggered animation delays for plan cards */
+  .bb-plan:nth-child(1) { animation-delay: 0.1s; }
+  .bb-plan:nth-child(2) { animation-delay: 0.2s; }
+  .bb-plan:nth-child(3) { animation-delay: 0.3s; }
+  .bb-plan:nth-child(4) { animation-delay: 0.4s; }
+  @keyframes fadeInUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  /* Button hover micro‑animation */
+  .btn-primary:hover, .btn-outline:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(99,102,241,0.25);
+  }
 </style>
 {% endblock %}
 
