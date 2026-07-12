@@ -1,92 +1,29 @@
-{% extends "base.html" %}
-
-{% block title %}Cookie Policy — Block Bord AI{% endblock %}
-
-{% block extra_head %}
-<style>
-  .legal-hero {
-    padding: 120px 0 64px;
-    background: linear-gradient(160deg, #f8faff 0%, #f0f4ff 100%);
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-  }
-  .legal-content {
-    max-width: 800px;
-    margin: 80px auto;
-    line-height: 1.8;
-    color: var(--text);
-  }
-  .legal-content h2 { margin: 48px 0 24px; font-size: 1.5rem; font-weight: 800; }
-  .legal-content p { margin-bottom: 24px; color: var(--text-muted); }
-  
-  .cookie-card {
-    background: var(--bg-alt);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-  }
-  .cookie-type {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-  }
-  .cookie-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-</style>
-{% endblock %}
-
-{% block content %}
-<section class="legal-hero">
-  <div class="bb-container">
-    <span class="bb-overline">User Experience</span>
-    <h1 class="bb-title">Cookie <span>Policy</span></h1>
-    <p class="bb-subtitle" style="margin:0 auto; max-width:600px;">Last Updated: March 24, 2026</p>
-  </div>
-</section>
-
-<div class="bb-container">
-  <article class="legal-content">
-    
-    <h2>1. What are cookies?</h2>
-    <p>Cookies are small text files placed on your device by websites you visit. They are used to make websites work efficiently and to provide session management. We also use local storage and session tokens for equivalent purposes.</p>
-
-    <h2>2. Cookies we use</h2>
-    
-    <div class="cookie-card">
-      <div class="cookie-type">
-        <span class="cookie-badge" style="background:rgba(16, 185, 129, 0.1); color:var(--status-safe);">Essential</span>
-        <strong style="font-size:1rem;">Strictly Necessary</strong>
-      </div>
-      <p style="margin:0; font-size:0.9rem;">These are required for the platform to function. They include session tokens (to keep you logged in) and security tokens (to prevent CSRF attacks).</p>
-    </div>
-
-    <div class="cookie-card">
-      <div class="cookie-type">
-        <span class="cookie-badge" style="background:rgba(99, 102, 241, 0.1); color:var(--primary);">Functional</span>
-        <strong style="font-size:1rem;">Preferences</strong>
-      </div>
-      <p style="margin:0; font-size:0.9rem;">These remember your interface choices, such as your UI layout preferences and dashboard state.</p>
-    </div>
-
-    <div class="cookie-card">
-      <div class="cookie-type">
-        <span class="cookie-badge" style="background:rgba(245, 158, 11, 0.1); color:var(--status-warn);">Analytics</span>
-        <strong style="font-size:1rem;">Performance</strong>
-      </div>
-      <p style="margin:0; font-size:0.9rem;">These help us understand how users interact with the Service. All data is anonymized and used solely for performance monitoring.</p>
-    </div>
-
-    <h2>3. Control</h2>
-    <p>You can manage cookies through your browser settings. However, disabling essential cookies will prevent you from signing in or using the dashboard.</p>
-
-  </article>
-</div>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Cookie Policy – Block Bord AI</title>
+</head>
+<body>
+  <section class="cookie">
+    <h1>Cookie Policy</h1>
+    <p>Block Bord AI uses cookies to enhance your experience, ensure security, and analyze usage.</p>
+    <h2>What are Cookies?</h2>
+    <p>Cookies are small text files stored on your device when you visit our website.</p>
+    <h2>Types of Cookies We Use</h2>
+    <ul>
+      <li><strong>Essential Cookies:</strong> Required for core functionality such as authentication and session management.</li>
+      <li><strong>Analytics Cookies:</strong> Help us understand how you use the platform so we can improve it. We use anonymized data only.</li>
+      <li><strong>Security Cookies:</strong> Protect against fraud and ensure safe transactions.</li>
+    </ul>
+    <h2>Managing Cookies</h2>
+    <p>You can control cookies through your browser settings. Disabling essential cookies may limit your ability to log in or use certain features.</p>
+    <h2>Third‑Party Cookies</h2>
+    <p>We embed third‑party services such as Razorpay for payments. These providers may set their own cookies according to their policies.</p>
+    <h2>Changes to This Policy</h2>
+    <p>We may update this policy from time to time. The "Last Updated" date at the top of the page indicates the most recent revision.</p>
+    <h2>Contact</h2>
+    <p>If you have questions about our cookie usage, please <a href="/contact">contact us</a>.</p>
+  </section>
+</body>
+</html>

@@ -6,6 +6,7 @@
   <!-- Top gradient accent line -->
   <div style="height:3px; background:var(--primary-grad); flex-shrink:0;"></div>
 
+{% if not request.url.path.startswith('/app') %}
   <!-- Logo -->
   <div class="sidebar-logo-container">
     <a href="/app" class="sidebar-logo-link">
@@ -15,6 +16,7 @@
       Block <span class="sidebar-brand-highlight">Bord</span> AI
     </a>
   </div>
+{% endif %}
 
   <!-- User Profile -->
   {% if user %}

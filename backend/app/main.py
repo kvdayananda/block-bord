@@ -5,6 +5,7 @@ Registers all modular routers, middleware, and exception handlers.
 import logging
 import asyncio
 import sentry_sdk
+from fastapi.responses import FileResponse
 from contextlib import asynccontextmanager
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 
@@ -22,8 +23,10 @@ from backend.app.middleware.security import SecurityHeadersMiddleware
 from backend.app.middleware.csrf import CSRFTokenMiddleware
 from backend.app.database.connection import engine, Base
 from backend.app.utils.limiter import limiter
+from sqlalchemy.orm import Session
+from backend.app.dependencies import get_db
 from backend.app.routers import (
-    auth, public, dashboard, scan, admin, payments, tools, security_tools, ai_tools
+    auth, public, dashboard, scan, admin, payments, tools, security_tools, ai_tools, password
 )
 from backend.app import models # Ensure models are registered for Base.metadata.create_all
 
@@ -60,6 +63,10 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 # ──────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if settings.is_production and settings.database_url.startswith("sqlite"):
+        logger.error("CRITICAL CONFIGURATION ERROR: SQLite database is not allowed in production mode. Use a PostgreSQL database instead.")
+        raise ValueError("SQLite database is not allowed in production mode.")
+
     # Initialize database tables if they don't exist (with retry logic)
     max_retries = 5
     for i in range(max_retries):
@@ -115,15 +122,14 @@ async def generic_exception_handler(request: Request, exc: Exception):
         content={"error": "An internal server error occurred. Our team has been notified."},
     )
 
-# 2. CORS Middleware - Restrict to actual origins + Browser Extension
+# 2. CORS Middleware - Restrict to configured origins + Browser Extension
+if settings.is_production:
+    cors_origins = [origin.strip() for origin in settings.cors_allowed_origins_prod.split(",") if origin.strip()]
+else:
+    cors_origins = [origin.strip() for origin in settings.cors_allowed_origins.split(",") if origin.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:8000",
-        "http://localhost:8000",
-        "http://localhost:3000",
-        "https://blockbord.onrender.com" # Example production domain
-    ],
+    allow_origins=cors_origins,
     allow_origin_regex=r"chrome-extension://.*", # Dynamic allow for browser extension
     allow_credentials=True,
     allow_methods=["*"],
@@ -135,7 +141,7 @@ app.add_middleware(CSRFTokenMiddleware)
 
 # 4. Session Middleware (Required for auth + CSRF) - Outermost
 app.add_middleware(
-    SessionMiddleware, 
+    SessionMiddleware,
     secret_key=settings.session_secret,
     max_age=86400 * 30, # 30 days
     same_site="lax",
@@ -147,6 +153,11 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 # 6. Static Files
 app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
+
+# Serve favicon to avoid 404 errors
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("frontend/static/favicon.ico", media_type="image/x-icon")
 
 
 # ──────────────────────────────────────────────────────────────
@@ -161,3 +172,22 @@ app.include_router(payments.router)
 app.include_router(tools.router)
 app.include_router(security_tools.router)
 app.include_router(ai_tools.router)
+app.include_router(password.router)
+
+
+# ──────────────────────────────────────────────────────────────
+# HEALTH ENDPOINT
+# ──────────────────────────────────────────────────────────────
+@app.get("/health")
+def health_check(db: Session = Depends(get_db)):
+    from sqlalchemy import text
+    try:
+        # Verify database connection is functional
+        db.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        logger.error(f"Health check database query failed: {e}")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "database": "disconnected"}
+        )

@@ -4,7 +4,7 @@ from backend.app.models import User
 def test_register_success(client):
     response = client.post(
         "/register",
-        data={"username": "testuser", "email": "test@example.com", "password": "password123"},
+        data={"username": "testuser", "email": "test@example.com", "password": "Password123!@#"},
         follow_redirects=False
     )
     assert response.status_code == 302

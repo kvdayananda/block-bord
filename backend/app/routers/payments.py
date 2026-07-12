@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from backend.app.dependencies import get_db, get_current_user, validate_csrf
 from backend.app.services.plan_service import PLAN_PRICES_PAISE, set_user_plan
 from backend.app.models import User, Payment
+from backend.app.config import settings
 
 # Optional dependency check
 try:
@@ -49,15 +50,25 @@ def checkout(plan_name: str, request: Request, db: Session = Depends(get_db)):
     if not amount:
         return RedirectResponse("/pricing", status_code=302)
 
-    # Simulation Mode (if no Razorpay keys)
-    razorpay_id = os.getenv("RAZORPAY_KEY_ID")
-    razorpay_secret = os.getenv("RAZORPAY_KEY_SECRET")
+    # Simulation Mode (only allowed if NOT in production AND payment_test_mode is True)
+    razorpay_id = settings.razorpay_key_id
+    razorpay_secret = settings.razorpay_key_secret
     
-    if not razorpay or not razorpay_id or not razorpay_secret:
-        logger.info(f"Payment simulation for {user.username}: {plan_name}")
-        set_user_plan(user, plan_name)
-        db.commit()
-        return RedirectResponse("/app?message=Plan upgraded successfully (Test Mode)", status_code=302)
+    if not settings.is_production and settings.payment_test_mode:
+        if not razorpay or not razorpay_id or not razorpay_secret:
+            logger.info(f"Payment simulation for {user.username}: {plan_name}")
+            set_user_plan(user, plan_name)
+            db.commit()
+            return RedirectResponse("/app?message=Plan upgraded successfully (Test Mode)", status_code=302)
+
+    # In production or if test mode is disabled, we require valid Razorpay configuration.
+    if not razorpay:
+        logger.error("Razorpay SDK not installed or unavailable.")
+        return RedirectResponse("/pricing?error=Payment gateway SDK error", status_code=302)
+
+    if not razorpay_id or not razorpay_secret:
+        logger.error("Razorpay credentials not configured.")
+        return RedirectResponse("/pricing?error=Payment gateway configuration missing", status_code=302)
 
     client = razorpay.Client(auth=(razorpay_id, razorpay_secret))
     order_data = {
@@ -99,20 +110,14 @@ def verify_payment(
     razorpay_order_id: str = Form(...),
     razorpay_payment_id: str = Form(...),
     razorpay_signature: str = Form(...),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    _csrf: None = Depends(validate_csrf)
 ):
     payment = db.query(Payment).filter(Payment.razorpay_order_id == razorpay_order_id).first()
     if not payment:
         raise HTTPException(status_code=404, detail="Payment record not found")
 
-    razorpay_secret = os.getenv("RAZORPAY_KEY_SECRET", "")
-    
-    # Signature verification
-    params_dict = {
-        'razorpay_order_id': razorpay_order_id,
-        'razorpay_payment_id': razorpay_payment_id,
-        'razorpay_signature': razorpay_signature
-    }
+    razorpay_secret = settings.razorpay_key_secret
     
     try:
         # Verify Razorpay payment signature using HMAC-SHA256
@@ -123,7 +128,7 @@ def verify_payment(
             hashlib.sha256
         ).hexdigest()
         
-        if generated_signature != razorpay_signature:
+        if not hmac.compare_digest(generated_signature, razorpay_signature):
             payment.status = "failed"
             db.commit()
             return RedirectResponse("/pricing?error=Signature mismatch", status_code=302)
@@ -151,7 +156,7 @@ def verify_payment(
 async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     body = await request.body()
     signature = request.headers.get("X-Razorpay-Signature")
-    secret = os.getenv("RAZORPAY_WEBHOOK_SECRET", "")
+    secret = settings.razorpay_webhook_secret
 
     if not signature or not secret:
         return JSONResponse({"status": "ignored"}, status_code=200)
@@ -160,7 +165,7 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
     h = hmac.new(secret.encode("utf-8"), body, hashlib.sha256)
     expected = h.hexdigest()
 
-    if expected != signature:
+    if not hmac.compare_digest(expected, signature):
         logger.error("Razorpay webhook signature mismatch")
         raise HTTPException(status_code=400, detail="Invalid signature")
 
@@ -183,3 +188,22 @@ async def razorpay_webhook(request: Request, db: Session = Depends(get_db)):
             logger.info(f"Webhook: Payment captured for order {order_id}")
 
     return {"status": "ok"}
+
+
+# ──────────────────────────────────────────────────────────────
+# DOWNGRADE PLAN
+# ──────────────────────────────────────────────────────────────
+@router.post("/downgrade")
+def downgrade_plan(
+    request: Request,
+    db: Session = Depends(get_db),
+    _csrf: None = Depends(validate_csrf)
+):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login?message=Please log in to downgrade", status_code=302)
+    
+    set_user_plan(user, "free")
+    db.commit()
+    logger.info(f"User {user.username} downgraded subscription to free plan.")
+    return RedirectResponse("/app?message=Plan downgraded to Community successfully", status_code=302)

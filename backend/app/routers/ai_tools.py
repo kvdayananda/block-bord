@@ -77,6 +77,11 @@ async def api_assistant(
             raw=res.get("raw")
         )
     except Exception as e:
+        # If the underlying service raised a GeminiBadRequestError, expose its details
+        from backend.app.services.api_clients import GeminiBadRequestError
+        if isinstance(e, GeminiBadRequestError):
+            logger.error(f"Gemini request failed: {e.body}")
+            raise HTTPException(status_code=500, detail=f"Gemini error: {e.body}")
         logger.error(f"AI Assistant Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 

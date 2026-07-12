@@ -5,9 +5,8 @@ services:
     build: .
     ports:
       - "8000:8000"
-    environment:
-      - ENV=production
-      - SESSION_SECRET=dev_only_change_me
+    env_file:
+      - .env
     volumes:
       # Mount data and models folders to persist them across container restarts
       - ./data:/app/data

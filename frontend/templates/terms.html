@@ -1,102 +1,55 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Terms of Service – Block Bord AI</title>
+</head>
+<body>
+  <section class="terms">
+    <h1>Terms of Service</h1>
+    <p>Welcome to Block Bord AI. By accessing or using our services, you agree to be bound by these Terms of Service ("Terms"). If you do not agree, please do not use the platform.</p>
 
-{% block title %}Terms of Service — Block Bord AI{% endblock %}
+    <h2>1. Acceptance of Terms</h2>
+    <p>These Terms constitute a legal agreement between you and Block Bord AI.</p>
 
-{% block extra_head %}
-<style>
-  .legal-hero {
-    padding: 120px 0 64px;
-    background: linear-gradient(160deg, #f8faff 0%, #f0f4ff 100%);
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-  }
-  .legal-content {
-    max-width: 800px;
-    margin: 80px auto;
-    line-height: 1.8;
-    color: var(--text);
-  }
-  .legal-content h2 { margin: 48px 0 24px; font-size: 1.5rem; font-weight: 800; }
-  .legal-content p { margin-bottom: 24px; color: var(--text-muted); }
-  .legal-content ul, .legal-content ol { margin-bottom: 24px; padding-left: 20px; color: var(--text-muted); }
-  .legal-content li { margin-bottom: 12px; }
-  
-  .legal-toc {
-    background: var(--bg-alt);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    margin-bottom: 64px;
-  }
-</style>
-{% endblock %}
+    <h2>2. Service Description</h2>
+    <p>Block Bord AI provides AI‑powered security analysis tools, including phishing detection, scam assessment, URL risk evaluation, and more. The service is provided "as is" and may be modified, suspended, or discontinued at any time.</p>
 
-{% block content %}
-<section class="legal-hero">
-  <div class="bb-container">
-    <span class="bb-overline">Legal Framework</span>
-    <h1 class="bb-title">Terms of <span>Service</span></h1>
-    <p class="bb-subtitle" style="margin:0 auto; max-width:600px;">Last Updated: March 24, 2026</p>
-  </div>
-</section>
+    <h2>3. User Accounts</h2>
+    <ul>
+      <li>You must provide accurate registration information.</li>
+      <li>You are responsible for maintaining the confidentiality of your password.</li>
+      <li>Accounts may be terminated for violation of these Terms or for suspicious activity.</li>
+    </ul>
 
-<div class="bb-container">
-  <article class="legal-content">
-    
-    <div class="legal-toc">
-      <h3 style="font-size:1rem; font-weight:800; margin-bottom:16px;">General Provisions</h3>
-      <nav style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.9rem; font-weight:600;">
-        <a href="#acceptance" style="color:var(--primary);">1. Acceptance</a>
-        <a href="#description" style="color:var(--primary);">2. Service Scope</a>
-        <a href="#accounts" style="color:var(--primary);">3. User Accounts</a>
-        <a href="#acceptable-use" style="color:var(--primary);">4. Usage Rules</a>
-        <a href="#billing" style="color:var(--primary);">5. Billing & Plans</a>
-        <a href="#liability" style="color:var(--primary);">6. Liability</a>
-      </nav>
-    </div>
+    <h2>4. Acceptable Use</h2>
+    <p>You agree not to use the service to:</p>
+    <ul>
+      <li>Engage in illegal activities or facilitate abuse.</li>
+      <li>Attempt to reverse‑engineer, tamper with, or disrupt the platform.</li>
+      <li>Upload malicious content that could harm other users.</li>
+    </ul>
 
-    <div id="acceptance">
-      <h2>1. Acceptance of Terms</h2>
-      <p>By registering for, accessing, or using Block Bord AI (the "Service"), you agree to be bound by these Terms of Service. If you do not agree to these Terms, do not use the Service. If you are using the Service on behalf of an organization, you represent that you have authority to bind that organization.</p>
-    </div>
+    <h2>5. Data & Privacy</h2>
+    <p>Our <a href="/privacy">Privacy Policy</a> governs how we handle your data. You retain ownership of any content you submit, but you grant us a worldwide, royalty‑free license to process it for providing the service.</p>
 
-    <div id="description">
-      <h2>2. Description of Service</h2>
-      <p>Block Bord AI provides an AI-powered real-time threat intelligence platform. This includes web-based scanning, browser extensions, and programmatic APIs for detecting digital fraud, phishing, and cybersecurity risks.</p>
-      <p>The Service is provided for informational and protective purposes. Scan results represent probabilistic risk assessments and should not be treated as absolute verdicts. We are not responsible for decisions made based on scan results.</p>
-    </div>
+    <h2>6. Payments & Refunds</h2>
+    <p>Paid plans are billed in advance. All sales are final; refunds are provided only at our discretion.</p>
 
-    <div id="accounts">
-      <h2>3. User Accounts</h2>
-      <ul>
-        <li>You must provide accurate information when registering.</li>
-        <li>You are responsible for maintaining the security of your account credentials.</li>
-        <li>Account or API key sharing is strictly prohibited.</li>
-        <li>We reserve the right to disable accounts that violate these Terms.</li>
-      </ul>
-    </div>
+    <h2>7. Disclaimer of Warranties</h2>
+    <p>The service is provided without warranties of any kind, express or implied, including but not limited to accuracy, reliability, or fitness for a particular purpose.</p>
 
-    <div id="acceptable-use">
-      <h2>4. Acceptable Use</h2>
-      <p>You agree NOT to use the Service to:</p>
-      <ul>
-        <li>Probe or scan infrastructure you do not own or have permission to test.</li>
-        <li>Attempt to reverse-engineer or extract core AI models.</li>
-        <li>Circumvent rate limits or security controls.</li>
-        <li>Submit content that violates third-party rights or laws.</li>
-      </ul>
-    </div>
+    <h2>8. Limitation of Liability</h2>
+    <p>To the maximum extent permitted by law, Block Bord AI shall not be liable for any indirect, incidental, special, or consequential damages arising out of or relating to your use of the service.</p>
 
-    <div id="billing">
-      <h2>5. Subscription Plans & Billing</h2>
-      <p>Subscription fees are billed in advance. Payments are processed securely via Razorpay. Cancellations take effect at the end of the current billing cycle. We do not offer refunds once a billing cycle has started, except as required by law.</p>
-    </div>
+    <h2>9. Governing Law</h2>
+    <p>These Terms are governed by the laws of the jurisdiction where Block Bord AI is incorporated, without regard to conflict of law principles.</p>
 
-    <div id="liability">
-      <h2>6. Limitation of Liability</h2>
-      <p>Block Bord AI shall not be liable for any indirect, incidental, or consequential damages arising from your use of the Service. The Service is provided "as is" without warranties of any kind.</p>
-    </div>
+    <h2>10. Changes to Terms</h2>
+    <p>We may update these Terms from time to time. Continued use after revisions constitutes acceptance.</p>
 
-  </article>
-</div>
-{% endblock %}
+    <h2>11. Contact</h2>
+    <p>If you have questions, please <a href="/contact">contact us</a>.</p>
+  </section>
+</body>
+</html>

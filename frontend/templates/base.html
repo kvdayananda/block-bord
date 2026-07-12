@@ -14,13 +14,25 @@
   <!-- Favicon -->
   <link rel="icon" href="/static/favicon.ico">
   <meta name="csrf-token" content="{{ request.session.get('csrf_token') }}">
-  <title>{% block title %}Block Bord AI{% endblock %}</title>
+  <meta name="description" content="{{ meta_description|default('Block Bord AI is an AI-powered cybersecurity platform that protects users from phishing attacks, malware, dark-web leaks, and online threats with real-time analysis and intelligent detection.') }}">
+  <meta name="keywords" content="AI Cybersecurity Platform, Phishing Detection, URL Scanner, Website Security Checker, Domain Reputation Checker, IP Reputation Checker, Email Phishing Detector, QR Code Security Scanner, UPI Fraud Detection, Scam Detection, Malware Detection, Browser Security, Threat Intelligence, Cyber Threat Protection, Online Fraud Prevention, AI Security Assistant, Safe Browsing, Cybersecurity Tools">
+  <title>{{ page_title|default('Block Bord AI') }}</title>
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:description" content="{% block og_description %}Block Bord AI is an AI-powered cybersecurity platform that protects users from phishing attacks, scam websites, malicious URLs, UPI fraud, malware, and online threats with real-time security analysis and intelligent threat detection.{% endblock %}">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta property="og:image" content="/static/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ self.title() }}">
+  <meta name="twitter:description" content="{% block twitter_description %}Block Bord AI is an AI-powered cybersecurity platform that protects users from phishing attacks, scam websites, malicious URLs, UPI fraud, malware, and online threats with real-time security analysis and intelligent threat detection.{% endblock %}">
+  <meta name="twitter:image" content="/static/og-image.png">
+  <link rel="canonical" href="{{ request.url }}">
   {% block extra_head %}{% endblock %}
 </head>
 
 <body>
   <!-- ================= NAVBAR ================= -->
-  {% if not (request.url.path.startswith('/app') or request.url.path.startswith('/history') or request.url.path.startswith('/settings') or request.url.path.startswith('/admin') or request.url.path.startswith('/leak-checker') or request.url.path.startswith('/scam-map')) %}
+  {% if not (request.url.path.startswith('/app') or request.url.path.startswith('/history') or request.url.path.startswith('/block-list') or request.url.path.startswith('/security') or request.url.path.startswith('/ai') or request.url.path.startswith('/settings') or request.url.path.startswith('/admin') or request.url.path.startswith('/leak-checker') or request.url.path.startswith('/scam-map')) %}
   {% block navbar %}
   <header class="main-navbar" id="mainNavbar">
     <a href="/" class="logo-link">
@@ -82,7 +94,7 @@
         <!-- Brand -->
         <div class="footer-brand-col">
           <div class="footer-logo-centered">
-            <img src="/static/logo.png" alt="Block Bord Logo">
+
             Block <span style="color:var(--primary-light);">Bord</span> AI
           </div>
           <p class="footer-brand-tagline">

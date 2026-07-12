@@ -1,6 +1,6 @@
 // Content Script for Block Bord AI - Advanced Edition
 
-let BB_REPORT_URL = "https://block-bord.onrender.com";
+let BB_REPORT_URL = "http://127.0.0.1:8000";
 
 // Initialize dynamic URL
 chrome.storage.local.get(['apiUrl'], (res) => {

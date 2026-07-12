@@ -13,7 +13,7 @@
         "scripting"
     ],
     "host_permissions": [
-        "http://127.0.0.1:8000/*",
+        "${BACKEND_URL}/*",
         "https://block-bord-ai-pro.onrender.com/*",
         "*://*/*"
     ],

@@ -122,43 +122,64 @@
 
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-document.getElementById('payBtn').onclick = async function(e) {
+document.getElementById('payBtn').onclick = function(e) {
     const btn = e.target;
     btn.disabled = true;
-    btn.textContent = 'Initializing Secure Checkout...';
+    btn.textContent = 'Opening Secure Payment Window...';
 
     try {
-        const response = await fetch('/api/create_order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
-            },
-            body: JSON.stringify({ plan: "{{ plan_name }}" })
-        });
-        const order = await response.json();
-
         const options = {
-            "key": order.key_id,
-            "amount": order.amount,
-            "currency": order.currency,
+            "key": "{{ razorpay_key }}",
+            "amount": "{{ order.amount }}",
+            "currency": "{{ order.currency }}",
             "name": "Block Bord AI",
             "description": "{{ plan_name }} Subscription",
-            "order_id": order.id,
+            "order_id": "{{ order.id }}",
             "prefill": {
                 "name": document.getElementById('cust-name').value,
                 "email": document.getElementById('cust-email').value
             },
             "theme": { "color": "#6366f1" },
             "handler": function (response){
-                window.location.href = `/payment/callback?payment_id=${response.razorpay_payment_id}&order_id=${response.razorpay_order_id}&signature=${response.razorpay_signature}`;
+                // Create form to POST verifying signature
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/payment/verify';
+                
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                form.appendChild(csrfInput);
+
+                const fields = {
+                    'razorpay_order_id': response.razorpay_order_id,
+                    'razorpay_payment_id': response.razorpay_payment_id,
+                    'razorpay_signature': response.razorpay_signature
+                };
+
+                for (const [key, value] of Object.entries(fields)) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = key;
+                    input.value = value;
+                    form.appendChild(input);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            },
+            "modal": {
+                "ondismiss": function() {
+                    btn.disabled = false;
+                    btn.textContent = 'Proceed to Payment';
+                }
             }
         };
         const rzp1 = new Razorpay(options);
         rzp1.open();
     } catch (err) {
-        alert('Could not initialize payment. Please try again.');
-    } finally {
+        alert('Could not initialize payment window. Please try again.');
         btn.disabled = false;
         btn.textContent = 'Proceed to Payment';
     }

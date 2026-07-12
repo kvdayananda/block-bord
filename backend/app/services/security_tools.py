@@ -1,4 +1,4 @@
-import os
+from backend.app.config import settings
 import socket
 import ssl
 import httpx
@@ -214,7 +214,7 @@ class SecurityToolService:
             raise HTTPException(status_code=400, detail="Invalid email format")
 
         # Let's call Have I Been Pwned if key is configured, else fallback to high quality simulation
-        hibp_key = os.getenv("HIBP_API_KEY")
+        hibp_key = settings.hibp_api_key
         if hibp_key:
             try:
                 headers = {"hibp-api-key": hibp_key, "user-agent": "BlockBord-AI"}

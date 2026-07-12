@@ -7,6 +7,7 @@ from fastapi import APIRouter
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from backend.app.utils.seo import seo_context
 
 router = APIRouter(tags=["Public"])
 templates = Jinja2Templates(directory="frontend/templates")

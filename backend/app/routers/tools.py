@@ -163,7 +163,7 @@ async def check_leak(request: Request, email: str = Form(...), db: Session = Dep
         raise HTTPException(status_code=401, detail="Unauthorized")
 
     email = email.strip().lower()
-    hibp_key = os.getenv("HIBP_API_KEY")
+    hibp_key = settings.hibp_api_key
 
     if not hibp_key:
         is_leaked = (len(email) % 4 != 0)
@@ -305,6 +305,11 @@ async def assistant_api(req: AssistantRequest, request: Request, db: Session = D
 # ── 5. IP LOOKUP ─────────────────────────────────────────────────────
 @router.get("/api/ip-lookup")
 async def ip_lookup(ip: str = Query(...), request: Request = None, db: Session = Depends(get_db)):
+    if settings.enable_mock_data:
+        logger.info("Mock data mode: returning simulated IP lookup result")
+        return {"country": "Mockland", "city": "Mock City", "isp": "Mock ISP",
+                "lat": 0.0, "lon": 0.0, "ip": ip,
+                "threat_score": 0, "blacklisted": False}
     try:
         async with httpx.AsyncClient(timeout=10) as client:
             r = await client.get(f"http://ip-api.com/json/{ip}?fields=status,country,city,isp,lat,lon,query")
@@ -347,6 +352,11 @@ async def email_header_analyse(req: EmailHeaderRequest):
 @router.get("/api/domain-inspect")
 async def domain_inspect(domain: str = Query(...)):
     domain = domain.strip().lower().replace("https://", "").replace("http://", "").split("/")[0]
+    if settings.enable_mock_data:
+        logger.info("Mock data mode: returning simulated domain inspector result")
+        return {"registrar": "Mock Registrar", "created": "2020-01-01", "expires": "2025-01-01",
+                "ssl_issuer": "Mock CA", "risk_level": "Low", "ip": "0.0.0.0",
+                "dns": [f"A: 0.0.0.0", f"MX: mail.{domain}", f"NS: ns1.{domain}", f"TXT: v=spf1 include:{domain} ~all"]}
     result = {"registrar": "Simulated Registrar Inc.", "created": "2019-03-15", "expires": "2025-03-15",
               "ssl_issuer": "Let's Encrypt", "risk_level": "Low", "ip": "Unknown",
               "dns": [f"A: 192.168.1.1", f"MX: mail.{domain}", f"NS: ns1.{domain}", f"TXT: v=spf1 include:{domain} ~all"]}
@@ -370,6 +380,9 @@ async def ssl_check(domain: str = Query(...)):
     import ssl
     import socket as sock
     domain = domain.strip().lower().replace("https://", "").replace("http://", "").split("/")[0]
+    if settings.enable_mock_data:
+        logger.info("Mock data mode: returning simulated SSL check result")
+        return {"valid": True, "subject": domain, "issuer": "Mock CA", "valid_from": "2020-01-01", "expires": "2030-01-01", "days_left": 3650, "cipher": "TLS_AES_256_GCM_SHA384", "tls_version": "TLSv1.3"}
     try:
         ctx = ssl.create_default_context()
         with ctx.wrap_socket(sock.socket(), server_hostname=domain) as s:
@@ -378,7 +391,7 @@ async def ssl_check(domain: str = Query(...)):
             cert = s.getpeercert()
             not_after = datetime.strptime(cert["notAfter"], "%b %d %H:%M:%S %Y %Z")
             not_before = datetime.strptime(cert["notBefore"], "%b %d %H:%M:%S %Y %Z")
-            days_left = (not_after - datetime.utcnow()).days
+            days_left = (not_after - datetime.now(timezone.utc)).days
             issuer = dict(x[0] for x in cert.get("issuer", []))
             subject = dict(x[0] for x in cert.get("subject", []))
             return {"valid": True, "subject": subject.get("commonName", domain),
@@ -389,6 +402,7 @@ async def ssl_check(domain: str = Query(...)):
     except ssl.SSLCertVerificationError:
         return {"valid": False, "subject": domain, "issuer": "Invalid", "days_left": 0,
                 "expires": "N/A", "valid_from": "N/A", "cipher": "N/A", "tls_version": "N/A"}
+
     except Exception as e:
         logger.warning(f"SSL check error for {domain}: {e}")
         return {"valid": False, "subject": domain, "issuer": "Could not connect", "days_left": 0,
@@ -401,6 +415,9 @@ async def qr_scan(request: Request, file: UploadFile = File(...), db: Session = 
     user = get_current_user(request, db)
     if not user:
         raise HTTPException(status_code=401, detail="Unauthorized")
+    if settings.enable_mock_data:
+        logger.info("Mock data mode: returning simulated QR scan result")
+        return {"url": "https://example.com", "risk_level": "Safe", "threat_score": 0}
 
     try:
         from PIL import Image

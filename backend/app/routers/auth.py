@@ -15,13 +15,40 @@ from backend.app.utils.limiter import limiter
 from sqlalchemy.orm import Session
 
 from backend.app.dependencies import get_db, validate_csrf
+from backend.app.config import settings
 from backend.app.models import User, PasswordResetToken
-from backend.app.services.email_service import send_high_risk_alert
+from backend.app.models.report import EmailVerificationToken
+from backend.app.services.email_service import send_password_reset_email, send_verification_email
+
 
 logger = logging.getLogger("blockbord.auth")
 router = APIRouter(tags=["Auth"])
 templates = Jinja2Templates(directory="frontend/templates")
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
+
+
+def validate_password_strength(password: str) -> Optional[str]:
+    """
+    Returns an error message string if password is weak, otherwise None.
+    Complexity requirements:
+    - Minimum 12 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one number
+    - At least one special character
+    """
+    if len(password) < 12:
+        return "Password must be at least 12 characters long."
+    if not any(c.isupper() for c in password):
+        return "Password must contain at least one uppercase letter."
+    if not any(c.islower() for c in password):
+        return "Password must contain at least one lowercase letter."
+    if not any(c.isdigit() for c in password):
+        return "Password must contain at least one number."
+    special_chars = "!@#$%^&*()_+-=[]{}|;':\",./<>?`~"
+    if not any(c in special_chars for c in password):
+        return "Password must contain at least one special character."
+    return None
 
 
 # ──────────────────────────────────────────────────────────────
@@ -45,13 +72,10 @@ def register(
     email = email.strip().lower()
 
     # Validate password strength
-    if len(password) < 8:
+    pwd_err = validate_password_strength(password)
+    if pwd_err:
         return templates.TemplateResponse(
-            "register.html", {"request": request, "error": "Password must be at least 8 characters."}
-        )
-    if not any(c.isdigit() for c in password):
-        return templates.TemplateResponse(
-            "register.html", {"request": request, "error": "Password must contain at least one number."}
+            "register.html", {"request": request, "error": pwd_err}
         )
 
     if db.query(User).filter(User.username == username).first():
@@ -127,6 +151,14 @@ def logout(request: Request):
     logger.info(f"User logged out: {username}")
     return RedirectResponse("/", status_code=302)
 
+@router.post("/verify-email")
+@limiter.limit("5/minute")
+def verify_email(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
+    """Placeholder email verification endpoint."""
+    # In production, send verification email with token.
+    logger.info(f"Email verification requested for {email}")
+    return {"detail": "Verification email sent (simulated)."}
+
 
 # ──────────────────────────────────────────────────────────────
 # FORGOT PASSWORD
@@ -144,9 +176,8 @@ def forgot_password(
     db: Session = Depends(get_db),
     _csrf: None = Depends(validate_csrf),
 ):
-    import os
     email = email.strip().lower()
-    is_prod = os.getenv("ENV", "development").lower() == "production"
+    is_prod = settings.is_production
     user = db.query(User).filter(User.email == email).first()
 
     token = None
@@ -206,6 +237,13 @@ def reset_password(
         return templates.TemplateResponse(
             "reset_password.html",
             {"request": request, "token": token, "error": "Passwords do not match."},
+        )
+
+    pwd_err = validate_password_strength(password)
+    if pwd_err:
+        return templates.TemplateResponse(
+            "reset_password.html",
+            {"request": request, "token": token, "error": pwd_err},
         )
 
     reset_token = db.query(PasswordResetToken).filter(

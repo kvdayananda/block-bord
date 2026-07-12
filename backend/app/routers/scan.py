@@ -100,13 +100,13 @@ async def scan_content(
     data: ScanRequest,
     request: Request,
     db: Session = Depends(get_db),
-    user: User = Depends(require_user),
+    user: Optional[User] = Depends(get_current_user),
     _csrf: None = Depends(validate_csrf),
 ):
 
-    plan = get_user_plan(user)
+    plan = get_user_plan(user) if user else "free"
     limit = PLAN_LIMITS.get(plan)
-    today_count = get_today_scan_count(db, user.id)
+    today_count = get_today_scan_count(db, user.id) if user else 0
 
     if limit is not None and today_count >= limit:
         return {
@@ -132,16 +132,17 @@ async def scan_content(
     if content_hash in _scan_cache:
         ts, cached_result = _scan_cache[content_hash]
         if now - ts < _scan_cache_ttl:
-            logger.info(f"Scan hit TTL memory cache for user={user.username}")
+            logger.info(f"Scan hit TTL memory cache for user={user.username if user else 'anon'}")
             return cached_result
 
-    # Deduplication: Check if exact same content was scanned by this user in last 5 mins
     five_mins_ago = datetime.now(timezone.utc) - timedelta(minutes=5)
-    recent_scan = db.query(ScanHistory).filter(
-        ScanHistory.user_id == user.id,
-        ScanHistory.url_hash == content_hash,
-        ScanHistory.created_at >= five_mins_ago
-    ).order_by(ScanHistory.created_at.desc()).first()
+    recent_scan = None
+    if user:
+        recent_scan = db.query(ScanHistory).filter(
+            ScanHistory.user_id == user.id,
+            ScanHistory.url_hash == content_hash,
+            ScanHistory.created_at >= five_mins_ago
+        ).order_by(ScanHistory.created_at.desc()).first()
 
     if recent_scan:
         logger.info(f"Scan #{recent_scan.id} | user={user.username} | Deduplicated DB hit.")
@@ -167,8 +168,11 @@ async def scan_content(
                 "reasons": [f"Domain '{d}' is on the trusted whitelist."],
                 "category": "Whitelisted",
             }
-            scan = _save_and_return(result, data, user, db, content_hash)
-            _scan_cache[content_hash] = (now, {**result, "scan_id": scan.id})
+            scan_id = None
+            if user:
+                scan = _save_and_return(result, data, user, db, content_hash)
+                scan_id = scan.id
+            _scan_cache[content_hash] = (now, {**result, "scan_id": scan_id})
             return _scan_cache[content_hash][1]
 
     # Check blacklist
@@ -183,8 +187,11 @@ async def scan_content(
                 ],
                 "category": "Blacklisted Domain",
             }
-            scan = _save_and_return(result, data, user, db, content_hash)
-            _scan_cache[content_hash] = (now, {**result, "scan_id": scan.id})
+            scan_id = None
+            if user:
+                scan = _save_and_return(result, data, user, db, content_hash)
+                scan_id = scan.id
+            _scan_cache[content_hash] = (now, {**result, "scan_id": scan_id})
             return _scan_cache[content_hash][1]
 
     # Run full risk analysis
@@ -196,9 +203,13 @@ async def scan_content(
         has_redirected=data.hasRedirected,
     )
 
-    scan = _save_and_return(result, data, user, db, content_hash)
+    scan_id = None
+    if user:
+        scan = _save_and_return(result, data, user, db, content_hash)
+        scan_id = scan.id
+
     logger.info(
-        f"Scan #{scan.id} | user={user.username} | score={result['risk_score']} "
+        f"Scan #{scan_id or 'anon'} | user={user.username if user else 'anon'} | score={result['risk_score']} "
         f"| level={result['risk_level']} | url={data.url or 'text'}"
     )
 
@@ -208,7 +219,7 @@ async def scan_content(
         "reasons": result.get("reasons", []),
         "category": result.get("category", "General Threat"),
         "scam_intent": result.get("scam_intent", "None Detected"),
-        "scan_id": scan.id,
+        "scan_id": scan_id,
     }
     _scan_cache[content_hash] = (now, final_resp)
     return final_resp

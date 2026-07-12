@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Dict
-from .api_clients import GeminiClient, OpenAIClient
+from .api_clients import GeminiClient, OpenAIClient, GeminiBadRequestError
+from backend.app.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,16 @@ class AIToolsService:
 
     async def detect_scam(self, input_text: str) -> Dict[str, Any]:
         system_prompt = "You are a cybersecurity analyst. Assess whether the given input is a scam, phishing, or malicious. Respond with a concise verdict (Scam, Legitimate, or Unclear) and a short reason."
-        response = await self.client.generate(system_prompt, input_text)
+        try:
+            response = await self.client.generate(system_prompt, input_text)
+        except GeminiBadRequestError as exc:
+            logger.warning(f"Gemini Bad Request: {exc.body}")
+            if settings.openai_api_key:
+                logger.info("Falling back to OpenAI for scam detection")
+                self.client = OpenAIClient()
+                response = await self.client.generate(system_prompt, input_text)
+            else:
+                raise
         # Simple parsing: assume first line is verdict, rest is reason
         lines = response["text"].splitlines()
         verdict = lines[0].strip() if lines else "Unclear"
@@ -29,10 +39,28 @@ class AIToolsService:
 
     async def chat_assistant(self, query: str) -> Dict[str, Any]:
         system_prompt = "You are an expert security assistant. Answer the user's security‑related question in a clear, concise, and professional tone."
-        response = await self.client.generate(system_prompt, query)
+        try:
+            response = await self.client.generate(system_prompt, query)
+        except GeminiBadRequestError as exc:
+            logger.warning(f"Gemini Bad Request: {exc.body}")
+            if settings.openai_api_key:
+                logger.info("Falling back to OpenAI for chat assistant")
+                self.client = OpenAIClient()
+                response = await self.client.generate(system_prompt, query)
+            else:
+                raise
         return {"answer": response["text"].strip(), "raw": response}
 
     async def explain_risk(self, payload: str) -> Dict[str, Any]:
         system_prompt = "You are a cybersecurity risk analyst. Explain the risk factors for the given risk payload, including impact, attack vectors, and mitigations."
-        response = await self.client.generate(system_prompt, payload)
+        try:
+            response = await self.client.generate(system_prompt, payload)
+        except GeminiBadRequestError as exc:
+            logger.warning(f"Gemini Bad Request: {exc.body}")
+            if settings.openai_api_key:
+                logger.info("Falling back to OpenAI for risk explanation")
+                self.client = OpenAIClient()
+                response = await self.client.generate(system_prompt, payload)
+            else:
+                raise
         return {"explanation": response["text"].strip(), "raw": response}

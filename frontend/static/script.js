@@ -559,7 +559,7 @@ function escapeHtml(str) {
 
         try {
             console.log("Chatbot: Sending message to assistant...", text);
-            const res = await fetch('/api/assistant', {
+            const res = await fetch('/ai/api/assistant', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

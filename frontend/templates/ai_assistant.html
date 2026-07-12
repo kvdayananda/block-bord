@@ -70,7 +70,7 @@ async function sendMsg() {
   msgs.innerHTML += `<div id="typing" class="chat-msg bot" style="display:flex;gap:12px;align-items:flex-start;"><div style="width:32px;height:32px;border-radius:50%;background:var(--primary-grad);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;flex-shrink:0;">🤖</div><div style="background:var(--surface-raised);border:1px solid var(--border);border-radius:0 14px 14px 14px;padding:14px 18px;font-size:0.9rem;color:var(--text-dim);">⏳ Thinking...</div></div>`;
   msgs.scrollTop = msgs.scrollHeight;
   try {
-    const r = await fetch('/tools/api/assistant', {
+    const r = await fetch('/ai/api/assistant', {
       method:'POST', headers:{'Content-Type':'application/json','X-CSRF-Token':document.querySelector('meta[name="csrf-token"]')?.content},
       body: JSON.stringify({message: msg})
     });

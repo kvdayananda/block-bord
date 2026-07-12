@@ -1,5 +1,5 @@
 // Background Service Worker for Block Bord AI – Full Feature Set
-let API_URL = "https://block-bord-ai-pro.onrender.com";
+let API_URL = "http://127.0.0.1:8000";
 
 // Initialize API_URL from storage
 chrome.storage.local.get(['apiUrl'], (res) => {
@@ -47,7 +47,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
     if (message.action === 'pageContentDetected') {
         const url = message.url.toLowerCase();
-        if ((url.includes("127.0.0.1") || url.includes("localhost")) && !url.includes("/test-")) return;
+        // if ((url.includes("127.0.0.1") || url.includes("localhost")) && !url.includes("/test-")) return;
 
         updateBadge(tabId, "...", "#3B82F6");
 
