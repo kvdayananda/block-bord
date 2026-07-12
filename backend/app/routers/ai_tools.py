@@ -67,7 +67,7 @@ async def api_assistant(
     req: AssistantRequest,
     request: Request,
     db: Session = Depends(get_db),
-    user = Depends(require_user)
+
 ):
     try:
         # Pass conversation history if supported, or just the main message
