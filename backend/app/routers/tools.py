@@ -671,3 +671,100 @@ async def security_report(req: ReportRequest, request: Request, db: Session = De
             "summary": f"Security posture is {risk} for {domain}. {len([v for v in sections.values() if v<70])} areas need improvement.",
             "sections": sections, "pdf_url": "#",
             "note": "Add API keys (VirusTotal, AbuseIPDB, HIBP) to .env for full live scanning"}
+
+
+# --- PHASE 1 TOOLS ---
+
+@router.get("/shopping-detector", response_class=HTMLResponse)
+def fake_shopping_detector_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    return templates.TemplateResponse("shopping_detector.html", {"request": request, "user": user, "plan": getattr(user, "plan", "free")})
+
+@router.get("/security-headers", response_class=HTMLResponse)
+def security_headers_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    return templates.TemplateResponse("header_analyzer.html", {"request": request, "user": user, "plan": getattr(user, "plan", "free")})
+
+@router.get("/fingerprint", response_class=HTMLResponse)
+def fingerprint_analyzer_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    return templates.TemplateResponse("fingerprint_analyzer.html", {"request": request, "user": user, "plan": getattr(user, "plan", "free")})
+
+@router.get("/metadata-scanner", response_class=HTMLResponse)
+def metadata_scanner_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    return templates.TemplateResponse("metadata_scanner.html", {"request": request, "user": user, "plan": getattr(user, "plan", "free")})
+
+@router.get("/screenshot-analyzer", response_class=HTMLResponse)
+def screenshot_analyzer_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    return templates.TemplateResponse("screenshot_analyzer.html", {"request": request, "user": user, "plan": getattr(user, "plan", "free")})
+
+
+# --- METADATA SCAN API ---
+@router.post("/api/scan-metadata")
+async def api_scan_metadata(request: Request, db: Session = Depends(get_db)):
+    """Fetch a URL and extract HTTP metadata."""
+    import httpx
+    form = await request.form()
+    url = form.get("url", "").strip()
+    if not url:
+        raise HTTPException(status_code=400, detail="URL is required")
+    if not url.startswith("http"):
+        url = "https://" + url
+
+    try:
+        async with httpx.AsyncClient(timeout=10, follow_redirects=True) as client:
+            resp = await client.get(url)
+        hdrs = dict(resp.headers)
+        hdrs_l = {k.lower(): v for k, v in hdrs.items()}
+
+        security_header_fields = ["content-security-policy","strict-transport-security","x-frame-options",
+                                   "x-content-type-options","referrer-policy","permissions-policy"]
+        sec_hdrs = {k: hdrs_l.get(k, "NOT SET") for k in security_header_fields}
+
+        general = {
+            "URL": url,
+            "Status Code": resp.status_code,
+            "Final URL": str(resp.url),
+            "Content Type": hdrs_l.get("content-type", "Unknown"),
+        }
+
+        server = {
+            "Server": hdrs_l.get("server", "Hidden"),
+            "X-Powered-By": hdrs_l.get("x-powered-by", "Not Disclosed"),
+            "Via": hdrs_l.get("via", "—"),
+        }
+
+        caching = {
+            "Cache-Control": hdrs_l.get("cache-control", "—"),
+            "Pragma": hdrs_l.get("pragma", "—"),
+            "Expires": hdrs_l.get("expires", "—"),
+            "Set-Cookie": "Present" if "set-cookie" in hdrs_l else "None",
+        }
+
+        warnings = []
+        if hdrs_l.get("x-powered-by"):
+            warnings.append(f"Server is exposing technology stack via X-Powered-By: {hdrs_l['x-powered-by']}")
+        if hdrs_l.get("server"):
+            warnings.append(f"Server version exposed via Server header: {hdrs_l['server']}")
+        not_set = [k for k, v in sec_hdrs.items() if v == "NOT SET"]
+        if not_set:
+            warnings.append(f"Missing security headers: {', '.join(not_set)}")
+
+        return {
+            "target": url,
+            "target_type": "url",
+            "metadata": {
+                "general": general,
+                "security_headers": sec_hdrs,
+                "server": server,
+                "caching": caching,
+            },
+            "risk_score": len(warnings) * 15,
+            "warnings": warnings
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch URL: {e}")
+
+

@@ -1,57 +1,51 @@
 """
-Block Bord AI — Public Pages Router
-Routes: /, /about, /status, /contact, /privacy, /terms, /cookie, /test-*
-No authentication required for these pages.
+Block Bord AI — Public API & Test Pages
 """
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from backend.app.utils.seo import seo_context
+from sqlalchemy.orm import Session
+
+from backend.app.dependencies import get_db, get_current_user
 
 router = APIRouter(tags=["Public"])
 templates = Jinja2Templates(directory="frontend/templates")
 
 
+# ── Landing Page ──
 @router.get("/", response_class=HTMLResponse)
-def landing(request: Request):
+def landing_page(request: Request):
     return templates.TemplateResponse("landing.html", {"request": request})
 
 
+# ── About ──
 @router.get("/about", response_class=HTMLResponse)
 def about_page(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 
-@router.get("/status", response_class=HTMLResponse)
-def status_page(request: Request):
-    return templates.TemplateResponse("status.html", {"request": request})
-
-
+# ── Contact ──
 @router.get("/contact", response_class=HTMLResponse)
 def contact_page(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
 
 
-@router.get("/privacy", response_class=HTMLResponse)
-def privacy_page(request: Request):
-    return templates.TemplateResponse("privacy.html", {"request": request})
+# ── Leak Checker (sidebar shortcut, canonical at /tools/leak-checker) ──
+@router.get("/leak-checker", response_class=HTMLResponse)
+def leak_checker_shortcut(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    plan = getattr(user, "plan", "free") if user else "free"
+    return templates.TemplateResponse("leak_checker.html", {"request": request, "user": user, "plan": plan})
 
 
-@router.get("/terms", response_class=HTMLResponse)
-def terms_page(request: Request):
-    return templates.TemplateResponse("terms.html", {"request": request})
+# ── Scam Map (sidebar shortcut, canonical at /tools/scam-map) ──
+@router.get("/scam-map", response_class=HTMLResponse)
+def scam_map_shortcut(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    plan = getattr(user, "plan", "free") if user else "free"
+    return templates.TemplateResponse("scam_map.html", {"request": request, "user": user, "plan": plan})
 
-
-@router.get("/cookie", response_class=HTMLResponse)
-def cookie_page(request: Request):
-    return templates.TemplateResponse("cookie.html", {"request": request})
-
-
-@router.get("/health")
-def health_check():
-    """Health check for Render, Docker, and load balancers."""
-    return {"status": "ok", "version": "2.0.0", "service": "blockbord-ai"}
 
 
 # ── Test pages for extension validation ──
@@ -100,3 +94,51 @@ def test_reward_scam(request: Request):
       </div>
     </body></html>
     """)
+
+
+# ──────────────────────────────────────────────────────────────
+# SEO: sitemap.xml + robots.txt
+# ──────────────────────────────────────────────────────────────
+from fastapi.responses import PlainTextResponse, Response
+
+@router.get("/sitemap.xml", include_in_schema=False)
+def sitemap(request: Request):
+    base = str(request.base_url).rstrip("/")
+    urls = [
+        "/", "/about", "/pricing", "/contact", "/status",
+        "/privacy", "/terms", "/cookie",
+        "/tools", "/tools/url-scanner", "/tools/domain-inspector",
+        "/tools/ip-lookup", "/tools/email-verifier", "/tools/email-header",
+        "/tools/qr-scanner", "/tools/password-checker", "/tools/ssl-checker",
+        "/tools/upi-checker", "/tools/social-scanner", "/tools/darkweb-monitor",
+        "/tools/file-hash", "/tools/malware-intel", "/tools/port-scanner",
+        "/tools/phishing-sim", "/tools/threat-score", "/tools/security-report",
+        "/tools/shopping-detector", "/tools/security-headers",
+        "/tools/fingerprint", "/tools/metadata-scanner", "/tools/screenshot-analyzer",
+        "/login", "/register",
+    ]
+    entries = "\n".join([
+        f"  <url><loc>{base}{u}</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>"
+        for u in urls
+    ])
+    xml = f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{entries}
+</urlset>"""
+    return Response(content=xml, media_type="application/xml")
+
+
+@router.get("/robots.txt", include_in_schema=False)
+def robots():
+    content = """User-agent: *
+Allow: /
+Disallow: /app/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /settings
+Disallow: /checkout/
+Disallow: /payment/
+Sitemap: https://blockbord.ai/sitemap.xml
+"""
+    return PlainTextResponse(content=content)
+

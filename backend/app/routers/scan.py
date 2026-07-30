@@ -100,13 +100,13 @@ async def scan_content(
     data: ScanRequest,
     request: Request,
     db: Session = Depends(get_db),
-    user: Optional[User] = Depends(get_current_user),
+    user: User = Depends(require_user),
     _csrf: None = Depends(validate_csrf),
 ):
 
-    plan = get_user_plan(user) if user else "free"
+    plan = get_user_plan(user)
     limit = PLAN_LIMITS.get(plan)
-    today_count = get_today_scan_count(db, user.id) if user else 0
+    today_count = get_today_scan_count(db, user.id)
 
     if limit is not None and today_count >= limit:
         return {
@@ -240,7 +240,22 @@ def _save_and_return(result: dict, data: ScanRequest, user: User, db: Session, u
     db.add(scan)
     db.commit()
     db.refresh(scan)
+
+    try:
+        from backend.app.utils.broadcaster import broadcaster
+        import asyncio
+        asyncio.create_task(broadcaster.broadcast({
+            "url": data.url or data.content,
+            "risk_score": scan.risk_score,
+            "risk_level": scan.risk_level,
+            "category": scan.category,
+            "time": datetime.now(timezone.utc).strftime('%H:%M:%S')
+        }))
+    except Exception:
+        pass
+
     return scan
+
 
 
 # ──────────────────────────────────────────────────────────────

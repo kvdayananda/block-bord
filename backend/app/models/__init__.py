@@ -3,7 +3,9 @@ from backend.app.models.scan import ScanHistory
 from backend.app.models.payment import Payment
 from backend.app.models.feedback import Feedback
 from backend.app.models.domain_lists import BlacklistDomain, WhitelistDomain
-from backend.app.models.report import UserReport, PasswordResetToken
+from backend.app.models.report import UserReport, PasswordResetToken, EmailVerificationToken
+from backend.app.models.bulk_scan import BulkScanJob
+from backend.app.models.support_ticket import SupportTicket
 
 __all__ = [
     "User",
@@ -14,4 +16,7 @@ __all__ = [
     "WhitelistDomain",
     "UserReport",
     "PasswordResetToken",
+    "EmailVerificationToken",
+    "BulkScanJob",
+    "SupportTicket",
 ]

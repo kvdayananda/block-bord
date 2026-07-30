@@ -484,3 +484,372 @@ class SecurityToolService:
             risk_score=risk_score,
             risk_level=risk_level
         )
+
+    async def analyze_shopping_site(self, url: str) -> "FakeShoppingResult":
+        # Simulate scraping trust signals from a shopping site
+        from ..schemas.security import FakeShoppingResult
+        trust_score = 100
+        reasons = []
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+
+        if not domain:
+            raise HTTPException(status_code=400, detail="Invalid URL")
+
+        # Basic heuristic checks for fake shops
+        suspicious_keywords = ["cheap", "discount", "free", "shop", "store", "buy", "sale"]
+        if any(kw in domain for kw in suspicious_keywords):
+            trust_score -= 20
+            reasons.append("Domain name contains suspicious e-commerce keywords")
+
+        # Check domain age via existing logic
+        try:
+            if whois:
+                w = whois.whois(domain)
+                creation_date = w.creation_date
+                if isinstance(creation_date, list):
+                    creation_date = creation_date[0]
+                if creation_date:
+                    age = (datetime.datetime.now() - creation_date).days
+                    if age < 30:
+                        trust_score -= 40
+                        reasons.append("Domain is extremely new (less than 30 days old)")
+                    elif age < 180:
+                        trust_score -= 20
+                        reasons.append("Domain is relatively new (less than 6 months old)")
+        except Exception:
+            trust_score -= 10
+            reasons.append("Could not verify domain age via WHOIS")
+
+        risk_level = "safe"
+        if trust_score < 40:
+            risk_level = "high"
+        elif trust_score < 70:
+            risk_level = "medium"
+        elif trust_score < 90:
+            risk_level = "low"
+
+        return FakeShoppingResult(
+            url=url,
+            trust_score=max(0, trust_score),
+            risk_level=risk_level,
+            reasons=reasons,
+            details={"scanned_domain": domain}
+        )
+
+    async def analyze_security_headers(self, url: str) -> "SecurityHeadersResult":
+        from ..schemas.security import SecurityHeadersResult
+        if not url.startswith("http"):
+            url = "https://" + url
+            
+        try:
+            resp = await self.http_client.get(url, follow_redirects=True, timeout=10.0)
+            headers = dict(resp.headers)
+            headers_lower = {k.lower(): v for k, v in headers.items()}
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Failed to connect to URL: {e}")
+
+        missing = []
+        score = 100
+        
+        expected_headers = {
+            "strict-transport-security": 20,
+            "content-security-policy": 30,
+            "x-content-type-options": 15,
+            "x-frame-options": 20,
+            "referrer-policy": 15
+        }
+        
+        for h, v in expected_headers.items():
+            if h not in headers_lower:
+                missing.append(h)
+                score -= v
+                
+        grade = "A"
+        if score < 40:
+            grade = "F"
+        elif score < 60:
+            grade = "D"
+        elif score < 80:
+            grade = "C"
+        elif score < 95:
+            grade = "B"
+            
+        return SecurityHeadersResult(
+            url=url,
+            grade=grade,
+            score=max(0, score),
+            headers=headers,
+            missing=missing,
+            warnings=["Modern web standards recommend implementing all missing headers."] if missing else []
+        )
+
+    async def check_ssl_certificate(self, domain: str) -> dict:
+        """Check SSL certificate details for a domain."""
+        domain = domain.replace("https://", "").replace("http://", "").split("/")[0]
+        try:
+            ctx = ssl.create_default_context()
+            conn = ctx.wrap_socket(
+                socket.socket(socket.AF_INET),
+                server_hostname=domain
+            )
+            conn.settimeout(8.0)
+            conn.connect((domain, 443))
+            cert = conn.getpeercert()
+            conn.close()
+
+            # Parse dates
+            not_before = cert.get("notBefore", "Unknown")
+            not_after = cert.get("notAfter", "Unknown")
+            
+            try:
+                expiry = datetime.datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
+                days_left = (expiry - datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)).days
+                is_expired = days_left < 0
+                is_expiring_soon = 0 <= days_left <= 30
+            except Exception:
+                days_left = None
+                is_expired = False
+                is_expiring_soon = False
+
+            subject = dict(x[0] for x in cert.get("subject", []))
+            issuer = dict(x[0] for x in cert.get("issuer", []))
+            
+            # Grade based on expiry
+            if is_expired:
+                grade = "F"
+            elif is_expiring_soon:
+                grade = "C"
+            else:
+                grade = "A"
+
+            return {
+                "domain": domain,
+                "grade": grade,
+                "subject": subject.get("commonName", domain),
+                "issuer": issuer.get("organizationName", "Unknown CA"),
+                "valid_from": not_before,
+                "valid_until": not_after,
+                "days_remaining": days_left,
+                "is_expired": is_expired,
+                "is_expiring_soon": is_expiring_soon,
+                "san": cert.get("subjectAltName", []),
+                "version": cert.get("version", "Unknown"),
+                "serial_number": cert.get("serialNumber", "Unknown"),
+            }
+        except ssl.SSLCertVerificationError as e:
+            return {
+                "domain": domain, "grade": "F",
+                "error": f"SSL Verification Failed: {e}",
+                "is_expired": True, "days_remaining": 0
+            }
+        except Exception as e:
+            return {"domain": domain, "grade": "F", "error": str(e), "days_remaining": 0}
+
+    async def check_dns_security(self, domain: str) -> dict:
+        """Check DNS security records: SPF, DKIM, DMARC, MX, TXT."""
+        domain = domain.replace("https://", "").replace("http://", "").split("/")[0]
+        records = {}
+        issues = []
+        score = 100
+
+        if not dns:
+            return {"domain": domain, "error": "DNS resolver not available (pip install dnspython)"}
+
+        # SPF
+        try:
+            spf_records = dns.resolver.resolve(domain, "TXT")
+            spf = [r.to_text() for r in spf_records if "v=spf1" in r.to_text()]
+            records["spf"] = spf[0] if spf else None
+            if not spf:
+                issues.append("No SPF record found — email spoofing is possible")
+                score -= 25
+        except Exception:
+            records["spf"] = None
+            issues.append("SPF lookup failed")
+            score -= 25
+
+        # DMARC
+        try:
+            dmarc = dns.resolver.resolve(f"_dmarc.{domain}", "TXT")
+            dmarc_records = [r.to_text() for r in dmarc if "v=DMARC1" in r.to_text()]
+            records["dmarc"] = dmarc_records[0] if dmarc_records else None
+            if not dmarc_records:
+                issues.append("No DMARC record — weak email authentication")
+                score -= 30
+        except Exception:
+            records["dmarc"] = None
+            issues.append("DMARC lookup failed or not configured")
+            score -= 30
+
+        # MX
+        try:
+            mx = dns.resolver.resolve(domain, "MX")
+            records["mx"] = [r.exchange.to_text() for r in mx]
+        except Exception:
+            records["mx"] = []
+            issues.append("No MX records found")
+            score -= 10
+
+        # NS
+        try:
+            ns = dns.resolver.resolve(domain, "NS")
+            records["ns"] = [r.target.to_text() for r in ns]
+        except Exception:
+            records["ns"] = []
+
+        # A record
+        try:
+            a = dns.resolver.resolve(domain, "A")
+            records["a"] = [r.address for r in a]
+        except Exception:
+            records["a"] = []
+
+        score = max(0, score)
+        grade = "A" if score >= 90 else "B" if score >= 70 else "C" if score >= 50 else "F"
+
+        return {
+            "domain": domain,
+            "grade": grade,
+            "score": score,
+            "records": records,
+            "issues": issues,
+        }
+
+    def check_password_strength(self, password: str) -> dict:
+        """Analyze password strength with entropy estimation."""
+        import math
+        import re
+
+        length = len(password)
+        has_lower = bool(re.search(r'[a-z]', password))
+        has_upper = bool(re.search(r'[A-Z]', password))
+        has_digit = bool(re.search(r'\d', password))
+        has_special = bool(re.search(r'[^a-zA-Z0-9]', password))
+
+        # Calculate charset size for entropy
+        charset = 0
+        if has_lower: charset += 26
+        if has_upper: charset += 26
+        if has_digit: charset += 10
+        if has_special: charset += 32
+
+        entropy = round(length * math.log2(charset), 1) if charset > 0 else 0
+
+        # Score 0–100
+        score = 0
+        if length >= 8: score += 15
+        if length >= 12: score += 15
+        if length >= 16: score += 10
+        if has_lower: score += 10
+        if has_upper: score += 15
+        if has_digit: score += 15
+        if has_special: score += 20
+
+        # Common password check (basic)
+        common = ["password", "123456", "qwerty", "password123", "letmein", "admin", "welcome", "monkey"]
+        is_common = password.lower() in common
+
+        if is_common:
+            score = min(score, 10)
+
+        # Crack time estimate
+        if entropy < 28:
+            crack_time = "Instantly"
+        elif entropy < 40:
+            crack_time = "Minutes"
+        elif entropy < 56:
+            crack_time = "Days"
+        elif entropy < 72:
+            crack_time = "Months"
+        else:
+            crack_time = "Centuries"
+
+        strength = "Very Weak" if score < 20 else "Weak" if score < 40 else "Fair" if score < 60 else "Strong" if score < 80 else "Very Strong"
+
+        suggestions = []
+        if length < 12: suggestions.append("Use at least 12 characters")
+        if not has_upper: suggestions.append("Add uppercase letters")
+        if not has_lower: suggestions.append("Add lowercase letters")
+        if not has_digit: suggestions.append("Add numbers")
+        if not has_special: suggestions.append("Add special characters (!@#$%...)")
+        if is_common: suggestions.append("Avoid commonly used passwords")
+
+        return {
+            "score": score,
+            "strength": strength,
+            "entropy": entropy,
+            "crack_time": crack_time,
+            "length": length,
+            "has_lower": has_lower,
+            "has_upper": has_upper,
+            "has_digit": has_digit,
+            "has_special": has_special,
+            "is_common": is_common,
+            "suggestions": suggestions,
+        }
+
+    async def analyze_email_phishing(self, email_content: str) -> dict:
+        """Analyze email content for phishing indicators."""
+        import re
+        content_lower = email_content.lower()
+        
+        indicators = []
+        score = 0
+
+        # Urgency keywords
+        urgency_words = ["urgent", "immediately", "action required", "account suspended", "verify now",
+                         "click here", "limited time", "your account will be", "expires today"]
+        found_urgency = [w for w in urgency_words if w in content_lower]
+        if found_urgency:
+            score += min(30, len(found_urgency) * 8)
+            indicators.append(f"Urgency language detected: {', '.join(found_urgency[:3])}")
+
+        # Suspicious links
+        urls = re.findall(r'https?://[^\s<>"]+', email_content)
+        suspicious_domains = [u for u in urls if any(kw in u.lower() for kw in
+            ["login", "verify", "secure", "account", "paypal", "bank", "update", "click"])]
+        if suspicious_domains:
+            score += min(25, len(suspicious_domains) * 12)
+            indicators.append(f"Suspicious links found: {len(suspicious_domains)}")
+
+        # Credential harvesting
+        credential_words = ["password", "username", "social security", "ssn", "credit card", "cvv", "pin", "otp"]
+        found_creds = [w for w in credential_words if w in content_lower]
+        if found_creds:
+            score += min(25, len(found_creds) * 10)
+            indicators.append(f"Credential requests: {', '.join(found_creds[:3])}")
+
+        # Impersonation patterns
+        impersonation = ["dear customer", "dear user", "dear account holder", "apple support",
+                         "google account team", "microsoft security", "amazon.com"]
+        found_imp = [w for w in impersonation if w in content_lower]
+        if found_imp:
+            score += min(20, len(found_imp) * 10)
+            indicators.append(f"Possible impersonation: {', '.join(found_imp[:2])}")
+
+        score = min(100, score)
+        if score >= 70:
+            verdict = "HIGH RISK — Likely Phishing"
+            risk_level = "High"
+        elif score >= 40:
+            verdict = "MEDIUM RISK — Suspicious Email"
+            risk_level = "Medium"
+        elif score >= 20:
+            verdict = "LOW RISK — Mildly Suspicious"
+            risk_level = "Low"
+        else:
+            verdict = "SAFE — No obvious phishing indicators"
+            risk_level = "Safe"
+
+        return {
+            "score": score,
+            "risk_level": risk_level,
+            "verdict": verdict,
+            "indicators": indicators,
+            "urls_found": urls[:10],
+            "url_count": len(urls),
+        }
+
+security_tool_service = SecurityToolService()
+

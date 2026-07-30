@@ -20,11 +20,11 @@ class GeminiClient:
     Reads ``GEMINI_API_KEY`` from environment.
     """
 
-    def __init__(self, model: str = "gemini-1.5-flash"):
+    def __init__(self, model: str = "gemini-2.0-flash"):
         self.api_key = settings.gemini_api_key
         if not self.api_key:
             raise ValueError("GEMINI_API_KEY not set in environment")
-        self.base_url = f"https://generativelanguage.googleapis.com/v1/models/{model}:generateContent"
+        self.base_url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         self.headers = {"Content-Type": "application/json"}
         self.client = httpx.AsyncClient(timeout=30)
         self.model = model

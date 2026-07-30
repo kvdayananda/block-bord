@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from backend.app.main import app
-from backend.app.database.connection import Base
+from backend.app.database.connection import Base, engine as app_engine
 from backend.app.dependencies import get_db
 
 # Use an in-memory SQLite database for tests
@@ -21,8 +21,10 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 @pytest.fixture(scope="session")
 def db_engine():
     Base.metadata.create_all(bind=engine)
+    Base.metadata.create_all(bind=app_engine)
     yield engine
     Base.metadata.drop_all(bind=engine)
+    Base.metadata.drop_all(bind=app_engine)
 
 @pytest.fixture(scope="function")
 def db(db_engine):

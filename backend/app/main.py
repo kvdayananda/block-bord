@@ -26,7 +26,7 @@ from backend.app.utils.limiter import limiter
 from sqlalchemy.orm import Session
 from backend.app.dependencies import get_db
 from backend.app.routers import (
-    auth, public, dashboard, scan, admin, payments, tools, security_tools, ai_tools, password
+    auth, public, dashboard, scan, admin, payments, tools, security_tools, ai_tools, password, bulk, support, ai_assistant
 )
 from backend.app import models # Ensure models are registered for Base.metadata.create_all
 
@@ -173,6 +173,27 @@ app.include_router(tools.router)
 app.include_router(security_tools.router)
 app.include_router(ai_tools.router)
 app.include_router(password.router)
+app.include_router(bulk.router)
+app.include_router(support.router)
+app.include_router(ai_assistant.router)
+
+
+# ──────────────────────────────────────────────────────────────
+# WEBSOCKET THREAT FEED (Real-time admin broadcast)
+# ──────────────────────────────────────────────────────────────
+from fastapi import WebSocket, WebSocketDisconnect
+from backend.app.utils.broadcaster import broadcaster
+
+@app.websocket("/ws/threat-feed")
+async def websocket_threat_feed(websocket: WebSocket):
+    await broadcaster.connect(websocket)
+    try:
+        while True:
+            # Maintain connection, read messages if sent (though it's unidirectional)
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        broadcaster.disconnect(websocket)
+
 
 
 # ──────────────────────────────────────────────────────────────

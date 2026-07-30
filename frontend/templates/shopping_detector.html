@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Fake Shopping Website Detector — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<style>
+  .tool-header { margin-bottom: 24px; }
+  .tool-header h1 { font-size: 2rem; margin-bottom: 8px; }
+  .tool-header p { color: var(--text-muted); }
+  
+  .result-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-top: 24px;
+    display: none;
+  }
+  .trust-score {
+    font-size: 3rem;
+    font-weight: 800;
+    margin: 12px 0;
+  }
+  .score-high { color: #10b981; }
+  .score-medium { color: #f59e0b; }
+  .score-low { color: #ef4444; }
+  
+  .reason-list { margin-top: 16px; padding-left: 20px; }
+  .reason-list li { margin-bottom: 8px; color: var(--text-muted); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bb-container" style="padding: 40px 20px;">
+  <div class="tool-header">
+    <h1>Fake Shopping Website Detector</h1>
+    <p>Analyze e-commerce sites for trust signals, domain age, and common scam patterns.</p>
+  </div>
+
+  <div class="bb-card" style="padding: 24px;">
+    <form id="shoppingForm" onsubmit="analyzeShopping(event)">
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label for="url">E-Commerce URL</label>
+        <input type="url" id="url" name="url" class="form-control" placeholder="https://example-shop.com" required>
+      </div>
+      <button type="submit" class="btn btn-primary" id="analyzeBtn">Analyze Store</button>
+    </form>
+  </div>
+
+  <div id="resultCard" class="result-card">
+    <h3>Analysis Result</h3>
+    <div id="trustScore" class="trust-score"></div>
+    <div id="riskLevel" style="font-size: 1.2rem; font-weight: 600; text-transform: uppercase;"></div>
+    
+    <h4 style="margin-top: 24px;">Risk Factors & Trust Signals</h4>
+    <ul id="reasonsList" class="reason-list"></ul>
+  </div>
+</div>
+
+<script>
+async function analyzeShopping(e) {
+  e.preventDefault();
+  const btn = document.getElementById('analyzeBtn');
+  const url = document.getElementById('url').value;
+  const resultCard = document.getElementById('resultCard');
+  
+  btn.innerText = 'Analyzing...';
+  btn.disabled = true;
+  resultCard.style.display = 'none';
+  
+  try {
+    const formData = new FormData();
+    formData.append('url', url);
+    
+    // Adjust endpoint based on API location
+    const response = await fetch('/security/api/analyze-shopping', {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrf_token='))?.split('=')[1] || ''
+      }
+    });
+    
+    const data = await response.json();
+    if(response.ok) {
+      resultCard.style.display = 'block';
+      const scoreEl = document.getElementById('trustScore');
+      scoreEl.innerText = data.trust_score + '/100';
+      scoreEl.className = 'trust-score ' + 
+        (data.trust_score > 70 ? 'score-high' : data.trust_score > 40 ? 'score-medium' : 'score-low');
+        
+      document.getElementById('riskLevel').innerText = "Risk Level: " + data.risk_level;
+      
+      const ul = document.getElementById('reasonsList');
+      ul.innerHTML = '';
+      if (data.reasons.length === 0) {
+        ul.innerHTML = '<li>No immediate red flags detected. Proceed with standard caution.</li>';
+      } else {
+        data.reasons.forEach(r => {
+          const li = document.createElement('li');
+          li.innerText = r;
+          ul.appendChild(li);
+        });
+      }
+    } else {
+      alert("Error: " + (data.detail || "Analysis failed"));
+    }
+  } catch (err) {
+    alert("Connection error");
+  } finally {
+    btn.innerText = 'Analyze Store';
+    btn.disabled = false;
+  }
+}
+</script>
+{% endblock %}

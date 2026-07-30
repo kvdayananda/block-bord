@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Verify 2FA — Block Bord AI{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;">
+  <div style="max-width:420px; width:100%;">
+    <div style="text-align:center; margin-bottom:32px;">
+      <div style="width:64px; height:64px; border-radius:50%; background:var(--primary-soft); display:flex; align-items:center; justify-content:center; margin:0 auto 16px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      </div>
+      <h1 style="font-size:1.5rem; margin-bottom:4px;">Two-Factor Verification</h1>
+      <p style="color:var(--text-muted); font-size:0.875rem;">Enter the 6-digit code from your authenticator app.</p>
+    </div>
+
+    {% if error %}
+    <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:12px 16px; margin-bottom:16px; color:#ef4444; font-size:0.875rem; text-align:center;">
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="bb-card" style="padding:32px;">
+      <form action="/verify-2fa" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ request.session.get('csrf_token', '') }}">
+        <input type="text" name="code" id="code2fa" placeholder="000000" required maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code" autofocus
+          style="width:100%; padding:16px; border-radius:12px; border:2px solid var(--border); background:var(--bg-input); color:var(--text); font-size:2rem; text-align:center; letter-spacing:0.5em; font-family:var(--font-mono); transition:border-color 0.3s ease;">
+        <button type="submit" class="btn btn-primary" style="width:100%; margin-top:20px; padding:14px; font-size:1rem;">Verify & Login</button>
+      </form>
+      <div style="text-align:center; margin-top:16px;">
+        <a href="/login" style="color:var(--text-muted); font-size:0.85rem; text-decoration:none;">← Back to Login</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-submit on 6 digits
+  document.getElementById('code2fa')?.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '');
+    if (this.value.length === 6) {
+      this.closest('form').submit();
+    }
+  });
+</script>
+{% endblock %}

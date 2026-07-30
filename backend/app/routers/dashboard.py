@@ -187,6 +187,21 @@ def generate_api_key(request: Request, db: Session = Depends(get_db)):
     return {"api_key": user.api_key}
 
 
+@router.post("/api/revoke_key")
+def revoke_api_key(request: Request, db: Session = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return JSONResponse({"error": "User not found"}, status_code=404)
+    user.api_key = None
+    db.commit()
+    logger.info(f"API key revoked for user: {user.username}")
+    return {"status": "revoked"}
+
+
+
 # ──────────────────────────────────────────────────────────────
 # API: SECURITY STATS
 # ──────────────────────────────────────────────────────────────

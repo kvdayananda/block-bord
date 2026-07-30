@@ -77,6 +77,7 @@
     <div style="display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap;" class="fade-up-d1">
         <button onclick="openTab('users')" class="admin-tab active" id="tab-btn-users">User Management</button>
         <button onclick="openTab('reports')" class="admin-tab" id="tab-btn-reports">User Reports</button>
+        <button onclick="openTab('threat-feed')" class="admin-tab" id="tab-btn-threat-feed">Live Threat Feed</button>
         <button onclick="location.href='/admin/blacklist'" class="admin-tab outline-tab">Domain Blacklist</button>
         <button onclick="location.href='/admin/whitelist'" class="admin-tab outline-tab">Domain Whitelist</button>
     </div>
@@ -139,6 +140,14 @@
                 No pending reports.
             </div>
             {% endfor %}
+        </div>
+    </div>
+
+    <!-- Live Threat Feed Section -->
+    <div id="section-threat-feed" class="tab-content bb-card">
+        <h2 style="font-size:1.1rem; font-weight:800; margin:0 0 20px 0; color:var(--text);">Live Threat Feed</h2>
+        <div style="background:var(--bg-alt); border:1px solid var(--border); border-radius:var(--radius-lg); padding:16px; min-height:300px; max-height:500px; overflow-y:auto; font-family:var(--font-mono); font-size:0.85rem;" id="ws-threat-log">
+            <div style="color:var(--text-muted);" id="ws-status">Connecting to platform threat stream...</div>
         </div>
     </div>
 
@@ -272,6 +281,51 @@
     loadUsers();
     refreshStats();
     setInterval(refreshStats, 30000);
+
+    // WebSocket Threat Feed
+    (function initThreatFeed() {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/threat-feed`;
+        const logContainer = document.getElementById('ws-threat-log');
+        const statusEl = document.getElementById('ws-status');
+        
+        let ws;
+        function connect() {
+            ws = new WebSocket(wsUrl);
+            ws.onopen = () => {
+                if (statusEl) statusEl.textContent = '✓ Live connection established. Awaiting events...';
+            };
+            ws.onmessage = (e) => {
+                try {
+                    const data = JSON.parse(e.data);
+                    const el = document.createElement('div');
+                    el.style.padding = '8px 0';
+                    el.style.borderBottom = '1px solid var(--border)';
+                    el.style.display = 'flex';
+                    el.style.justifyContent = 'space-between';
+                    
+                    const scoreColor = data.risk_score > 70 ? '#ef4444' : data.risk_score > 40 ? '#f59e0b' : '#10b981';
+                    el.innerHTML = `
+                        <span>[${data.time}] <b style="color:var(--primary);">${data.category}</b>: <span style="font-family:monospace; color:var(--text-muted);">${data.url}</span></span>
+                        <span style="color:${scoreColor}; font-weight:bold;">Score: ${data.risk_score} (${data.risk_level})</span>
+                    `;
+                    logContainer.appendChild(el);
+                    logContainer.scrollTop = logContainer.scrollHeight;
+                    
+                    // Remove initial status message if still there
+                    if(statusEl) statusEl.style.display = 'none';
+                } catch(err) { console.error('WS parse error', err); }
+            };
+            ws.onclose = () => {
+                if (statusEl) {
+                    statusEl.style.display = 'block';
+                    statusEl.textContent = '✗ Connection lost. Reconnecting in 5s...';
+                }
+                setTimeout(connect, 5000);
+            };
+        }
+        connect();
+    })();
 </script>
 
 <style>

@@ -6,6 +6,7 @@ All models import Base from here to register with the same metadata.
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from backend.app.config import settings
 
@@ -29,6 +30,9 @@ engine_kwargs: dict = {
     "pool_pre_ping": True, 
     "future": True,
 }
+
+if is_sqlite and DATABASE_URL == "sqlite:///:memory:":
+    engine_kwargs["poolclass"] = StaticPool
 
 if not is_sqlite:
     engine_kwargs.update({

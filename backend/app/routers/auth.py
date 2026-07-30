@@ -91,12 +91,26 @@ def register(
         username=username,
         email=email,
         password=pwd_context.hash(password),
+        is_active=True,
+        is_email_verified=False,
         is_pro=False,
         plan="free",
     )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+    token_value = secrets.token_urlsafe(32)
+    db.query(EmailVerificationToken).filter(
+        EmailVerificationToken.user_id == new_user.id,
+        EmailVerificationToken.used == False,
+    ).update({"used": True})
+    db.add(EmailVerificationToken(token=token_value, user_id=new_user.id, expires_at=expires_at))
+    db.commit()
+
+    verification_link = f"{request.base_url}verify-email/{token_value}"
+    send_verification_email(email, verification_link)
 
     # Auto-login after registration
     request.session["user_id"] = new_user.id
@@ -130,6 +144,13 @@ def login(
                 "login.html",
                 {"request": request, "error": "Your account has been suspended. Contact support."},
             )
+        
+        # Check if 2FA is enabled
+        if getattr(user, "totp_enabled", False) and user.totp_secret:
+            # Store pending user ID and redirect to 2FA verification page
+            request.session["pending_2fa_user_id"] = user.id
+            return RedirectResponse("/verify-2fa", status_code=302)
+        
         request.session["user_id"] = user.id
         request.session["username"] = user.username
         logger.info(f"User logged in: {username}")
@@ -154,10 +175,48 @@ def logout(request: Request):
 @router.post("/verify-email")
 @limiter.limit("5/minute")
 def verify_email(request: Request, email: str = Form(...), db: Session = Depends(get_db)):
-    """Placeholder email verification endpoint."""
-    # In production, send verification email with token.
+    """Send an email verification link for the supplied address."""
+    email = email.strip().lower()
+    user = db.query(User).filter(User.email == email).first()
+    if user:
+        token = db.query(EmailVerificationToken).filter(
+            EmailVerificationToken.user_id == user.id,
+            EmailVerificationToken.used == False,
+            EmailVerificationToken.expires_at > datetime.now(timezone.utc),
+        ).order_by(EmailVerificationToken.created_at.desc()).first()
+        if not token:
+            expires_at = datetime.now(timezone.utc) + timedelta(hours=24)
+            token_value = secrets.token_urlsafe(32)
+            token = EmailVerificationToken(token=token_value, user_id=user.id, expires_at=expires_at)
+            db.add(token)
+            db.commit()
+        verification_link = f"{request.base_url}verify-email/{token.token}"
+        send_verification_email(email, verification_link)
     logger.info(f"Email verification requested for {email}")
-    return {"detail": "Verification email sent (simulated)."}
+    return {"detail": "Verification email sent."}
+
+
+@router.get("/verify-email/{token}")
+def verify_email_token(request: Request, token: str, db: Session = Depends(get_db)):
+    """Verify an email using the token supplied in the verification link."""
+    verification_token = db.query(EmailVerificationToken).filter(
+        EmailVerificationToken.token == token,
+        EmailVerificationToken.used == False,
+        EmailVerificationToken.expires_at > datetime.now(timezone.utc),
+    ).first()
+
+    if not verification_token:
+        return RedirectResponse("/login?message=The verification link is invalid or has expired.", status_code=302)
+
+    user = db.query(User).filter(User.id == verification_token.user_id).first()
+    if not user:
+        return RedirectResponse("/login?message=The verification link is invalid.", status_code=302)
+
+    user.is_email_verified = True
+    verification_token.used = True
+    db.commit()
+    logger.info(f"Email verified for user: {user.username}")
+    return RedirectResponse("/login?message=Email verified successfully. You can now sign in.", status_code=302)
 
 
 # ──────────────────────────────────────────────────────────────
@@ -264,3 +323,117 @@ def reset_password(
     db.commit()
     logger.info(f"Password reset successful for user: {user.username}")
     return RedirectResponse("/login?message=Password reset successful. Please log in.", status_code=302)
+
+
+# ──────────────────────────────────────────────────────────────
+# TWO-FACTOR AUTHENTICATION (2FA / TOTP)
+# ──────────────────────────────────────────────────────────────
+from backend.app.services.totp_service import generate_totp_secret, get_totp_uri, generate_qr_code_base64, verify_totp
+from backend.app.dependencies import get_current_user
+
+@router.get("/setup-2fa", response_class=HTMLResponse)
+def setup_2fa_page(request: Request, db: Session = Depends(get_db)):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    
+    # Generate a new secret if user doesn't have one yet
+    if not user.totp_secret:
+        user.totp_secret = generate_totp_secret()
+        db.commit()
+    
+    uri = get_totp_uri(user.totp_secret, user.username)
+    qr_b64 = generate_qr_code_base64(uri)
+    
+    return templates.TemplateResponse("setup_2fa.html", {
+        "request": request,
+        "user": user,
+        "qr_code": qr_b64,
+        "secret": user.totp_secret,
+        "already_enabled": user.totp_enabled
+    })
+
+
+@router.post("/setup-2fa")
+def enable_2fa(
+    request: Request,
+    code: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    if not user.totp_secret:
+        return RedirectResponse("/setup-2fa", status_code=302)
+    
+    if verify_totp(user.totp_secret, code.strip()):
+        user.totp_enabled = True
+        db.commit()
+        logger.info(f"2FA enabled for user: {user.username}")
+        return RedirectResponse("/settings?message=2FA enabled successfully!", status_code=302)
+    else:
+        uri = get_totp_uri(user.totp_secret, user.username)
+        qr_b64 = generate_qr_code_base64(uri)
+        return templates.TemplateResponse("setup_2fa.html", {
+            "request": request, "user": user,
+            "qr_code": qr_b64, "secret": user.totp_secret,
+            "error": "Invalid code. Please try again.",
+            "already_enabled": user.totp_enabled
+        })
+
+
+@router.post("/disable-2fa")
+def disable_2fa(
+    request: Request,
+    code: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = get_current_user(request, db)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    
+    if verify_totp(user.totp_secret, code.strip()):
+        user.totp_enabled = False
+        user.totp_secret = None
+        db.commit()
+        logger.info(f"2FA disabled for user: {user.username}")
+        return RedirectResponse("/settings?message=2FA has been disabled.", status_code=302)
+    else:
+        return RedirectResponse("/setup-2fa?error=Invalid code", status_code=302)
+
+
+@router.get("/verify-2fa", response_class=HTMLResponse)
+def verify_2fa_page(request: Request):
+    pending = request.session.get("pending_2fa_user_id")
+    if not pending:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("verify_2fa.html", {"request": request})
+
+
+@router.post("/verify-2fa")
+def verify_2fa(
+    request: Request,
+    code: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    pending_id = request.session.get("pending_2fa_user_id")
+    if not pending_id:
+        return RedirectResponse("/login", status_code=302)
+    
+    user = db.query(User).filter(User.id == pending_id).first()
+    if not user or not user.totp_secret:
+        request.session.pop("pending_2fa_user_id", None)
+        return RedirectResponse("/login", status_code=302)
+    
+    if verify_totp(user.totp_secret, code.strip()):
+        request.session.pop("pending_2fa_user_id", None)
+        request.session["user_id"] = user.id
+        request.session["username"] = user.username
+        logger.info(f"2FA verified for user: {user.username}")
+        return RedirectResponse("/app", status_code=302)
+    else:
+        return templates.TemplateResponse("verify_2fa.html", {
+            "request": request,
+            "error": "Invalid 2FA code. Please try again."
+        })
+

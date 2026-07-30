@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block title %}Security Header Analyzer — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="Analyze HTTP security headers of any website. Grade CSP, HSTS, X-Frame-Options, and more with Block Bord AI.">
+<style>
+.tool-hero { padding: 40px 0 20px; }
+.tool-hero h1 { font-size: 2rem; margin-bottom: 10px; }
+.tool-hero p { color: var(--text-muted); max-width: 600px; }
+.grade-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 900;
+  margin: 16px 0;
+}
+.grade-A { background: rgba(16,185,129,0.15); color: #10b981; border: 3px solid #10b981; }
+.grade-B { background: rgba(99,102,241,0.15); color: #6366f1; border: 3px solid #6366f1; }
+.grade-C { background: rgba(245,158,11,0.15); color: #f59e0b; border: 3px solid #f59e0b; }
+.grade-D { background: rgba(239,68,68,0.15); color: #ef4444; border: 3px solid #ef4444; }
+.grade-F { background: rgba(239,68,68,0.15); color: #ef4444; border: 3px solid #ef4444; }
+
+.headers-table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+.headers-table th { text-align: left; padding: 10px 12px; background: var(--bg-alt); color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.headers-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 0.875rem; word-break: break-all; }
+.missing-badge { background: rgba(239,68,68,0.12); color: #ef4444; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+.present-badge { background: rgba(16,185,129,0.12); color: #10b981; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; }
+.score-bar-wrap { background: var(--bg-alt); border-radius: 99px; height: 8px; margin: 8px 0; overflow: hidden; }
+.score-bar { height: 8px; border-radius: 99px; background: var(--primary-grad); transition: width 0.6s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bb-container tool-hero">
+  <span class="bb-overline">Security Intelligence</span>
+  <h1>🔐 Security Header Analyzer</h1>
+  <p>Instantly grade any website's HTTP security headers — CSP, HSTS, XSS Protection, X-Frame-Options, and more.</p>
+</div>
+
+<div class="bb-container" style="padding-bottom: 60px;">
+  <div class="bb-card" style="padding: 28px;">
+    <form id="headerForm" onsubmit="analyzeHeaders(event)">
+      <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+        <div style="flex:1; min-width:260px;">
+          <label style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:6px;">Target URL or Domain</label>
+          <input id="hdrUrl" type="text" class="form-control" placeholder="https://example.com" required style="width:100%; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg-input); color:var(--text);">
+        </div>
+        <button type="submit" class="btn btn-primary" id="hdrBtn" style="height:42px; padding:0 28px;">Analyze Headers</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading -->
+  <div id="hdrLoading" style="display:none; text-align:center; padding:40px;">
+    <div class="spinner"></div>
+    <p style="color:var(--text-muted); margin-top:12px;">Fetching and grading security headers...</p>
+  </div>
+
+  <!-- Results -->
+  <div id="hdrResults" style="display:none;">
+    <div class="bb-card" style="padding:28px; margin-top:20px;">
+      <div style="display:flex; align-items:center; gap:24px; flex-wrap:wrap;">
+        <div id="gradeBadge" class="grade-badge grade-A">A</div>
+        <div>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Overall Security Score</div>
+          <div id="scoreNum" style="font-size:2rem; font-weight:800; line-height:1;">100<span style="font-size:1rem; color:var(--text-muted);">/100</span></div>
+          <div class="score-bar-wrap" style="width:200px;">
+            <div id="scoreBar" class="score-bar" style="width:100%;"></div>
+          </div>
+        </div>
+        <div id="missingCount" style="margin-left:auto;"></div>
+      </div>
+    </div>
+
+    <div class="bb-card" style="padding:24px; margin-top:16px;">
+      <h3 style="margin-bottom:16px;">Required Security Headers</h3>
+      <table class="headers-table" id="requiredTable">
+        <thead><tr><th>Header</th><th>Status</th><th>Value</th></tr></thead>
+        <tbody id="requiredBody"></tbody>
+      </table>
+    </div>
+
+    <div class="bb-card" style="padding:24px; margin-top:16px;">
+      <h3 style="margin-bottom:16px;">All Response Headers</h3>
+      <table class="headers-table" id="allTable">
+        <thead><tr><th>Header</th><th>Value</th></tr></thead>
+        <tbody id="allBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const CRITICAL_HEADERS = ['strict-transport-security','content-security-policy','x-content-type-options','x-frame-options','referrer-policy'];
+
+async function analyzeHeaders(e) {
+  e.preventDefault();
+  const url = document.getElementById('hdrUrl').value;
+  const btn = document.getElementById('hdrBtn');
+  btn.disabled = true; btn.textContent = 'Analyzing…';
+  document.getElementById('hdrLoading').style.display = 'block';
+  document.getElementById('hdrResults').style.display = 'none';
+
+  try {
+    const fd = new FormData();
+    fd.append('url', url);
+    const res = await fetch('/security/api/analyze-headers', { method:'POST', body:fd });
+    const data = await res.json();
+
+    if (!res.ok) { alert(data.detail || 'Error'); return; }
+
+    // Grade badge
+    const gb = document.getElementById('gradeBadge');
+    gb.textContent = data.grade;
+    gb.className = 'grade-badge grade-' + data.grade;
+
+    document.getElementById('scoreNum').innerHTML = data.score + '<span style="font-size:1rem; color:var(--text-muted);">/100</span>';
+    document.getElementById('scoreBar').style.width = data.score + '%';
+
+    const mc = document.getElementById('missingCount');
+    if (data.missing.length > 0) {
+      mc.innerHTML = `<span style="color:#ef4444; font-weight:700; font-size:1.5rem;">${data.missing.length}</span><br><span style="color:var(--text-muted); font-size:0.85rem;">headers missing</span>`;
+    } else {
+      mc.innerHTML = `<span style="color:#10b981; font-weight:700;">✓ All critical headers present</span>`;
+    }
+
+    // Required headers table
+    const rb = document.getElementById('requiredBody');
+    rb.innerHTML = '';
+    const hdrsLower = {};
+    Object.keys(data.headers).forEach(k => hdrsLower[k.toLowerCase()] = data.headers[k]);
+    CRITICAL_HEADERS.forEach(h => {
+      const present = !data.missing.includes(h);
+      const val = hdrsLower[h] || '';
+      rb.innerHTML += `<tr><td><code>${h}</code></td><td><span class="${present?'present-badge':'missing-badge'}">${present?'✓ Present':'✗ Missing'}</span></td><td style="color:var(--text-muted);">${val ? val.substring(0,80)+'…' : '—'}</td></tr>`;
+    });
+
+    // All headers table
+    const ab = document.getElementById('allBody');
+    ab.innerHTML = '';
+    Object.entries(data.headers).forEach(([k,v]) => {
+      ab.innerHTML += `<tr><td><code>${k}</code></td><td style="color:var(--text-muted);">${String(v).substring(0,120)}</td></tr>`;
+    });
+
+    document.getElementById('hdrResults').style.display = 'block';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Analyze Headers';
+    document.getElementById('hdrLoading').style.display = 'none';
+  }
+}
+</script>
+{% endblock %}

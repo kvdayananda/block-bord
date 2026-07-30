@@ -59,3 +59,37 @@ class QRInfo(BaseModel):
     decoded_text: str
     risk_score: int
     risk_level: str
+
+class FakeShoppingResult(BaseModel):
+    url: str
+    trust_score: int
+    risk_level: str
+    reasons: List[str]
+    details: Dict[str, Any]
+
+class BrowserFingerprint(BaseModel):
+    canvas_hash: Optional[str] = None
+    webgl_vendor: Optional[str] = None
+    user_agent: Optional[str] = None
+    languages: Optional[str] = None
+    color_depth: Optional[int] = None
+    screen_resolution: Optional[str] = None
+    hardware_concurrency: Optional[int] = None
+    device_memory: Optional[int] = None
+    tracking_score: int
+    privacy_level: str
+
+class MetadataResult(BaseModel):
+    target: str
+    target_type: str
+    metadata: Dict[str, Any]
+    risk_score: int
+    warnings: List[str]
+
+class SecurityHeadersResult(BaseModel):
+    url: str
+    grade: str
+    score: int
+    headers: Dict[str, Any]
+    missing: List[str]
+    warnings: List[str]

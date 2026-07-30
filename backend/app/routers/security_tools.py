@@ -166,3 +166,86 @@ async def api_analyze_qr(
     except Exception as e:
         logger.error(f"QR Scan Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/analyze-shopping")
+async def api_analyze_shopping(
+    request: Request,
+    db: Session = Depends(get_db),
+    user = Depends(require_user)
+):
+    try:
+        form = await request.form()
+        url = form.get("url")
+        if not url:
+            raise HTTPException(status_code=400, detail="Missing url parameter")
+        return await service.analyze_shopping_site(str(url))
+    except Exception as e:
+        logger.error(f"Shopping Analysis Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/api/analyze-headers")
+async def api_analyze_headers(
+    request: Request,
+    db: Session = Depends(get_db),
+    user = Depends(require_user)
+):
+    try:
+        form = await request.form()
+        url = form.get("url")
+        if not url:
+            raise HTTPException(status_code=400, detail="Missing url parameter")
+        return await service.analyze_security_headers(str(url))
+    except Exception as e:
+        logger.error(f"Security Headers Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/check-ssl")
+async def api_check_ssl(
+    request: Request,
+    db: Session = Depends(get_db),
+    user = Depends(require_user)
+):
+    try:
+        form = await request.form()
+        domain = form.get("domain")
+        if not domain:
+            raise HTTPException(status_code=400, detail="Missing domain parameter")
+        return await service.check_ssl_certificate(str(domain))
+    except Exception as e:
+        logger.error(f"SSL Check Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/check-dns")
+async def api_check_dns(
+    request: Request,
+    db: Session = Depends(get_db),
+    user = Depends(require_user)
+):
+    try:
+        form = await request.form()
+        domain = form.get("domain")
+        if not domain:
+            raise HTTPException(status_code=400, detail="Missing domain parameter")
+        return await service.check_dns_security(str(domain))
+    except Exception as e:
+        logger.error(f"DNS Check Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/api/analyze-email")
+async def api_analyze_email(
+    request: Request,
+    db: Session = Depends(get_db),
+    user = Depends(require_user)
+):
+    try:
+        form = await request.form()
+        content = form.get("content")
+        if not content:
+            raise HTTPException(status_code=400, detail="Missing email content parameter")
+        return await service.analyze_email_phishing(str(content))
+    except Exception as e:
+        logger.error(f"Email Analysis Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

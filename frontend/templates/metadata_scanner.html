@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+{% block title %}Metadata Scanner — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="Extract and analyze metadata from websites and files. Discover hidden information with Block Bord AI.">
+<style>
+.meta-grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap:16px; margin-top:20px; }
+.meta-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; }
+.meta-card-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--primary); margin-bottom:10px; }
+.meta-row { display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--border); font-size:0.875rem; }
+.meta-row:last-child { border-bottom:none; }
+.meta-key { color:var(--text-muted); flex-shrink:0; margin-right:12px; }
+.meta-val { text-align:right; word-break:break-all; font-weight:500; }
+.tab-btn { padding:8px 20px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text-muted); cursor:pointer; transition:all 0.2s; font-size:0.875rem; }
+.tab-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.warning-item { background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:8px; padding:10px 14px; margin:6px 0; font-size:0.875rem; color:#ef4444; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bb-container" style="padding:40px 20px 60px;">
+  <span class="bb-overline">Digital Forensics</span>
+  <h1 style="font-size:2rem; margin:10px 0 8px;">📋 Metadata Scanner</h1>
+  <p style="color:var(--text-muted); max-width:600px;">Extract hidden metadata from websites and files. Uncover server technology, response headers, and security configurations.</p>
+
+  <!-- Tabs -->
+  <div style="display:flex; gap:8px; margin-top:24px; flex-wrap:wrap;">
+    <button class="tab-btn active" id="tabUrl" onclick="switchTab('url')">🌐 Website URL</button>
+    <button class="tab-btn" id="tabFile" onclick="switchTab('file')">📄 File Upload</button>
+  </div>
+
+  <div class="bb-card" style="padding:24px; margin-top:16px;">
+    <!-- URL Tab -->
+    <div id="urlTab">
+      <form onsubmit="scanUrlMeta(event)">
+        <label style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:6px;">Target URL</label>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+          <input id="metaUrl" type="text" class="form-control" placeholder="https://example.com" required style="flex:1; min-width:240px; padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg-input); color:var(--text);">
+          <button type="submit" class="btn btn-primary" id="metaUrlBtn" style="height:42px; padding:0 24px;">Scan Metadata</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- File Tab -->
+    <div id="fileTab" style="display:none;">
+      <label style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:6px;">Upload File (PDF, Image, DOCX)</label>
+      <input type="file" id="metaFile" accept=".pdf,.jpg,.jpeg,.png,.docx,.doc" class="form-control" style="padding:10px 14px; border-radius:8px; border:1px solid var(--border); background:var(--bg-input); color:var(--text);">
+      <button class="btn btn-primary" style="margin-top:12px; height:42px; padding:0 24px;" onclick="scanFileMeta()">Extract Metadata</button>
+      <p style="color:var(--text-muted); font-size:0.8rem; margin-top:8px;">Note: File metadata extraction is performed locally in your browser. No files are uploaded.</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="metaLoading" style="display:none; text-align:center; padding:40px;">
+    <div class="spinner"></div>
+    <p style="color:var(--text-muted); margin-top:12px;">Extracting metadata...</p>
+  </div>
+
+  <!-- Results -->
+  <div id="metaResults" style="display:none; margin-top:24px;">
+    <div id="warningsSection" style="display:none; margin-bottom:16px;">
+      <h3 style="color:#ef4444; margin-bottom:8px;">⚠️ Security Warnings</h3>
+      <div id="warningsList"></div>
+    </div>
+    <div class="meta-grid" id="metaGrid"></div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.getElementById('urlTab').style.display = tab === 'url' ? 'block' : 'none';
+  document.getElementById('fileTab').style.display = tab === 'file' ? 'block' : 'none';
+  document.getElementById('tabUrl').className = 'tab-btn' + (tab === 'url' ? ' active' : '');
+  document.getElementById('tabFile').className = 'tab-btn' + (tab === 'file' ? ' active' : '');
+  document.getElementById('metaResults').style.display = 'none';
+}
+
+function renderResults(sections, warnings) {
+  const grid = document.getElementById('metaGrid');
+  grid.innerHTML = '';
+  sections.forEach(sec => {
+    let rows = '';
+    Object.entries(sec.data).forEach(([k,v]) => {
+      rows += `<div class="meta-row"><span class="meta-key">${k}</span><span class="meta-val">${String(v).substring(0,80)}</span></div>`;
+    });
+    grid.innerHTML += `<div class="meta-card"><div class="meta-card-title">${sec.title}</div>${rows}</div>`;
+  });
+
+  const warnList = document.getElementById('warningsList');
+  warnList.innerHTML = '';
+  if (warnings && warnings.length > 0) {
+    warnings.forEach(w => { warnList.innerHTML += `<div class="warning-item">⚠️ ${w}</div>`; });
+    document.getElementById('warningsSection').style.display = 'block';
+  } else {
+    document.getElementById('warningsSection').style.display = 'none';
+  }
+  document.getElementById('metaResults').style.display = 'block';
+}
+
+async function scanUrlMeta(e) {
+  e.preventDefault();
+  const url = document.getElementById('metaUrl').value;
+  const btn = document.getElementById('metaUrlBtn');
+  btn.disabled = true; btn.textContent = 'Scanning…';
+  document.getElementById('metaLoading').style.display = 'block';
+  document.getElementById('metaResults').style.display = 'none';
+
+  try {
+    const fd = new FormData();
+    fd.append('url', url);
+    const res = await fetch('/tools/api/scan-metadata', { method:'POST', body:fd });
+    const data = await res.json();
+    if (!res.ok) { alert(data.detail || 'Error'); return; }
+
+    const sections = [
+      { title: '🌐 General Info', data: data.metadata.general || {} },
+      { title: '🔒 Security Headers', data: data.metadata.security_headers || {} },
+      { title: '🖥️ Server Info', data: data.metadata.server || {} },
+      { title: '🍪 Cookies & Cache', data: data.metadata.caching || {} },
+    ];
+    renderResults(sections.filter(s => Object.keys(s.data).length > 0), data.warnings);
+  } catch(err) {
+    alert('Connection error: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Scan Metadata';
+    document.getElementById('metaLoading').style.display = 'none';
+  }
+}
+
+async function scanFileMeta() {
+  const file = document.getElementById('metaFile').files[0];
+  if (!file) { alert('Please select a file.'); return; }
+  
+  document.getElementById('metaLoading').style.display = 'block';
+  document.getElementById('metaResults').style.display = 'none';
+
+  // Read file properties locally — no upload
+  await new Promise(r => setTimeout(r, 500));
+  
+  const sections = [
+    {
+      title: '📄 File Properties',
+      data: {
+        'File Name': file.name,
+        'File Type': file.type || 'Unknown',
+        'File Size': (file.size / 1024).toFixed(2) + ' KB',
+        'Last Modified': new Date(file.lastModified).toLocaleString(),
+      }
+    }
+  ];
+
+  // Try to extract EXIF from images
+  if (file.type.startsWith('image/')) {
+    sections.push({
+      title: '📸 Image Info',
+      data: {
+        'Format': file.type,
+        'Size': `${file.size} bytes`,
+        'Note': 'Full EXIF extraction requires server-side processing'
+      }
+    });
+  }
+
+  const warnings = [];
+  if (file.name.includes(' ')) warnings.push('File name contains spaces — could cause issues on some servers.');
+  if (file.size > 5 * 1024 * 1024) warnings.push('Large file size detected — may expose sensitive data if uploaded publicly.');
+
+  document.getElementById('metaLoading').style.display = 'none';
+  renderResults(sections, warnings);
+}
+</script>
+{% endblock %}

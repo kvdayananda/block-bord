@@ -60,7 +60,9 @@ async def api_detect_scam(
         )
     except Exception as e:
         logger.error(f"AI Scam Detector Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        if "429" in str(e) or "quota" in str(e).lower():
+            return JSONResponse(status_code=503, content={"detail": "AI service is temporarily rate-limited. Please try again in a few seconds."})
+        raise HTTPException(status_code=500, detail="AI analysis is temporarily unavailable. Please try again later.")
 
 @router.post("/api/assistant")
 async def api_assistant(
@@ -77,13 +79,14 @@ async def api_assistant(
             raw=res.get("raw")
         )
     except Exception as e:
-        # If the underlying service raised a GeminiBadRequestError, expose its details
         from backend.app.services.api_clients import GeminiBadRequestError
         if isinstance(e, GeminiBadRequestError):
             logger.error(f"Gemini request failed: {e.body}")
-            raise HTTPException(status_code=500, detail=f"Gemini error: {e.body}")
+            return JSONResponse(status_code=503, content={"detail": "AI service returned an error. Please try again later."})
         logger.error(f"AI Assistant Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        if "429" in str(e) or "quota" in str(e).lower():
+            return JSONResponse(status_code=503, content={"detail": "AI service is temporarily rate-limited. Please try again in a few seconds."})
+        return JSONResponse(status_code=503, content={"detail": "AI assistant is temporarily unavailable. Please try again later."})
 
 @router.post("/api/risk")
 async def api_explain_risk(
@@ -102,4 +105,6 @@ async def api_explain_risk(
         )
     except Exception as e:
         logger.error(f"AI Risk Explainer Error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        if "429" in str(e) or "quota" in str(e).lower():
+            return JSONResponse(status_code=503, content={"detail": "AI service is temporarily rate-limited. Please try again in a few seconds."})
+        return JSONResponse(status_code=503, content={"detail": "AI risk analysis is temporarily unavailable. Please try again later."})
