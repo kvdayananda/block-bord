@@ -31,6 +31,20 @@ def contact_page(request: Request):
     return templates.TemplateResponse("contact.html", {"request": request})
 
 
+# ── Privacy, Terms, Cookie Policy ──
+@router.get("/privacy", response_class=HTMLResponse)
+def privacy_page(request: Request):
+    return templates.TemplateResponse("privacy.html", {"request": request})
+
+@router.get("/terms", response_class=HTMLResponse)
+def terms_page(request: Request):
+    return templates.TemplateResponse("terms.html", {"request": request})
+
+@router.get("/cookie", response_class=HTMLResponse)
+def cookie_page(request: Request):
+    return templates.TemplateResponse("cookie.html", {"request": request})
+
+
 # ── Leak Checker (sidebar shortcut, canonical at /tools/leak-checker) ──
 @router.get("/leak-checker", response_class=HTMLResponse)
 def leak_checker_shortcut(request: Request, db: Session = Depends(get_db)):

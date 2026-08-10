@@ -3,206 +3,228 @@
 
 {% block content %}
 <style>
-  .history-table-container { 
-    background: var(--surface); 
-    border-radius: var(--radius);
-    overflow-x: auto;
+  body {
+    background-color: #07090e !important;
+    color: #f8fafc !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
-  .premium-table {
+  
+  .main-navbar {
+    background: rgba(7, 9, 14, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  }
+  .main-navbar .nav-link {
+    color: #94a3b8 !important;
+  }
+
+  .app-page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: 
+      radial-gradient(circle at 80% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 15% 85%, rgba(45, 212, 191, 0.1) 0%, transparent 50%),
+      #07090e !important;
+    align-items: flex-start;
+  }
+
+  .app-glass-sidebar {
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .app-main-content {
+    flex: 1;
+    padding: 36px 40px 80px;
+    max-width: calc(1440px - var(--sidebar-w, 260px));
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .app-page-header {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 26px 30px;
+    backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  }
+
+  .cyber-search-input, .cyber-select {
+    background: rgba(6, 8, 20, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 12px 18px;
+    color: #ffffff;
+    font-size: 0.88rem;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+
+  .cyber-search-input:focus, .cyber-select:focus {
+    border-color: rgba(96, 165, 250, 0.7);
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
+  }
+
+  .cyber-select option {
+    background: #0f172a;
+    color: #ffffff;
+  }
+
+  .history-card-glass {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(16px);
+    overflow: hidden;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+  }
+
+  .history-table {
     width: 100%;
     border-collapse: collapse;
-    table-layout: auto;
+    font-size: 0.88rem;
   }
-  .premium-table th, .premium-table td {
-    padding: 18px 20px !important;
-    vertical-align: middle !important;
-    border-bottom: 1px solid var(--border) !important;
-  }
-  .premium-table th {
-    background: var(--bg-alt);
-    color: var(--text-dim);
-    font-size: 0.75rem;
+
+  .history-table th {
+    background: rgba(6, 8, 20, 0.6);
+    color: #94a3b8;
     font-weight: 700;
+    font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    white-space: nowrap;
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   }
-  .content-cell {
-    max-width: 320px !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-    color: var(--text-muted);
+
+  .history-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    vertical-align: middle;
+  }
+
+  .history-row:hover td {
+    background: rgba(99, 102, 241, 0.08) !important;
   }
 </style>
+
 <div class="app-page-wrapper">
   {% include "sidebar.html" %}
 
   <main class="app-main-content">
     <div class="app-page-header">
-      <div class="app-page-header-left">
-        <span class="app-page-tag">FORENSICS</span>
-        <h1 class="app-page-title">Scan History</h1>
-        <p class="app-page-subtitle">Review your recently analyzed URLs, domains, and text.</p>
+      <div>
+        <span style="font-size:0.72rem; font-weight:700; background:rgba(45,212,191,0.08); border:1px solid rgba(45,212,191,0.25); color:#2dd4bf; padding:4px 12px; border-radius:20px; text-transform:uppercase; letter-spacing:1px; display:inline-block; margin-bottom:8px;">FORENSICS LOGS</span>
+        <h1 style="font-size:1.8rem; font-weight:800; color:#ffffff; margin:0 0 6px;">Scan History</h1>
+        <p style="font-size:0.92rem; color:#94a3b8; margin:0;">Review your forensic logs, submitted targets, and risk scores.</p>
       </div>
-      <div class="app-page-header-right">
-        <div class="app-status-badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          {{ scans|length }} Records
+      <div style="display:flex; gap:12px; align-items:center;">
+        <div style="font-size:0.8rem; color:#34d399; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.25); padding:6px 14px; border-radius:20px; font-weight:600;">
+          {{ scans|length }} Records Logged
         </div>
-        <a href="/app" class="btn btn-primary btn-sm">New Scan</a>
+        <a href="/app" style="padding:8px 20px; background:linear-gradient(135deg, #6366f1, #a855f7); color:#fff; font-weight:700; font-size:0.82rem; border-radius:20px; text-decoration:none;">New Scan</a>
       </div>
     </div>
 
-    <!-- Search row -->
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-      <div style="position:relative;flex:1;min-width:220px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--text-dim);pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="historySearch" placeholder="Search history…" oninput="filterHistory()" style="width:100%;padding:10px 14px 10px 40px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:0.875rem;outline:none;transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+    <!-- Search & Filter Controls -->
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+      <div style="position:relative; flex:1; min-width:240px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); pointer-events:none;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="historySearch" placeholder="Search target URL, domain, or category…" oninput="filterHistory()" class="cyber-search-input" style="width:100%; padding-left:42px;">
       </div>
-      <select id="riskFilter" onchange="filterHistory()" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);font-size:0.875rem;color:var(--text);outline:none;cursor:pointer;transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
-        <option value="">All risk levels</option>
-        <option value="High">High risk</option>
+      <select id="riskFilter" onchange="filterHistory()" class="cyber-select" style="min-width:160px;">
+        <option value="">All Risk Levels</option>
+        <option value="High">High Risk</option>
         <option value="Suspicious">Suspicious</option>
         <option value="Safe">Safe</option>
       </select>
     </div>
 
-    <!-- Table card -->
-    <div class="bb-card" style="padding:0;overflow:hidden;" id="historyCard">
+    <!-- Table Container -->
+    <div class="history-card-glass" id="historyCard">
       {% if scans %}
-      <div class="history-table-container">
-        <table class="premium-table" id="historyTable">
+      <div style="overflow-x:auto;">
+        <table class="history-table" id="historyTable">
           <thead>
             <tr>
-              <th style="width: 100px;">Status</th>
+              <th style="width: 110px;">Threat Level</th>
               <th style="width: 180px;">Category</th>
-              <th>Content Preview</th>
-              <th style="width: 120px;">Risk Score</th>
-              <th style="width: 140px;">Time</th>
-              <th style="width: 100px; padding-right:24px;">Action</th>
+              <th>Target Preview</th>
+              <th style="width: 120px;">Score</th>
+              <th style="width: 120px;">Time</th>
+              <th style="width: 100px; text-align:right;">Action</th>
             </tr>
           </thead>
           <tbody>
             {% for scan in scans %}
-            <tr class="history-row"
-                data-content="{{ scan.content|lower }}"
-                data-risk="{{ scan.risk_level }}">
+            <tr class="history-row" data-content="{{ scan.content|lower }}" data-risk="{{ scan.risk_level }}">
               <td>
-                <span class="status-pill {{ 'pill-danger' if scan.risk_level == 'High' else ('pill-warn' if scan.risk_level == 'Suspicious' else 'pill-safe') }}" style="display: inline-block; width: 80px; text-align: center;">
+                <span style="
+                  display:inline-block; padding:4px 12px; border-radius:12px; font-size:0.75rem; font-weight:700; text-align:center; min-width:80px;
+                  background:{% if 'High' in scan.risk_level %}rgba(239,68,68,0.12){% elif 'Susp' in scan.risk_level %}rgba(245,158,11,0.12){% else %}rgba(16,185,129,0.12){% endif %};
+                  color:{% if 'High' in scan.risk_level %}#ef4444{% elif 'Susp' in scan.risk_level %}#f59e0b{% else %}#34d399{% endif %};
+                  border:1px solid {% if 'High' in scan.risk_level %}rgba(239,68,68,0.3){% elif 'Susp' in scan.risk_level %}rgba(245,158,11,0.3){% else %}rgba(16,185,129,0.3){% endif %};
+                ">
                   {{ scan.risk_level|upper }}
                 </span>
               </td>
-              <td style="font-weight:600; color: var(--text); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <td style="font-weight:600; color:#ffffff; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                 {{ scan.category or 'General' }}
               </td>
-              <td class="content-cell" style="font-family:var(--font-mono); font-size:0.75rem; color:var(--text-muted); max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                {{ scan.content }}
+              <td>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:0.82rem; color:#cbd5e1; max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  {{ scan.content }}
+                </div>
               </td>
-              <td style="text-align: center;">
-                <span style="font-size: 1.125rem; font-weight:800; color:{% if scan.risk_score >= 70 %}var(--status-danger){% elif scan.risk_score >= 40 %}var(--status-warn){% else %}var(--status-safe){% endif %};">
-                  {{ scan.risk_score|int }}%
-                </span>
+              <td style="font-weight:700; color:#f8fafc;">
+                {{ scan.score or 'N/A' }}
               </td>
-              <td style="color:var(--text-muted); font-size:0.8125rem; white-space:nowrap; font-family:var(--font-mono);">
-                {{ scan.created_at.strftime('%b %d, %H:%M') }}
+              <td style="font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:#64748b;">
+                {{ scan.created_at.strftime('%Y-%m-%d %H:%M') if scan.created_at else 'N/A' }}
               </td>
-              <td style="padding-right:24px;">
-                <button class="btn btn-sm btn-outline" onclick="viewScan({{ scan.id }})">Details</button>
+              <td style="text-align:right;">
+                <a href="/scan/{{ scan.id }}" style="color:#60a5fa; font-weight:600; font-size:0.82rem; text-decoration:none;">Inspect →</a>
               </td>
             </tr>
             {% endfor %}
           </tbody>
         </table>
       </div>
-
       {% else %}
-      <!-- Empty state -->
-      <div style="text-align:center;padding:96px 24px;">
-        <div style="width:72px;height:72px;background:var(--bg-alt);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-dim)" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-        </div>
-        <h3 style="font-size:1.125rem;font-weight:700;margin-bottom:8px;">No scans yet</h3>
-        <p style="color:var(--text-muted);font-size:0.9375rem;max-width:360px;margin:0 auto 28px;">Run your first analysis from the dashboard to see your threat history here.</p>
-        <a href="/app" class="btn btn-primary">Go to Dashboard</a>
+      <div style="padding:60px 20px; text-align:center; color:#64748b;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3; margin-bottom:12px;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        <p style="margin:0; font-size:0.95rem;">No forensic scan logs found. Run your first analysis in the Intelligence Console.</p>
       </div>
       {% endif %}
     </div>
 
-    <!-- Detail panel -->
-    <div id="scanDetail" class="bb-card hidden" style="margin-top:24px;border:2px solid var(--primary);scroll-margin-top:32px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-        <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;">Scan Details</h3>
-        <button onclick="closeScanDetail()" class="btn btn-sm" style="background:var(--status-danger-bg);color:var(--status-danger);border:1px solid rgba(220,38,38,0.2);">Close</button>
-      </div>
-      <div id="scanDetailContent" style="font-family:var(--font-mono);font-size:0.875rem;line-height:1.7;color:var(--text);"></div>
-    </div>
   </main>
 </div>
 
 <script>
 function filterHistory() {
-  const q = document.getElementById('historySearch').value.toLowerCase();
-  const risk = document.getElementById('riskFilter').value;
-  document.querySelectorAll('.history-row').forEach(row => {
-    const matchQ = !q || row.dataset.content.includes(q);
-    const matchR = !risk || row.dataset.risk === risk;
-    row.style.display = matchQ && matchR ? '' : 'none';
+  const query = document.getElementById('historySearch').value.toLowerCase();
+  const risk  = document.getElementById('riskFilter').value;
+  const rows  = document.querySelectorAll('.history-row');
+
+  rows.forEach(row => {
+    const content = row.getAttribute('data-content') || '';
+    const rLevel  = row.getAttribute('data-risk') || '';
+
+    const matchQuery = !query || content.includes(query);
+    const matchRisk  = !risk  || rLevel === risk;
+
+    row.style.display = (matchQuery && matchRisk) ? '' : 'none';
   });
-}
-
-function viewScan(id) {
-  const detailDiv = document.getElementById('scanDetail');
-  const contentDiv = document.getElementById('scanDetailContent');
-  
-  contentDiv.innerHTML = '<div style="color:var(--text-muted);">Loading forensic metrics...</div>';
-  detailDiv.classList.remove('hidden');
-  detailDiv.scrollIntoView({ behavior: 'smooth' });
-
-  fetch(`/api/scan/${id}`)
-    .then(r => {
-      if (!r.ok) throw new Error("Forensic payload not loaded.");
-      return r.json();
-    })
-    .then(data => {
-      let reasonsHTML = "";
-      if (data.reasons && data.reasons.length > 0) {
-        reasonsHTML = data.reasons.map(r => `<div style="padding: 8px 12px; background:rgba(99,102,241,0.05); margin-bottom: 6px; border-radius: 6px; border-left: 3px solid var(--primary);">${r}</div>`).join('');
-      } else {
-        reasonsHTML = `<div style="color:var(--text-dim);">No heuristic flags tripped.</div>`;
-      }
-      
-      contentDiv.innerHTML = `
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 16px;">
-          <div>
-            <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Threat Level</div>
-            <div style="font-size:1.2rem; font-weight:800; color:${data.risk_level === 'High' ? 'var(--status-danger)' : (data.risk_level === 'Suspicious' ? 'var(--status-warn)' : 'var(--status-safe)')}">${data.risk_level} (${data.risk_score}%)</div>
-          </div>
-          <div>
-            <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Category</div>
-            <div style="font-weight:700; color:var(--text);">${data.category || 'General'}</div>
-          </div>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Scanned Content</div>
-          <div style="background:var(--bg-alt); padding: 12px; border-radius:6px; border: 1px solid var(--border); word-break: break-all;">${data.content}</div>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <div style="font-weight:700; color:var(--text-muted); margin-bottom:4px;">Detected Anomalies</div>
-          <div>${reasonsHTML}</div>
-        </div>
-        <div>
-          <a href="/scan/${data.id}" class="btn btn-primary btn-sm">Open Deep Insights Page →</a>
-        </div>
-      `;
-    })
-    .catch(err => {
-      contentDiv.innerHTML = `<div style="color:var(--status-danger);">${err.message}</div>`;
-    });
-}
-
-function closeScanDetail() {
-  document.getElementById('scanDetail').classList.add('hidden');
 }
 </script>
 {% endblock %}

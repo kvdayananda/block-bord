@@ -1,29 +1,369 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Cookie Policy – Block Bord AI</title>
-</head>
-<body>
-  <section class="cookie">
-    <h1>Cookie Policy</h1>
-    <p>Block Bord AI uses cookies to enhance your experience, ensure security, and analyze usage.</p>
-    <h2>What are Cookies?</h2>
-    <p>Cookies are small text files stored on your device when you visit our website.</p>
-    <h2>Types of Cookies We Use</h2>
-    <ul>
-      <li><strong>Essential Cookies:</strong> Required for core functionality such as authentication and session management.</li>
-      <li><strong>Analytics Cookies:</strong> Help us understand how you use the platform so we can improve it. We use anonymized data only.</li>
-      <li><strong>Security Cookies:</strong> Protect against fraud and ensure safe transactions.</li>
-    </ul>
-    <h2>Managing Cookies</h2>
-    <p>You can control cookies through your browser settings. Disabling essential cookies may limit your ability to log in or use certain features.</p>
-    <h2>Third‑Party Cookies</h2>
-    <p>We embed third‑party services such as Razorpay for payments. These providers may set their own cookies according to their policies.</p>
-    <h2>Changes to This Policy</h2>
-    <p>We may update this policy from time to time. The "Last Updated" date at the top of the page indicates the most recent revision.</p>
-    <h2>Contact</h2>
-    <p>If you have questions about our cookie usage, please <a href="/contact">contact us</a>.</p>
-  </section>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Cookie Policy — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="Block Bord AI Cookie Policy — Detailed information regarding how we use cookies, session storage, and security tokens on our platform.">
+<style>
+  body {
+    background-color: #07090e !important;
+    color: #f8fafc !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  .main-navbar {
+    background: rgba(7, 9, 14, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  }
+  .main-navbar .nav-link {
+    color: #94a3b8 !important;
+  }
+  .main-navbar .nav-link:hover, .main-navbar .nav-link.active {
+    color: #60a5fa !important;
+  }
+
+  /* ── Hero ── */
+  .cookie-hero {
+    position: relative;
+    padding: 70px 5% 40px;
+    text-align: center;
+    background: 
+      radial-gradient(circle at 50% 20%, rgba(45, 212, 191, 0.15) 0%, transparent 60%),
+      #07090e;
+  }
+
+  .cyber-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: rgba(45, 212, 191, 0.08);
+    border: 1px solid rgba(45, 212, 191, 0.25);
+    border-radius: 30px;
+    color: #2dd4bf;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .cookie-title {
+    font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 14px;
+    letter-spacing: -0.02em;
+  }
+
+  .cookie-title .highlight {
+    background: linear-gradient(135deg, #2dd4bf 0%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .cookie-meta {
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  /* ── Content Container ── */
+  .cookie-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 5% 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .glass-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 36px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+  }
+
+  .card-sec-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .card-sec-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(45, 212, 191, 0.12);
+    color: #2dd4bf;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .cookie-text {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .cookie-text:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Table Style for Cookie Types */
+  .cookie-table-wrapper {
+    overflow-x: auto;
+    margin: 20px 0 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(7, 9, 14, 0.5);
+  }
+
+  .cookie-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  .cookie-table th {
+    background: rgba(15, 23, 42, 0.9);
+    color: #f1f5f9;
+    font-weight: 700;
+    padding: 14px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .cookie-table td {
+    padding: 16px 18px;
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .cookie-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .badge-tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  .badge-essential {
+    background: rgba(45, 212, 191, 0.12);
+    color: #2dd4bf;
+    border: 1px solid rgba(45, 212, 191, 0.3);
+  }
+
+  .badge-security {
+    background: rgba(99, 102, 241, 0.12);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
+
+  .badge-payment {
+    background: rgba(234, 179, 8, 0.12);
+    color: #facc15;
+    border: 1px solid rgba(234, 179, 8, 0.3);
+  }
+
+  .browser-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+  }
+
+  .browser-box {
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .browser-box:hover {
+    border-color: rgba(45, 212, 191, 0.3);
+    background: rgba(15, 23, 42, 0.7);
+  }
+
+  .browser-name {
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 0.92rem;
+    margin-bottom: 4px;
+  }
+
+  .browser-desc {
+    font-size: 0.82rem;
+    color: #64748b;
+  }
+
+  .contact-box {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+    border: 1px solid rgba(45, 212, 191, 0.25);
+    border-radius: 16px;
+    padding: 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .contact-btn {
+    padding: 10px 22px;
+    background: #2dd4bf;
+    color: #07090e;
+    font-weight: 700;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .contact-btn:hover {
+    background: #14b8a6;
+    color: #07090e;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Cookie Hero -->
+<section class="cookie-hero">
+  <div class="cyber-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+    TRANSPARENCY & COOKIES
+  </div>
+  <h1 class="cookie-title">Cookie <span class="highlight">Policy</span></h1>
+  <p class="cookie-meta">Last Updated: August 2026 • Transparent information about cookies and storage on Block Bord AI</p>
+</section>
+
+<div class="cookie-container">
+  
+  <!-- What are Cookies -->
+  <article class="glass-card">
+    <h2 class="card-sec-title">
+      <span class="card-sec-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      </span>
+      What Are Cookies?
+    </h2>
+    <p class="cookie-text">
+      Cookies are small text files placed on your device by your web browser when you visit websites. They allow platforms to remember your authentication session, preserve preference settings, and safeguard against security threats.
+    </p>
+    <p class="cookie-text">
+      In addition to standard HTTP cookies, Block Bord AI uses modern HTML5 Web Storage (localStorage and sessionStorage) to securely handle transient application state without storing tracking scripts.
+    </p>
+  </article>
+
+  <!-- Cookie Breakdown Table -->
+  <article class="glass-card">
+    <h2 class="card-sec-title">
+      <span class="card-sec-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </span>
+      Categories of Cookies We Use
+    </h2>
+    <p class="cookie-text">Below is a complete index of cookie types utilized across our website and applications:</p>
+
+    <div class="cookie-table-wrapper">
+      <table class="cookie-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Purpose & Functionality</th>
+            <th>Lifespan</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <span class="badge-tag badge-essential">Essential / Session</span>
+            </td>
+            <td>
+              Used to keep you securely logged in, verify CSRF security tokens, and maintain active user sessions (`session_id`).
+            </td>
+            <td>Session (purged on logout)</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="badge-tag badge-security">Security & Abuse</span>
+            </td>
+            <td>
+              Detects rapid automated bot activity, prevents rate-limit bypassing, and validates API keys across endpoints.
+            </td>
+            <td>1 day to 30 days</td>
+          </tr>
+          <tr>
+            <td>
+              <span class="badge-tag badge-payment">Third-Party Payment</span>
+            </td>
+            <td>
+              Set securely by Razorpay checkout frames to process payments, validate checkout sessions, and prevent fraud.
+            </td>
+            <td>Varies by Razorpay policy</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <!-- Managing Cookies -->
+  <article class="glass-card">
+    <h2 class="card-sec-title">
+      <span class="card-sec-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </span>
+      Managing & Disabling Cookies
+    </h2>
+    <p class="cookie-text">
+      You have full control to accept, block, or clear cookies directly within your web browser preferences. Please note that disabling essential session cookies will prevent you from signing into your dashboard or utilizing paid API features.
+    </p>
+
+    <div class="browser-grid">
+      <div class="browser-box">
+        <div class="browser-name">Google Chrome</div>
+        <div class="browser-desc">Settings → Privacy & Security → Cookies and site data</div>
+      </div>
+      <div class="browser-box">
+        <div class="browser-name">Mozilla Firefox</div>
+        <div class="browser-desc">Settings → Privacy & Security → Cookies & Site Data</div>
+      </div>
+      <div class="browser-box">
+        <div class="browser-name">Apple Safari</div>
+        <div class="browser-desc">Preferences → Privacy → Manage Website Data</div>
+      </div>
+      <div class="browser-box">
+        <div class="browser-name">Microsoft Edge</div>
+        <div class="browser-desc">Settings → Cookies and Site Permissions</div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Contact CTA -->
+  <div class="contact-box">
+    <div>
+      <strong style="color:#ffffff; font-size:1rem; display:block; margin-bottom:4px;">Questions about our cookie usage?</strong>
+      <span style="color:#94a3b8; font-size:0.88rem;">Our security support team is happy to assist.</span>
+    </div>
+    <a href="/contact" class="contact-btn">Contact Support</a>
+  </div>
+
+</div>
+{% endblock %}

@@ -2,76 +2,258 @@
 
 {% block title %}Community Block List — Block Bord AI{% endblock %}
 
+{% block extra_head %}
+<style>
+  body {
+    background-color: #07090e !important;
+    color: #f8fafc !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  .app-page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: 
+      radial-gradient(circle at 80% 15%, rgba(239, 68, 68, 0.12) 0%, transparent 50%),
+      radial-gradient(circle at 15% 85%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+      #07090e !important;
+    align-items: flex-start;
+  }
+
+  .app-glass-sidebar {
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .app-main-content {
+    flex: 1;
+    padding: 36px 40px 80px;
+    max-width: calc(1440px - var(--sidebar-w, 260px));
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .app-page-header {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 26px 30px;
+    backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  }
+
+  .bb-card-glass {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 28px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Responsive Report Box */
+  .report-box-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .report-input-row {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .cyber-input-field {
+    flex: 1;
+    padding: 14px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    background: rgba(6, 8, 20, 0.7);
+    color: #ffffff;
+    font-size: 0.92rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .cyber-input-field:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+  }
+
+  .btn-cyber-submit {
+    padding: 14px 28px;
+    background: linear-gradient(90deg, #6366f1, #a855f7);
+    border: none;
+    border-radius: 14px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .btn-cyber-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  }
+
+  /* Table styling */
+  .block-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .block-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .block-table th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .block-table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+  }
+
+  /* Mobile Card Layout Override */
+  @media (max-width: 768px) {
+    .app-main-content {
+      padding: 16px 16px 90px !important;
+    }
+
+    .report-box-grid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+
+    .report-input-row {
+      flex-direction: column !important;
+      gap: 10px !important;
+    }
+
+    .btn-cyber-submit {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+
+    .block-table-header {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 14px !important;
+    }
+
+    .block-search-wrap {
+      max-width: 100% !important;
+      width: 100% !important;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="app-page-wrapper">
   {% include "sidebar.html" %}
 
   <main class="app-main-content">
+    
+    <!-- Page Header -->
     <div class="app-page-header">
-      <div class="app-page-header-left">
-        <span class="app-page-tag">Live Threat Intelligence</span>
-        <h1 class="app-page-title">Community Block List</h1>
-        <p class="app-page-subtitle">Real-time database of malicious domains verified by our global threat network.</p>
+      <div>
+        <span style="font-size:0.72rem; font-weight:700; background:rgba(99,102,241,0.12); border:1px solid rgba(99,102,241,0.3); color:#818cf8; padding:4px 14px; border-radius:20px; text-transform:uppercase; letter-spacing:1px; display:inline-flex; align-items:center; gap:6px;">
+          <span style="width:7px; height:7px; border-radius:50%; background:#818cf8; display:inline-block;"></span>
+          LIVE THREAT NETWORK
+        </span>
+        <h1 style="font-size:1.8rem; font-weight:800; color:#ffffff; margin:8px 0 6px;">Community Block List</h1>
+        <p style="font-size:0.92rem; color:#94a3b8; margin:0;">Real-time database of malicious domains, scam links, and phishing targets verified by AI threat intelligence.</p>
       </div>
-      <div class="app-page-header-right">
-        <div class="app-status-badge">
-          <div class="app-status-dot" style="background:var(--status-safe); animation:pulse 2s infinite;"></div>
-          Live Network Monitoring
-        </div>
+
+      <div>
+        <span style="font-size:0.75rem; font-weight:700; color:#34d399; background:rgba(16,185,129,0.12); padding:6px 16px; border-radius:20px; border:1px solid rgba(16,185,129,0.25); display:inline-flex; align-items:center; gap:8px;">
+          <span style="width:8px; height:8px; border-radius:50%; background:#34d399; box-shadow:0 0 10px #34d399;"></span>
+          Active Syncing
+        </span>
       </div>
     </div>
 
-    <!-- Quick Report Banner -->
-    <div class="bb-card" style="margin-top:32px; border-left:4px solid var(--primary); padding:32px;">
-      <div class="flex-stack-mobile" style="display:flex; align-items:center; gap:32px; flex-wrap:wrap;">
-        <div style="flex:1; min-width:300px;">
-          <h3 style="font-size:1.1rem; font-weight:800; margin-bottom:6px;">Spotted a new threat?</h3>
-          <p style="margin:0; font-size:0.9rem; color:var(--text-muted);">Protect the community by reporting suspicious domains for AI verification.</p>
+    <!-- Quick Report Box -->
+    <div class="bb-card-glass" style="border-left:4px solid #6366f1;">
+      <div class="report-box-grid">
+        <div>
+          <h3 style="font-size:1.1rem; font-weight:800; color:#ffffff; margin:0 0 6px;">Spotted a suspicious link or scam domain?</h3>
+          <p style="margin:0; font-size:0.88rem; color:#94a3b8;">Help protect the community by submitting suspicious domains for automated AI verification.</p>
         </div>
-        <div class="flex-stack-mobile" style="flex:1.5; display:flex; gap:12px; min-width:300px;">
-          <input type="text" id="reportUrl" placeholder="Enter suspicious domain or URL..." style="flex:1; padding:12px 16px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg-alt); color:var(--text); outline:none; font-size:0.9rem; transition:var(--transition);" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
-          <button class="btn btn-primary" onclick="submitReport()" id="reportBtn" style="padding:12px 24px;">Report Threat</button>
+
+        <div class="report-input-row">
+          <input type="text" id="reportUrl" class="cyber-input-field" placeholder="Enter domain or URL (e.g. scam-bank-login.com)">
+          <button class="btn-cyber-submit" onclick="submitReport()" id="reportBtn">Report Threat</button>
         </div>
       </div>
-      <div id="reportMsg" style="margin-top:16px; font-size:0.85rem; font-weight:700; display:none;"></div>
+      <div id="reportMsg" style="margin-top:14px; font-size:0.85rem; font-weight:700; display:none;"></div>
     </div>
 
-    <!-- Blacklist Table -->
-    <div class="bb-card" style="margin-top:24px; padding:0; overflow:hidden;">
-      <div style="padding:24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-        <h3 style="font-size:0.95rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em;">🛡️ Verified Threats</h3>
-        <div style="position:relative; width:100%; max-width:300px;">
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--text-dim);"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-           <input type="text" id="listSearch" placeholder="Search blocked domains..." style="width:100%; padding:10px 14px 10px 40px; border:1.5px solid var(--border); border-radius:30px; background:var(--bg-alt); color:var(--text); font-size:0.875rem; outline:none; transition:var(--transition);" oninput="filterList()" onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='var(--border)'">
+    <!-- Blocklist Table Card -->
+    <div class="bb-card-glass" style="padding:0; overflow:hidden;">
+      
+      <!-- Table Header & Search Input -->
+      <div class="block-table-header" style="padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; gap:16px;">
+        <h2 style="font-size:1.05rem; font-weight:800; color:#ffffff; margin:0;">🛡️ Verified Blocked Threat Register</h2>
+        
+        <div class="block-search-wrap" style="position:relative; width:100%; max-width:320px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#64748b;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="listSearch" class="cyber-input-field" style="padding:10px 14px 10px 42px; border-radius:30px;" placeholder="Search blocked domains..." oninput="filterList()">
         </div>
       </div>
 
-      <div class="table-container">
-        <table class="premium-table" id="blockTable">
+      <!-- Scrollable Table Wrap -->
+      <div class="block-table-wrap">
+        <table class="block-table" id="blockTable">
           <thead>
             <tr>
               <th>Blocked Domain</th>
-              <th>Primary Threat Reason</th>
-              <th>Intelligence Level</th>
-              <th style="padding-right:24px; text-align:right;">Status</th>
+              <th>Threat Reason</th>
+              <th>Risk Rating</th>
+              <th style="text-align:right; padding-right:28px;">Status</th>
             </tr>
           </thead>
           <tbody id="blocklistBody">
             <tr>
-              <td colspan="4" style="text-align:center; padding:60px; color:var(--text-dim);">
-                <span class="loader" style="width:24px; height:24px; border:2px solid var(--border); border-top-color:var(--primary); border-radius:50%; display:inline-block; animation:spin 1s linear infinite;"></span>
-                <div style="margin-top:12px; font-weight:600;">Accessing Threat Intel...</div>
+              <td colspan="4" style="text-align:center; padding:50px; color:#64748b;">
+                <div style="font-weight:700;">Loading Threat Intelligence...</div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div style="padding:20px 24px; border-top:1px solid var(--border); font-size:0.8rem; color:var(--text-dim); display:flex; align-items:center; gap:8px; font-weight:600;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-        Showing the most recent 100 high-risk verified threats globally.
+      <div style="padding:18px 28px; border-top:1px solid rgba(255,255,255,0.08); font-size:0.8rem; color:#64748b; font-weight:600; display:flex; align-items:center; gap:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Displaying latest verified high-risk threat domains. Updated in real time.
       </div>
     </div>
+
   </main>
 </div>
 
@@ -81,20 +263,20 @@ async function loadList() {
   try {
     const r = await fetch('/api/public/blacklist');
     const data = await r.json();
-    if (!data.length) {
-      body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--text-muted);">No threats currently active.</td></tr>';
+    if (!data || !data.length) {
+      body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#64748b;">No active blocklist threats found.</td></tr>';
       return;
     }
     body.innerHTML = data.map(item => `
       <tr class="block-row">
-        <td style="font-family:var(--font-mono); font-weight:700; color:var(--text);">🚫 ${item.domain}</td>
-        <td style="font-size:0.9rem; color:var(--text-muted);">${item.reason}</td>
-        <td><span class="status-pill pill-danger" style="background:rgba(239, 68, 68, 0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.3);">High Risk</span></td>
-        <td style="padding-right:24px; text-align:right;"><span class="status-pill pill-safe" style="background:rgba(16, 185, 129, 0.12); color:#10b981; border:1px solid rgba(16,185,129,0.3);">Blocked</span></td>
+        <td style="font-family:monospace; font-weight:700; color:#ffffff;">🚫 ${item.domain}</td>
+        <td style="color:#94a3b8;">${item.reason || 'Phishing / Fraud Target'}</td>
+        <td><span style="font-size:0.75rem; font-weight:700; background:rgba(239,68,68,0.12); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:4px 12px; border-radius:20px;">High Risk</span></td>
+        <td style="text-align:right; padding-right:28px;"><span style="font-size:0.75rem; font-weight:700; background:rgba(16,185,129,0.12); color:#34d399; border:1px solid rgba(16,185,129,0.3); padding:4px 12px; border-radius:20px;">BLOCKED</span></td>
       </tr>
     `).join('');
   } catch (e) {
-    body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:var(--status-danger);">Network Intel Unavailable.</td></tr>';
+    body.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:40px; color:#ef4444;">Unable to load threat network data.</td></tr>';
   }
 }
 
@@ -115,21 +297,21 @@ async function submitReport() {
   btn.textContent = 'Submitting...';
   
   try {
-    await fetch('/report', {
+    const res = await fetch('/report', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content || ''
       },
       body: JSON.stringify({ url: url, description: 'Community dashboard report' })
     });
-    msg.textContent = '✓ Report received. Our AI engine is now investigating.';
-    msg.style.color = 'var(--status-safe)';
+    msg.textContent = '✓ Report submitted successfully. Our AI engine is investigating.';
+    msg.style.color = '#34d399';
     msg.style.display = 'block';
     document.getElementById('reportUrl').value = '';
   } catch (e) {
-    msg.textContent = 'Submission failed. Try again.';
-    msg.style.color = 'var(--status-danger)';
+    msg.textContent = 'Submission failed. Please try again.';
+    msg.style.color = '#ef4444';
     msg.style.display = 'block';
   } finally {
     btn.disabled = false;

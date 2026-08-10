@@ -4,38 +4,100 @@
 
 {% block extra_head %}
 <style>
+  body {
+    background-color: #07090e !important;
+    color: #f8fafc !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  .main-navbar {
+    background: rgba(7, 9, 14, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  }
+  .main-navbar .nav-link {
+    color: #94a3b8 !important;
+  }
+  .main-navbar .nav-link:hover, .main-navbar .nav-link.active {
+    color: #60a5fa !important;
+  }
+
+  .app-page-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: 
+      radial-gradient(circle at 80% 15%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 15% 85%, rgba(45, 212, 191, 0.1) 0%, transparent 50%),
+      #07090e !important;
+    align-items: flex-start;
+  }
+
+  .app-glass-sidebar {
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .app-main-content {
+    flex: 1;
+    padding: 36px 40px 80px;
+    max-width: calc(1440px - var(--sidebar-w, 260px));
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .app-page-header {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 26px 30px;
+    backdrop-filter: blur(16px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+  }
+
   .tools-nav-tabs {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 30px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    margin-bottom: 24px;
   }
+
   .tool-tab-btn {
-    background: var(--bg-alt);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 0.875rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    padding: 10px 22px;
+    border-radius: 30px;
+    font-size: 0.88rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    backdrop-filter: blur(12px);
   }
+
   .tool-tab-btn:hover {
-    border-color: var(--primary);
-    color: var(--text);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #60a5fa;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
   }
+
   .tool-tab-btn.active {
-    background: var(--primary-grad);
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     border-color: transparent;
-    color: #fff;
-    box-shadow: 0 0 15px rgba(99,102,241,0.3);
+    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
   }
+
   .tool-panel {
     display: none;
     animation: fadeIn 0.4s ease-in-out forwards;
@@ -43,24 +105,76 @@
   .tool-panel.active {
     display: block;
   }
+
+  .bb-card-glass {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 36px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 15px 40px -10px rgba(0, 0, 0, 0.5);
+  }
+
+  .cyber-input, .cyber-textarea {
+    width: 100%;
+    background: rgba(6, 8, 20, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: #ffffff;
+    font-size: 0.92rem;
+    outline: none;
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+    font-family: inherit;
+  }
+
+  .cyber-input:focus, .cyber-textarea:focus {
+    border-color: rgba(96, 165, 250, 0.7);
+    box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
+  }
+
+  .btn-cyber-submit {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.92rem;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-cyber-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.45);
+  }
+
   .result-box {
     margin-top: 24px;
-    background: rgba(10, 15, 30, 0.6);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    background: rgba(6, 8, 20, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
     padding: 24px;
     display: none;
   }
+
   .pro-badge {
     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-    color: #fff;
-    font-size: 0.7rem;
+    color: #ffffff;
+    font-size: 0.68rem;
     font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 4px;
+    padding: 2px 8px;
+    border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+
   .gated-overlay {
     position: relative;
   }
@@ -75,52 +189,41 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(6, 8, 20, 0.85);
-    backdrop-filter: blur(8px);
+    background: rgba(7, 9, 14, 0.88);
+    backdrop-filter: blur(12px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    border-radius: 12px;
+    border-radius: 24px;
     z-index: 10;
     padding: 40px;
     border: 1px solid rgba(245, 158, 11, 0.3);
   }
   .gated-icon {
-    width: 50px;
-    height: 50px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
-    background: rgba(245, 158, 11, 0.1);
+    background: rgba(245, 158, 11, 0.12);
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 16px;
     border: 1px solid rgba(245, 158, 11, 0.3);
     color: #f59e0b;
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
   }
-  .gated-title {
-    font-weight: 800;
-    font-size: 1.2rem;
-    color: var(--text);
-    margin-bottom: 8px;
-  }
-  .gated-desc {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    margin-bottom: 24px;
-    max-width: 320px;
-    line-height: 1.5;
-  }
+
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
   .json-key { color: #f43f5e; }
-  .json-string { color: #10b981; }
-  .json-number { color: #3b82f6; }
-  .json-boolean { color: #f59e0b; }
+  .json-string { color: #34d399; }
+  .json-number { color: #60a5fa; }
+  .json-boolean { color: #fbbf24; }
 </style>
 {% endblock %}
 
@@ -130,14 +233,14 @@
 
   <main class="app-main-content">
     <div class="app-page-header">
-      <div class="app-page-header-left">
-        <span class="app-page-tag">Platform Toolkit</span>
-        <h1 class="app-page-title">Security Suite</h1>
-        <p class="app-page-subtitle">Real-time modular scanners and utility intelligence diagnostics.</p>
+      <div>
+        <span style="font-size:0.72rem; font-weight:700; background:rgba(99,102,241,0.1); border:1px solid rgba(99,102,241,0.25); color:#818cf8; padding:4px 12px; border-radius:20px; text-transform:uppercase; letter-spacing:1px; display:inline-block; margin-bottom:8px;">PLATFORM TOOLKIT</span>
+        <h1 style="font-size:1.8rem; font-weight:800; color:#ffffff; margin:0 0 6px;">Security Suite</h1>
+        <p style="font-size:0.92rem; color:#94a3b8; margin:0;">Real-time modular scanners and security intelligence diagnostics console.</p>
       </div>
     </div>
 
-    <!-- Tab navigation -->
+    <!-- Tab Navigation -->
     <div class="tools-nav-tabs">
       <button class="tool-tab-btn active" onclick="switchTab('url-scan')">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -175,15 +278,15 @@
 
     <!-- 1. URL SCAN PANEL -->
     <div class="tool-panel active" id="panel-url-scan">
-      <div class="bb-card">
-        <h3>🔍 URL Scanner</h3>
-        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Analyze any website link to identify safety indicators and risk verdicts instantly.</p>
+      <div class="bb-card-glass">
+        <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">🔍 URL Threat Scanner</h2>
+        <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Analyze any web link or URL to evaluate safety indicators, domain reputation, and threat verdicts.</p>
         <form onsubmit="runScan(event, 'url-scan', '/security/api/scan-url')">
-          <div class="input-group">
-            <label>Target URL</label>
-            <input type="url" name="url" placeholder="https://example-phishing.com" required style="background:var(--bg); border-color:var(--border);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">Target URL</label>
+            <input type="url" name="url" placeholder="https://example-phishing.com" required class="cyber-input">
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Perform Diagnostic</button>
+          <button type="submit" class="btn-cyber-submit">Perform Diagnostic</button>
         </form>
         <div class="result-box" id="result-url-scan"></div>
       </div>
@@ -191,15 +294,15 @@
 
     <!-- 2. DOMAIN INFO PANEL -->
     <div class="tool-panel" id="panel-domain-info">
-      <div class="bb-card">
-        <h3>📂 WHOIS Domain Registry</h3>
-        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Query registrar ownership, creation, expiration and raw WHOIS payload records.</p>
+      <div class="bb-card-glass">
+        <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">📂 WHOIS Domain Registry</h2>
+        <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Query domain ownership, creation timestamps, expiration, and registrar payload details.</p>
         <form onsubmit="runScan(event, 'domain-info', '/security/api/lookup-domain')">
-          <div class="input-group">
-            <label>Domain Name</label>
-            <input type="text" name="domain" placeholder="google.com" required style="background:var(--bg); border-color:var(--border);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">Domain Name</label>
+            <input type="text" name="domain" placeholder="google.com" required class="cyber-input">
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Retrieve WHOIS</button>
+          <button type="submit" class="btn-cyber-submit">Retrieve WHOIS</button>
         </form>
         <div class="result-box" id="result-domain-info"></div>
       </div>
@@ -207,31 +310,31 @@
 
     <!-- 3. IP REPUTATION PANEL -->
     <div class="tool-panel" id="panel-ip-rep">
-      <div class="bb-card">
-        <h3>🌐 IP Reputation Lookup</h3>
-        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Analyze IP addresses for location details, abuse reports, and server reputations.</p>
+      <div class="bb-card-glass">
+        <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">🌐 IP Reputation Lookup</h2>
+        <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Analyze IPv4/IPv6 addresses for location, abuse history, ASN, and server risk reputation.</p>
         <form onsubmit="runScan(event, 'ip-rep', '/security/api/check-ip')">
-          <div class="input-group">
-            <label>IP Address</label>
-            <input type="text" name="ip" placeholder="8.8.8.8" required style="background:var(--bg); border-color:var(--border);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">IP Address</label>
+            <input type="text" name="ip" placeholder="8.8.8.8" required class="cyber-input">
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Scan IP Profile</button>
+          <button type="submit" class="btn-cyber-submit">Scan IP Profile</button>
         </form>
         <div class="result-box" id="result-ip-rep"></div>
       </div>
     </div>
 
-    <!-- 4. EMAIL BREACH CHECK PANEL -->
+    <!-- 4. EMAIL BREACH PANEL -->
     <div class="tool-panel" id="panel-email-breach">
-      <div class="bb-card">
-        <h3>✉️ Data Breach Checker</h3>
-        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Diagnose if your credentials or accounts have leaked in public data breaches.</p>
+      <div class="bb-card-glass">
+        <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">✉️ Data Breach & Leak Checker</h2>
+        <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Check if your email address or accounts have been exposed in known public data leaks.</p>
         <form onsubmit="runScan(event, 'email-breach', '/security/api/check-email')">
-          <div class="input-group">
-            <label>Email Address</label>
-            <input type="email" name="email" placeholder="user@gmail.com" required style="background:var(--bg); border-color:var(--border);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">Email Address</label>
+            <input type="email" name="email" placeholder="user@example.com" required class="cyber-input">
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Check Leaks</button>
+          <button type="submit" class="btn-cyber-submit">Check Exposure</button>
         </form>
         <div class="result-box" id="result-email-breach"></div>
       </div>
@@ -239,186 +342,98 @@
 
     <!-- 5. PASSWORD STRENGTH PANEL -->
     <div class="tool-panel" id="panel-password-strength">
-      <div class="bb-card">
-        <h3>🔑 Password Analyzer</h3>
-        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Analyze password complexity and search SHA-1 pwned databases securely using k-anonymity.</p>
+      <div class="bb-card-glass">
+        <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">🔑 Password Safety & Entropy</h2>
+        <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Analyze password complexity and test pwned hashes using secure k-anonymity protocols.</p>
         <form onsubmit="runScan(event, 'password-strength', '/security/api/check-password')">
-          <div class="input-group">
-            <label>Password</label>
-            <input type="password" name="password" placeholder="••••••••••••••••" required style="background:var(--bg); border-color:var(--border);">
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">Password to Evaluate</label>
+            <input type="password" name="password" placeholder="••••••••••••••••" required class="cyber-input">
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Test Password Safety</button>
+          <button type="submit" class="btn-cyber-submit">Test Password Safety</button>
         </form>
         <div class="result-box" id="result-password-strength"></div>
       </div>
     </div>
 
-    <!-- 6. SSL AUDIT (GATED) -->
+    <!-- 6. SSL AUDIT (GATED FOR FREE) -->
     <div class="tool-panel" id="panel-ssl-report">
-      <div class="bb-card {% if plan == 'free' %}gated-overlay{% endif %}">
+      <div class="bb-card-glass {% if plan == 'free' %}gated-overlay{% endif %}">
         {% if plan == 'free' %}
         <div class="gated-lock-screen">
           <div class="gated-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <div class="gated-title">Pro Feature Required</div>
-          <div class="gated-desc">Unlock advanced SSL/TLS diagnostics and certificate chains auditing. Upgrade your plan now.</div>
-          <a href="/pricing" class="btn btn-primary">Upgrade Plan</a>
+          <div style="font-weight:800; font-size:1.2rem; color:#ffffff; margin-bottom:8px;">Pro Feature Required</div>
+          <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:24px; max-width:340px; line-height:1.5;">Unlock advanced SSL/TLS diagnostics and certificate trust chain audits. Upgrade your plan.</div>
+          <a href="/pricing" style="padding:10px 24px; background:linear-gradient(135deg, #6366f1, #a855f7); color:#fff; font-weight:700; border-radius:30px; text-decoration:none;">Upgrade Plan</a>
         </div>
         {% endif %}
         <div class="{% if plan == 'free' %}gated-blur{% endif %}">
-          <h3>🔒 SSL/TLS Certificate Audit</h3>
-          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Inspect TLS/SSL certificate status, expiry date, issuer, and cipher strength.</p>
+          <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">🔒 SSL/TLS Certificate Audit</h2>
+          <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Inspect TLS/SSL certificate status, expiry timeline, issuer authority, and cipher grade.</p>
           <form onsubmit="runScan(event, 'ssl-report', '/security/api/analyze-ssl')">
-            <div class="input-group">
-              <label>Host / Domain</label>
-              <input type="text" name="hostname" placeholder="github.com" {% if plan != 'free' %}required{% endif %} style="background:var(--bg); border-color:var(--border);">
+            <div style="margin-bottom:20px;">
+              <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">Target Host / Domain</label>
+              <input type="text" name="hostname" placeholder="github.com" {% if plan != 'free' %}required{% endif %} class="cyber-input">
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:16px;">Audit Certificate</button>
+            <button type="submit" class="btn-cyber-submit">Audit Certificate</button>
           </form>
           <div class="result-box" id="result-ssl-report"></div>
         </div>
       </div>
     </div>
 
-    <!-- 7. DNS RECORDS (GATED) -->
+    <!-- 7. DNS RECORDS (GATED FOR FREE) -->
     <div class="tool-panel" id="panel-dns-lookup">
-      <div class="bb-card {% if plan == 'free' %}gated-overlay{% endif %}">
+      <div class="bb-card-glass {% if plan == 'free' %}gated-overlay{% endif %}">
         {% if plan == 'free' %}
         <div class="gated-lock-screen">
           <div class="gated-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <div class="gated-title">Pro Feature Required</div>
-          <div class="gated-desc">Retrieve advanced DNS records including MX, AAAA, TXT and NS profiles. Upgrade your plan.</div>
-          <a href="/pricing" class="btn btn-primary">Upgrade Plan</a>
+          <div style="font-weight:800; font-size:1.2rem; color:#ffffff; margin-bottom:8px;">Pro Feature Required</div>
+          <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:24px; max-width:340px; line-height:1.5;">Retrieve advanced DNS records including MX, AAAA, TXT, SPF, and DMARC security profiles.</div>
+          <a href="/pricing" style="padding:10px 24px; background:linear-gradient(135deg, #6366f1, #a855f7); color:#fff; font-weight:700; border-radius:30px; text-decoration:none;">Upgrade Plan</a>
         </div>
         {% endif %}
         <div class="{% if plan == 'free' %}gated-blur{% endif %}">
-          <h3>⚡ DNS Records Lookup</h3>
-          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Query DNS A, MX, NS, TXT, and CNAME resolution matrices.</p>
+          <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">⚡ DNS Security Records</h2>
+          <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Resolve DNS A, MX, NS, TXT, CNAME, and SPF resolution matrices.</p>
           <form onsubmit="runScan(event, 'dns-lookup', '/security/api/dns-lookup')">
-            <div class="input-group">
-              <label>Domain Name</label>
-              <input type="text" name="hostname" placeholder="microsoft.com" {% if plan != 'free' %}required{% endif %} style="background:var(--bg); border-color:var(--border);">
+            <div style="margin-bottom:20px;">
+              <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">Domain Name</label>
+              <input type="text" name="hostname" placeholder="microsoft.com" {% if plan != 'free' %}required{% endif %} class="cyber-input">
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:16px;">Resolve Records</button>
+            <button type="submit" class="btn-cyber-submit">Resolve Records</button>
           </form>
           <div class="result-box" id="result-dns-lookup"></div>
         </div>
       </div>
     </div>
 
-    <!-- 4. EMAIL BREACH / PHISHING PANEL -->
-    <div class="tool-panel" id="panel-email-breach">
-      <div class="bb-card">
-        <h3>📧 Email Phishing & Breach Scanner</h3>
-        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Analyze email content for phishing indicators and credential harvesting attempts.</p>
-        <form onsubmit="runScan(event, 'email-breach', '/security/api/analyze-email')">
-          <div class="input-group">
-            <label>Email Content</label>
-            <textarea name="content" placeholder="Paste suspicious email content here..." required style="background:var(--bg); border-color:var(--border); width: 100%; height: 100px; padding: 12px; border-radius: 8px; color: var(--text); font-family: inherit; resize: vertical;"></textarea>
-          </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Analyze Email</button>
-        </form>
-        <div class="result-box" id="result-email-breach"></div>
-      </div>
-    </div>
-
-    <!-- 5. PASSWORD STRENGTH PANEL -->
-    <div class="tool-panel" id="panel-password-strength">
-      <div class="bb-card">
-        <h3>🔑 Password Strength Analyzer</h3>
-        <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Calculate entropy and crack time for your passwords. Passwords are analyzed locally and not stored.</p>
-        <form onsubmit="runScan(event, 'password-strength', '/security/api/check-password')">
-          <div class="input-group">
-            <label>Password to Check</label>
-            <input type="password" name="password" placeholder="Enter password" required style="background:var(--bg); border-color:var(--border);">
-          </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Evaluate Strength</button>
-        </form>
-        <div class="result-box" id="result-password-strength"></div>
-      </div>
-    </div>
-
-    <!-- 6. SSL REPORT PANEL -->
-    <div class="tool-panel" id="panel-ssl-report">
-      <div class="bb-card {% if plan == 'free' %}gated-overlay{% endif %}">
-        {% if plan == 'free' %}
-        <div class="gated-lock-screen">
-          <div class="gated-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div class="gated-title">Pro Feature Required</div>
-          <div class="gated-desc">Audit SSL/TLS certificates for validity, issuer trust, and upcoming expirations.</div>
-          <a href="/pricing" class="btn btn-primary">Upgrade Plan</a>
-        </div>
-        {% endif %}
-        <div class="{% if plan == 'free' %}gated-blur{% endif %}">
-          <h3>🔒 SSL Certificate Audit</h3>
-          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Inspect SSL certificates for a target domain.</p>
-          <form onsubmit="runScan(event, 'ssl-report', '/security/api/check-ssl')">
-            <div class="input-group">
-              <label>Domain Name</label>
-              <input type="text" name="domain" placeholder="example.com" {% if plan != 'free' %}required{% endif %} style="background:var(--bg); border-color:var(--border);">
-            </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:16px;">Audit Certificate</button>
-          </form>
-          <div class="result-box" id="result-ssl-report"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 7. DNS LOOKUP PANEL (GATED) -->
-    <div class="tool-panel" id="panel-dns-lookup">
-      <div class="bb-card {% if plan == 'free' %}gated-overlay{% endif %}">
-        {% if plan == 'free' %}
-        <div class="gated-lock-screen">
-          <div class="gated-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <div class="gated-title">Pro Feature Required</div>
-          <div class="gated-desc">Advanced DNS security record lookups (SPF, DMARC, MX) for domains.</div>
-          <a href="/pricing" class="btn btn-primary">Upgrade Plan</a>
-        </div>
-        {% endif %}
-        <div class="{% if plan == 'free' %}gated-blur{% endif %}">
-          <h3>🌍 DNS Security Records</h3>
-          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Check advanced DNS records (A, MX, SPF, DMARC) for vulnerabilities.</p>
-          <form onsubmit="runScan(event, 'dns-lookup', '/security/api/check-dns')">
-            <div class="input-group">
-              <label>Domain Name</label>
-              <input type="text" name="domain" placeholder="microsoft.com" {% if plan != 'free' %}required{% endif %} style="background:var(--bg); border-color:var(--border);">
-            </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:16px;">Resolve Records</button>
-          </form>
-          <div class="result-box" id="result-dns-lookup"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 8. QR CODE SCANNER (GATED) -->
+    <!-- 8. QR SCANNER (GATED FOR FREE) -->
     <div class="tool-panel" id="panel-qr-scan">
-      <div class="bb-card {% if plan == 'free' %}gated-overlay{% endif %}">
+      <div class="bb-card-glass {% if plan == 'free' %}gated-overlay{% endif %}">
         {% if plan == 'free' %}
         <div class="gated-lock-screen">
           <div class="gated-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
-          <div class="gated-title">Pro Feature Required</div>
-          <div class="gated-desc">Scan and decode QR codes to analyze hidden payloads and deep links for safety risks.</div>
-          <a href="/pricing" class="btn btn-primary">Upgrade Plan</a>
+          <div style="font-weight:800; font-size:1.2rem; color:#ffffff; margin-bottom:8px;">Pro Feature Required</div>
+          <div style="color:#94a3b8; font-size:0.9rem; margin-bottom:24px; max-width:340px; line-height:1.5;">Scan and decode QR code matrices to uncover hidden malicious links and payloads.</div>
+          <a href="/pricing" style="padding:10px 24px; background:linear-gradient(135deg, #6366f1, #a855f7); color:#fff; font-weight:700; border-radius:30px; text-decoration:none;">Upgrade Plan</a>
         </div>
         {% endif %}
         <div class="{% if plan == 'free' %}gated-blur{% endif %}">
-          <h3>📱 QR Code Safety Scanner</h3>
-          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:20px;">Upload a QR code image to decode contents and scan links for embedded threats.</p>
+          <h2 style="font-size:1.3rem; font-weight:800; color:#ffffff; margin:0 0 8px;">📱 QR Code Safety Scanner</h2>
+          <p style="color:#94a3b8; font-size:0.9rem; margin:0 0 24px;">Upload a QR code image to decode contents and scan links for embedded threats.</p>
           <form onsubmit="runQRScan(event)">
-            <div class="input-group">
-              <label>QR Code Image File</label>
-              <input type="file" id="qr-file-input" accept="image/*" {% if plan != 'free' %}required{% endif %} style="background:var(--bg); border-color:var(--border); padding: 8px;">
+            <div style="margin-bottom:20px;">
+              <label style="display:block; font-size:0.85rem; font-weight:600; color:#cbd5e1; margin-bottom:8px;">QR Code Image File</label>
+              <input type="file" id="qr-file-input" accept="image/*" {% if plan != 'free' %}required{% endif %} class="cyber-input" style="padding:10px;">
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-top:16px;">Scan & Decode QR</button>
+            <button type="submit" class="btn-cyber-submit">Scan & Decode QR</button>
           </form>
           <div class="result-box" id="result-qr-scan"></div>
         </div>
@@ -469,7 +484,7 @@
     
     // UI state
     resultBox.style.display = 'block';
-    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div style="width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;"></div> Analyzing payload...</div>';
+    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:10px;color:#60a5fa;"><div style="width:18px;height:18px;border:2px solid rgba(96,165,250,0.3);border-top-color:#60a5fa;border-radius:50%;animation:spin 0.8s linear infinite;"></div> Analyzing payload...</div>';
 
     try {
       const response = await fetch(endpoint, {
@@ -485,9 +500,9 @@
       }
 
       const data = await response.json();
-      resultBox.innerHTML = '<h4 style="margin-top:0;margin-bottom:12px;color:var(--primary-light);">Diagnostic Payload:</h4><pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.6;overflow-x:auto;">' + syntaxHighlightJson(data) + '</pre>';
+      resultBox.innerHTML = '<h4 style="margin-top:0;margin-bottom:12px;color:#60a5fa;">Diagnostic Payload:</h4><pre style="margin:0;font-family:\'JetBrains Mono\',monospace;font-size:0.85rem;line-height:1.6;overflow-x:auto;">' + syntaxHighlightJson(data) + '</pre>';
     } catch(err) {
-      resultBox.innerHTML = '<div style="color:var(--status-danger);font-weight:700;">Diagnostic error: ' + err.message + '</div>';
+      resultBox.innerHTML = '<div style="color:#ef4444;font-weight:700;">Diagnostic error: ' + err.message + '</div>';
     }
   }
 
@@ -505,7 +520,7 @@
     formData.append('file', fileInput.files[0]);
 
     resultBox.style.display = 'block';
-    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><div style="width:20px;height:20px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:spin 0.8s linear infinite;"></div> Decoding matrix code...</div>';
+    resultBox.innerHTML = '<div style="display:flex;align-items:center;gap:10px;color:#60a5fa;"><div style="width:18px;height:18px;border:2px solid rgba(96,165,250,0.3);border-top-color:#60a5fa;border-radius:50%;animation:spin 0.8s linear infinite;"></div> Decoding matrix code...</div>';
 
     try {
       const response = await fetch('/security/api/analyze-qr', {
@@ -518,9 +533,9 @@
       }
 
       const data = await response.json();
-      resultBox.innerHTML = '<h4 style="margin-top:0;margin-bottom:12px;color:var(--primary-light);">QR Scan Verdict:</h4><pre style="margin:0;font-family:var(--font-mono);font-size:0.85rem;line-height:1.6;overflow-x:auto;">' + syntaxHighlightJson(data) + '</pre>';
+      resultBox.innerHTML = '<h4 style="margin-top:0;margin-bottom:12px;color:#60a5fa;">QR Scan Verdict:</h4><pre style="margin:0;font-family:\'JetBrains Mono\',monospace;font-size:0.85rem;line-height:1.6;overflow-x:auto;">' + syntaxHighlightJson(data) + '</pre>';
     } catch(err) {
-      resultBox.innerHTML = '<div style="color:var(--status-danger);font-weight:700;">Scan failed: ' + err.message + '</div>';
+      resultBox.innerHTML = '<div style="color:#ef4444;font-weight:700;">Scan failed: ' + err.message + '</div>';
     }
   }
 </script>

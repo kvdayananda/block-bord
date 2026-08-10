@@ -3,71 +3,79 @@
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { background-color: #07090e !important; color: #f8fafc !important; }
+  .app-page-wrapper {
+    display: flex; min-height: 100vh;
+    background: radial-gradient(circle at 80% 15%, rgba(99,102,241,0.1) 0%, transparent 50%), #07090e !important;
+    align-items: flex-start;
+  }
+  .app-glass-sidebar { background: rgba(15,23,42,0.75) !important; backdrop-filter: blur(20px) !important; border-right: 1px solid rgba(255,255,255,0.08) !important; }
+  .app-main-content { flex:1; padding:36px 40px 80px; max-width:calc(1440px - var(--sidebar-w,260px)); overflow-x:hidden; display:flex; flex-direction:column; gap:28px; }
+  .app-page-header { background:rgba(15,23,42,0.6); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:26px 30px; backdrop-filter:blur(16px); display:flex; justify-content:space-between; align-items:center; gap:20px; flex-wrap:wrap; }
+  .bb-card-glass { background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:28px; backdrop-filter:blur(20px); box-shadow:0 15px 40px -10px rgba(0,0,0,0.5); }
+  .analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media (max-width: 768px) {
+    .app-main-content { padding:16px 16px 90px !important; }
+    .analytics-grid { grid-template-columns:1fr !important; }
+    .app-page-header { flex-direction:column !important; align-items:flex-start !important; }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="app-page-wrapper">
   {% include "sidebar.html" %}
-
   <main class="app-main-content">
+
+    <!-- Page Header -->
     <div class="app-page-header">
-      <div class="app-page-header-left">
+      <div>
         <span class="app-page-tag">Analytics Engine</span>
-        <h1 class="app-page-title">Risk Distribution</h1>
+        <h1 class="app-page-title" style="margin-top:8px;">Risk Distribution</h1>
         <p class="app-page-subtitle">Detailed breakdown of threat telemetry and historical forensic scans.</p>
       </div>
-      <div class="app-page-header-right">
-        <a href="/app" class="btn btn-outline" style="padding:8px 18px;font-size:0.8125rem;">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right:6px;"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
-          Back to Dashboard
-        </a>
-      </div>
+      <a href="/app" class="app-back-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
+        Dashboard
+      </a>
     </div>
 
-    <div class="premium-grid-2">
-      <!-- Risk Doughnut -->
-      <div class="bb-card" style="display:flex;flex-direction:column;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text);">Global Distribution</h3>
-          <span class="badge badge-primary">LIVE FETCH</span>
+    <!-- Charts Grid -->
+    <div class="analytics-grid">
+      <!-- Risk Doughnut Chart -->
+      <div class="bb-card-glass" style="display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+          <h3 style="font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#ffffff; margin:0;">Global Distribution</h3>
+          <span style="font-size:0.72rem; font-weight:700; background:rgba(99,102,241,0.12); color:#818cf8; padding:4px 12px; border-radius:20px; border:1px solid rgba(99,102,241,0.25);">LIVE FETCH</span>
         </div>
-        <div style="flex:1;position:relative;min-height:300px;">
+        <div style="flex:1; position:relative; min-height:280px;">
           <canvas id="riskChart"></canvas>
         </div>
-        <div style="display:flex;justify-content:center;gap:24px;margin-top:24px;flex-wrap:wrap;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);font-weight:700;">
-            <span style="width:10px;height:10px;border-radius:50%;background:#10b981;display:inline-block;box-shadow:0 0 8px #10b981;"></span>Safe
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);font-weight:700;">
-            <span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;display:inline-block;box-shadow:0 0 8px #f59e0b;"></span>Suspicious
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);font-weight:700;">
-            <span style="width:10px;height:10px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 8px #ef4444;"></span>Malicious
-          </div>
+        <div style="display:flex; justify-content:center; gap:24px; margin-top:20px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#94a3b8; font-weight:700;"><span style="width:10px;height:10px;border-radius:50%;background:#10b981;box-shadow:0 0 8px #10b981;display:inline-block;"></span>Safe</div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#94a3b8; font-weight:700;"><span style="width:10px;height:10px;border-radius:50%;background:#f59e0b;box-shadow:0 0 8px #f59e0b;display:inline-block;"></span>Suspicious</div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#94a3b8; font-weight:700;"><span style="width:10px;height:10px;border-radius:50%;background:#ef4444;box-shadow:0 0 8px #ef4444;display:inline-block;"></span>Malicious</div>
         </div>
       </div>
 
-      <!-- Categories breakdown -->
-      <div class="bb-card" style="display:flex;flex-direction:column;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
-          <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text);">Threat Categories</h3>
-        </div>
-        <div id="categoryContainer" style="display:flex;flex-direction:column;gap:16px;">
-          <!-- Fetched via JS -->
-          <div style="color:var(--text-dim);font-size:0.9rem;text-align:center;padding:40px 0;">Loading telemetry...</div>
+      <!-- Threat Categories -->
+      <div class="bb-card-glass" style="display:flex; flex-direction:column;">
+        <h3 style="font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#ffffff; margin:0 0 24px;">Threat Categories</h3>
+        <div id="categoryContainer" style="display:flex; flex-direction:column; gap:16px; flex:1;">
+          <div style="color:#64748b; font-size:0.9rem; text-align:center; padding:40px 0;">Loading telemetry...</div>
         </div>
       </div>
     </div>
 
-    <!-- Timeline -->
-    <div class="bb-card" style="margin-top:32px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;">
-        <h3 style="font-size:1rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text);">30-Day Threat Intelligence Timeline</h3>
-      </div>
-      <div style="height:350px;width:100%;">
+    <!-- Timeline Chart -->
+    <div class="bb-card-glass">
+      <h3 style="font-size:1rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:#ffffff; margin:0 0 28px;">30-Day Threat Intelligence Timeline</h3>
+      <div style="height:320px; width:100%;">
         <canvas id="timelineChart"></canvas>
       </div>
     </div>
+
   </main>
 </div>
 {% endblock %}
@@ -77,111 +85,46 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const gridColor = 'rgba(255,255,255,0.04)';
   const textColor = '#64748b';
-  
   try {
-    // 1. Fetch Stats for Risk Distribution
     const statsRes = await fetch('/api/stats');
     const stats = await statsRes.json();
-    
     const riskCtx = document.getElementById('riskChart');
     if (riskCtx && stats.total_scans !== undefined) {
       new Chart(riskCtx, {
         type: 'doughnut',
         data: {
           labels: ['Safe', 'Suspicious', 'Malicious'],
-          datasets: [{
-            data: [stats.safe, stats.suspicious, stats.high_risk],
-            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-            borderColor: ['rgba(16,185,129,0.3)', 'rgba(245,158,11,0.3)', 'rgba(239,68,68,0.3)'],
-            borderWidth: 1,
-            hoverOffset: 12
-          }]
+          datasets: [{ data: [stats.safe, stats.suspicious, stats.high_risk], backgroundColor: ['#10b981','#f59e0b','#ef4444'], borderColor: ['rgba(16,185,129,0.3)','rgba(245,158,11,0.3)','rgba(239,68,68,0.3)'], borderWidth: 1, hoverOffset: 12 }]
         },
-        options: {
-          cutout: '75%',
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } }
-        }
+        options: { cutout: '75%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
     }
-
-    // Render Categories
     const catContainer = document.getElementById('categoryContainer');
     if (stats.categories && Object.keys(stats.categories).length > 0) {
-        catContainer.innerHTML = '';
-        // Sort categories by volume
-        const sortedCats = Object.entries(stats.categories).sort((a, b) => b[1] - a[1]);
-        const maxVol = sortedCats[0][1] || 1;
-        
-        sortedCats.forEach(([cat, count]) => {
-            const pct = Math.min(100, (count / maxVol) * 100);
-            catContainer.innerHTML += `
-              <div>
-                 <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:0.875rem;">
-                   <span style="font-weight:700; color:var(--text);">${Math.round((count/stats.total_scans)*100)}% - ${cat}</span>
-                   <span style="color:var(--text-muted);">${count} logs</span>
-                 </div>
-                 <div style="height:8px; background:var(--bg-alt); border-radius:4px; overflow:hidden;">
-                   <div style="height:100%; width:${pct}%; background:var(--primary-grad); border-radius:4px;"></div>
-                 </div>
-              </div>
-            `;
-        });
+      catContainer.innerHTML = '';
+      const sortedCats = Object.entries(stats.categories).sort((a,b)=>b[1]-a[1]);
+      const maxVol = sortedCats[0][1] || 1;
+      sortedCats.forEach(([cat, count]) => {
+        const pct = Math.min(100, (count / maxVol) * 100);
+        catContainer.innerHTML += `<div><div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:0.875rem;"><span style="font-weight:700;color:#ffffff;">${Math.round((count/stats.total_scans)*100)}% — ${cat}</span><span style="color:#64748b;">${count} scans</span></div><div style="height:6px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:4px;"></div></div></div>`;
+      });
     } else {
-        catContainer.innerHTML = '<div style="color:var(--text-dim);font-size:0.9rem;text-align:center;padding:40px 0;">No category telemetry available.</div>';
+      catContainer.innerHTML = '<div style="color:#64748b;text-align:center;padding:40px 0;">No category telemetry available.</div>';
     }
-
-
-    // 2. Fetch Analytics for Timeline
     const analyticsRes = await fetch('/api/analytics');
     const analytics = await analyticsRes.json();
-
     const timelineCtx = document.getElementById('timelineChart');
     if (timelineCtx && analytics.labels) {
       new Chart(timelineCtx, {
         type: 'line',
-        data: {
-          labels: analytics.labels,
-          datasets: [
-            {
-              label: 'Threats Blocked',
-              data: analytics.high,
-              borderColor: '#ef4444',
-              backgroundColor: 'rgba(239,68,68,0.08)',
-              fill: true, tension: 0.45, pointRadius: 3, borderWidth: 2,
-              pointBackgroundColor: '#ef4444',
-              pointBorderColor: 'transparent'
-            },
-            {
-              label: 'Safe Content',
-              data: analytics.safe,
-              borderColor: '#10b981',
-              backgroundColor: 'rgba(16,185,129,0.08)',
-              fill: true, tension: 0.45, pointRadius: 3, borderWidth: 2,
-              pointBackgroundColor: '#10b981',
-              pointBorderColor: 'transparent'
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { 
-            legend: { display: true, labels: { color: textColor, usePointStyle: true, pointStyle: 'circle', boxWidth: 8 } },
-            tooltip: { backgroundColor: 'rgba(6,8,20,0.9)', borderColor: 'rgba(99,102,241,0.3)', borderWidth: 1, padding: 12 }
-          },
-          scales: {
-            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
-            x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 }, maxTicksLimit: 7 } }
-          }
-        }
+        data: { labels: analytics.labels, datasets: [
+          { label: 'Threats Blocked', data: analytics.high, borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,0.06)', fill: true, tension: 0.45, pointRadius: 3, borderWidth: 2, pointBackgroundColor: '#ef4444', pointBorderColor: 'transparent' },
+          { label: 'Safe Content', data: analytics.safe, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.06)', fill: true, tension: 0.45, pointRadius: 3, borderWidth: 2, pointBackgroundColor: '#10b981', pointBorderColor: 'transparent' }
+        ]},
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, labels: { color: textColor, usePointStyle: true, pointStyle: 'circle', boxWidth: 8 } }, tooltip: { backgroundColor: 'rgba(6,8,20,0.9)', borderColor: 'rgba(99,102,241,0.3)', borderWidth: 1, padding: 12 } }, scales: { y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } }, x: { grid: { display: false }, ticks: { color: textColor, font: { size: 11 }, maxTicksLimit: 7 } } } }
       });
     }
-
-  } catch (err) {
-    console.error("Error fetching analytics:", err);
-  }
+  } catch (err) { console.error("Analytics error:", err); }
 });
 </script>
 {% endblock %}

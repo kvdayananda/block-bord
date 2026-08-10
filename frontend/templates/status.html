@@ -5,11 +5,27 @@
 {% block extra_head %}
 <meta name="description" content="Check the real-time operational status of Block Bord AI services, including the risk engine, dashboard, and API.">
 <style>
+  body {
+    background-color: #07090e !important;
+    color: #f8fafc !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  .main-navbar {
+    background: rgba(7, 9, 14, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  }
+  .main-navbar .nav-link {
+    color: #94a3b8 !important;
+  }
+
   .status-hero {
-    padding: 100px 0 60px;
-    background: linear-gradient(160deg, var(--bg) 0%, var(--bg-alt) 100%);
+    padding: 80px 0 50px;
+    background: 
+      radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 60%),
+      #07090e;
     text-align: center;
-    border-bottom: 1px solid var(--border);
   }
   
   .status-wrapper {

@@ -1,42 +1,430 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Privacy Policy – Block Bord AI</title>
-</head>
-<body>
-  <section class="privacy">
-    <h1>Privacy Policy</h1>
-    <p>Block Bord AI ("we", "us", "our") is committed to protecting your privacy. This policy explains how we collect, use, store, and disclose personal information.</p>
-    <h2>Information We Collect</h2>
-    <ul>
-      <li>Account information: email address, username, and password (hashed).</li>
-      <li>Usage data: IP address, browser type, pages visited, and interaction timestamps.</li>
-      <li>Security data: URLs, files, or text you submit for analysis, stored temporarily for processing.</li>
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy — Block Bord AI{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="Block Bord AI Privacy Policy — How we collect, process, encrypt, store, and protect your personal data and security analysis information.">
+<style>
+  body {
+    background-color: #07090e !important;
+    color: #f8fafc !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  
+  .main-navbar {
+    background: rgba(7, 9, 14, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+  }
+  .main-navbar .nav-link {
+    color: #94a3b8 !important;
+  }
+  .main-navbar .nav-link:hover, .main-navbar .nav-link.active {
+    color: #60a5fa !important;
+  }
+
+  /* ── Policy Hero ── */
+  .policy-hero {
+    position: relative;
+    padding: 70px 5% 40px;
+    text-align: center;
+    background: 
+      radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 60%),
+      #07090e;
+  }
+
+  .cyber-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 30px;
+    color: #818cf8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .policy-title {
+    font-size: clamp(2.2rem, 3.8vw, 3.2rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 14px;
+    letter-spacing: -0.02em;
+  }
+
+  .policy-title .highlight {
+    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .policy-meta {
+    font-size: 0.9rem;
+    color: #64748b;
+  }
+
+  /* ── Layout Grid ── */
+  .policy-container {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 40px 5% 80px;
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 40px;
+  }
+
+  @media (max-width: 900px) {
+    .policy-container {
+      grid-template-columns: 1fr;
+    }
+    .sticky-toc {
+      display: none;
+    }
+  }
+
+  /* Sticky TOC Sidebar */
+  .sticky-toc {
+    position: sticky;
+    top: 100px;
+    align-self: start;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 20px;
+    backdrop-filter: blur(16px);
+  }
+
+  .toc-header {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    margin-bottom: 14px;
+  }
+
+  .toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .toc-link {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    text-decoration: none;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: block;
+  }
+
+  .toc-link:hover {
+    color: #60a5fa;
+    background: rgba(99, 102, 241, 0.1);
+  }
+
+  /* Content Cards */
+  .policy-body {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .policy-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 36px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+  }
+
+  .card-sec-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .card-sec-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: rgba(99, 102, 241, 0.15);
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .policy-text {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+
+  .policy-text:last-child {
+    margin-bottom: 0;
+  }
+
+  .policy-list {
+    margin: 12px 0 16px 20px;
+    color: #94a3b8;
+    font-size: 0.93rem;
+    line-height: 1.7;
+  }
+
+  .policy-list li {
+    margin-bottom: 8px;
+  }
+
+  .policy-list strong {
+    color: #f1f5f9;
+  }
+
+  /* Highlight Callout Box */
+  .highlight-callout {
+    background: rgba(45, 212, 191, 0.08);
+    border: 1px solid rgba(45, 212, 191, 0.25);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 20px 0;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .callout-icon {
+    color: #2dd4bf;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .callout-text {
+    font-size: 0.9rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+  }
+
+  .callout-text strong {
+    color: #2dd4bf;
+  }
+
+  .contact-box {
+    background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.8));
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 16px;
+    padding: 28px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .contact-btn {
+    padding: 10px 22px;
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-radius: 20px;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+
+  .contact-btn:hover {
+    background: #2563eb;
+    color: white;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Policy Hero -->
+<section class="policy-hero">
+  <div class="cyber-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    LEGAL & COMPLIANCE
+  </div>
+  <h1 class="policy-title">Privacy <span class="highlight">Policy</span></h1>
+  <p class="policy-meta">Last Updated: August 2026 • Effective Immediately for all Block Bord AI Users</p>
+</section>
+
+<div class="policy-container">
+  <!-- Sticky TOC Sidebar -->
+  <aside class="sticky-toc">
+    <div class="toc-header">Table of Contents</div>
+    <ul class="toc-list">
+      <li><a href="#overview" class="toc-link">1. Overview</a></li>
+      <li><a href="#collection" class="toc-link">2. Data We Collect</a></li>
+      <li><a href="#usage" class="toc-link">3. How We Use Data</a></li>
+      <li><a href="#retention" class="toc-link">4. Data Retention</a></li>
+      <li><a href="#sharing" class="toc-link">5. Information Sharing</a></li>
+      <li><a href="#rights" class="toc-link">6. Your Rights</a></li>
+      <li><a href="#security" class="toc-link">7. Security Measures</a></li>
+      <li><a href="#contact" class="toc-link">8. Contact Us</a></li>
     </ul>
-    <h2>How We Use Your Data</h2>
-    <ul>
-      <li>Provide and improve the AI security services.</li>
-      <li>Send transactional emails (e.g., password resets, payment receipts).</li>
-      <li>Detect and mitigate abuse or fraudulent activity.</li>
-    </ul>
-    <h2>Data Retention</h2>
-    <p>Analysis data is retained for a maximum of 48 hours and then permanently deleted. Account data is retained until you delete your account.</p>
-    <h2>Sharing of Information</h2>
-    <ul>
-      <li>We never sell your data to third parties.</li>
-      <li>We may share anonymized usage statistics for research.</li>
-      <li>We may disclose data to comply with legal obligations or protect rights.</li>
-    </ul>
-    <h2>Your Rights</h2>
-    <ul>
-      <li>Access, correct, or delete your personal data by contacting support.</li>
-      <li>Opt‑out of marketing communications via the unsubscribe link in emails.</li>
-    </ul>
-    <h2>Security</h2>
-    <p>All data in transit is encrypted with TLS. Passwords are stored using strong salted hashing.</p>
-    <h2>Contact</h2>
-    <p>If you have questions about this policy, please <a href="/contact">contact us</a>.</p>
-  </section>
-</body>
-</html>
+  </aside>
+
+  <!-- Main Policy Body -->
+  <main class="policy-body">
+    
+    <!-- 1. Overview -->
+    <article class="policy-card" id="overview">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        </span>
+        1. Overview & Our Commitment
+      </h2>
+      <p class="policy-text">
+        Block Bord AI ("we", "us", "our") is dedicated to safeguarding your privacy and treating all user data with maximum security. This Privacy Policy outlines how we collect, process, store, and protect personal and security data when you access our platform, APIs, or browser tools.
+      </p>
+      
+      <div class="highlight-callout">
+        <div class="callout-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="callout-text">
+          <strong>Zero Data Monetization Guarantee:</strong> We never sell, monetize, or rent your personal information, scan logs, or target submission inputs to third-party advertisers or data brokers.
+        </div>
+      </div>
+    </article>
+
+    <!-- 2. Data We Collect -->
+    <article class="policy-card" id="collection">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-9M14 17H5M17 12H3"/></svg>
+        </span>
+        2. Information We Collect
+      </h2>
+      <p class="policy-text">We limit collection strictly to data essential for platform operations and security threat analysis:</p>
+      <ul class="policy-list">
+        <li><strong>Account Credentials:</strong> Email address, username, and password hashes generated using Argon2id encryption.</li>
+        <li><strong>Security Target Inputs:</strong> URLs, IP addresses, file hashes, QR codes, or text patterns submitted for threat assessment.</li>
+        <li><strong>Telemetry & Usage Data:</strong> Anonymized IP addresses, HTTP user-agent headers, timestamp logs, and API token usage statistics to prevent platform abuse and enforce tier rate limits.</li>
+        <li><strong>Billing Metadata:</strong> Transaction reference IDs and subscription status provided securely by payment processors (Razorpay). We do not store raw credit card details on our servers.</li>
+      </ul>
+    </article>
+
+    <!-- 3. How We Use Data -->
+    <article class="policy-card" id="usage">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        </span>
+        3. How We Use Your Data
+      </h2>
+      <p class="policy-text">Your information is processed strictly for legitimate operational purposes:</p>
+      <ul class="policy-list">
+        <li>Executing real-time 3-layer risk inspection (Safe Browsing API + XGBoost ML Engine + Heuristic Rules).</li>
+        <li>Generating threat assessment reports, history logs, and security dashboard metrics.</li>
+        <li>Authenticating user sessions (JWT & 2FA) and verifying API access permissions.</li>
+        <li>Mitigating rate-limit abuse, DDoS attacks, and malicious automated bot activity.</li>
+        <li>Sending essential account notifications such as password resets and payment receipts.</li>
+      </ul>
+    </article>
+
+    <!-- 4. Data Retention -->
+    <article class="policy-card" id="retention">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </span>
+        4. Data Retention & Deletion
+      </h2>
+      <p class="policy-text">
+        Transient security scan inputs (e.g. submitted URLs or files) are stored in encrypted temporary caches during processing and automatically purged within 48 hours unless saved explicitly to a registered user’s scan history.
+      </p>
+      <p class="policy-text">
+        Account data remains active for the duration of your registration. When you choose to close your account, all associated session records, API keys, and personal identifiers are permanently deleted from our primary databases within 30 days.
+      </p>
+    </article>
+
+    <!-- 5. Information Sharing -->
+    <article class="policy-card" id="sharing">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </span>
+        5. Information Sharing & Disclosure
+      </h2>
+      <p class="policy-text">We do not share your private data except under the following strict scenarios:</p>
+      <ul class="policy-list">
+        <li><strong>Infrastructure Partners:</strong> Secure cloud infrastructure providers (e.g. Neon PostgreSQL, Render hosting) bound by strict non-disclosure agreements.</li>
+        <li><strong>Anonymized Threat Metrics:</strong> Aggregated, fully non-identifiable threat statistics (e.g., total phishing domains blocked) used for public security reports.</li>
+        <li><strong>Legal Compliance:</strong> When required by enforceable law enforcement sub-poenas or statutory legal obligations.</li>
+      </ul>
+    </article>
+
+    <!-- 6. Your Rights -->
+    <article class="policy-card" id="rights">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </span>
+        6. Your Data Rights & Choices
+      </h2>
+      <p class="policy-text">
+        Under global privacy frameworks (GDPR, CCPA, and DPDP Act), you possess full authority over your data:
+      </p>
+      <ul class="policy-list">
+        <li><strong>Right to Access:</strong> Export a full archive of your account history and scan logs at any time.</li>
+        <li><strong>Right to Erasure:</strong> Delete your account and associated telemetry upon request.</li>
+        <li><strong>Right to Rectification:</strong> Update your profile credentials and security settings directly from the account dashboard.</li>
+      </ul>
+    </article>
+
+    <!-- 7. Security Measures -->
+    <article class="policy-card" id="security">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        7. Technical Security Measures
+      </h2>
+      <p class="policy-text">
+        All network communications are encrypted end-to-end using TLS 1.3 encryption. Passwords and secrets are protected via Argon2id hashing algorithms, and session tokens utilize cryptographically signed JWTs with strict expiration lifetimes.
+      </p>
+    </article>
+
+    <!-- 8. Contact -->
+    <article class="policy-card" id="contact">
+      <h2 class="card-sec-title">
+        <span class="card-sec-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </span>
+        8. Data Protection Contact
+      </h2>
+      <p class="policy-text">
+        If you have questions regarding this Privacy Policy or wish to exercise your privacy rights, our Data Protection Team is available to assist you.
+      </p>
+      
+      <div class="contact-box">
+        <div>
+          <strong style="color:#ffffff; font-size:1rem; display:block; margin-bottom:4px;">Have questions or data requests?</strong>
+          <span style="color:#94a3b8; font-size:0.88rem;">Our security compliance officers respond within 24 hours.</span>
+        </div>
+        <a href="/contact" class="contact-btn">Contact Privacy Officer</a>
+      </div>
+    </article>
+
+  </main>
+</div>
+{% endblock %}

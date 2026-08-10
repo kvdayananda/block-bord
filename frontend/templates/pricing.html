@@ -3,121 +3,121 @@
 {% block title %}Pricing Plans — Block Bord AI{% endblock %}
 
 {% block extra_head %}
+<meta name="description" content="Flexible, transparent pricing plans for Block Bord AI. Free personal security scanning, Pro power user tiers, and Enterprise API plans.">
 <style>
-  .pricing-page {
-    background-color: var(--bg);
-    position: relative;
-    overflow: hidden;
-    padding-bottom: 100px;
+  body {
+    background-color: #07090e !important;
+    color: #f8fafc !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
   
-  /* Background decorative glow */
-  .pricing-page::before {
-    content: '';
-    position: absolute;
-    top: -200px; left: 50%;
-    transform: translateX(-50%);
-    width: 800px; height: 600px;
-    background: radial-gradient(ellipse at top, rgba(99,102,241,0.15) 0%, transparent 70%);
-    z-index: 0;
-    pointer-events: none;
+  .main-navbar {
+    background: rgba(7, 9, 14, 0.85) !important;
+    backdrop-filter: blur(16px) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
   }
-  
+  .main-navbar .nav-link {
+    color: #94a3b8 !important;
+  }
+  .main-navbar .nav-link:hover, .main-navbar .nav-link.active {
+    color: #60a5fa !important;
+  }
+
+  /* ── Pricing Hero ── */
   .pricing-hero {
-    padding: 160px 0 80px;
-    text-align: center;
     position: relative;
-    z-index: 1;
+    padding: 80px 5% 50px;
+    text-align: center;
+    background: 
+      radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.18) 0%, transparent 60%),
+      radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.12) 0%, transparent 50%),
+      #07090e;
+    overflow: hidden;
   }
-  
-  .pricing-hero .bb-overline {
-    background: rgba(99,102,241,0.1);
-    color: var(--primary-light);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 800;
+
+  .cyber-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 30px;
+    color: #818cf8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    display: inline-block;
-    margin-bottom: 20px;
-    border: 1px solid rgba(99,102,241,0.2);
+    margin-bottom: 24px;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.1);
   }
-  
-  .pricing-hero .bb-title {
-    font-size: 3.8rem;
-    font-weight: 900;
-    margin-bottom: 16px;
-    color: var(--text);
-    letter-spacing: -0.03em;
+
+  .gradient-heading {
+    font-size: clamp(2.2rem, 4vw, 3.6rem);
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
   }
-  
-  .pricing-hero .bb-title span {
-    background: linear-gradient(135deg, #6366f1, #c084fc);
+
+  .gradient-heading .highlight {
+    background: linear-gradient(135deg, #60a5fa 0%, #a855f7 50%, #ec4899 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  
-  .pricing-hero .bb-subtitle {
-    font-size: 1.15rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    max-width: 600px;
+
+  .pricing-hero-sub {
+    font-size: 1.08rem;
+    color: #94a3b8;
+    max-width: 620px;
     margin: 0 auto;
     line-height: 1.6;
+  }
+
+  /* ── Pricing Grid ── */
+  .pricing-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px 5% 90px;
   }
 
   .pricing-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 24px;
-    max-width: 1280px;
-    margin: 0 auto;
-    padding: 0 24px;
-    position: relative;
-    z-index: 1;
+    align-items: stretch;
   }
-  
+
   @media (max-width: 1100px) {
     .pricing-grid { grid-template-columns: repeat(2, 1fr); }
   }
-  
   @media (max-width: 700px) {
     .pricing-grid { grid-template-columns: 1fr; }
   }
 
   .pricing-card {
-    background: rgba(6, 8, 20, 0.4);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 32px 24px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 36px 28px;
     position: relative;
     display: flex;
     flex-direction: column;
-    transition: var(--transition);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
   }
 
   .pricing-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-    border-color: rgba(99,102,241,0.3);
+    transform: translateY(-6px);
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
   }
-  
+
   .pricing-card.popular {
-    background: linear-gradient(180deg, rgba(99,102,241,0.08) 0%, rgba(6, 8, 20, 0.6) 100%);
-    border-color: rgba(99,102,241,0.5);
-    box-shadow: 0 10px 40px rgba(99,102,241,0.15);
-  }
-  
-  .pricing-card.popular::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 4px;
-    background: var(--primary-grad);
-    border-top-left-radius: var(--radius-lg);
-    border-top-right-radius: var(--radius-lg);
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.12) 0%, rgba(15, 23, 42, 0.75) 100%);
+    border-color: rgba(168, 85, 247, 0.45);
+    box-shadow: 0 15px 40px rgba(99, 102, 241, 0.2);
   }
 
   .popular-badge {
@@ -125,48 +125,46 @@
     top: -14px;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--primary-grad);
-    color: #fff;
-    padding: 4px 14px;
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #ffffff;
+    padding: 5px 16px;
     border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    box-shadow: 0 4px 10px rgba(99,102,241,0.4);
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
   }
 
   .plan-name {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 700;
-    color: var(--text);
-    margin-bottom: 12px;
+    color: #ffffff;
+    margin-bottom: 10px;
   }
-  
+
   .plan-desc {
-    font-size: 0.9rem;
-    color: var(--text-muted);
+    font-size: 0.88rem;
+    color: #94a3b8;
     margin-bottom: 24px;
     line-height: 1.5;
-    min-height: 44px;
+    min-height: 42px;
   }
 
   .plan-price {
-    font-size: 3rem;
-    font-weight: 900;
-    color: #fff;
-    font-family: var(--font-display);
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: #ffffff;
     display: flex;
     align-items: baseline;
     gap: 4px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
 
   .plan-price span {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 500;
-    color: var(--text-dim);
-    font-family: var(--font-sans);
+    color: #64748b;
   }
 
   .plan-features {
@@ -177,76 +175,77 @@
   }
 
   .plan-features li {
-    font-size: 0.95rem;
-    color: var(--text-muted);
+    font-size: 0.9rem;
+    color: #cbd5e1;
     margin-bottom: 14px;
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 10px;
     line-height: 1.4;
   }
 
   .plan-features li svg {
     flex-shrink: 0;
-    color: #10b981;
+    color: #34d399;
     margin-top: 2px;
   }
 
   .plan-cta {
     display: block;
     text-align: center;
-    padding: 14px 20px;
-    border-radius: 8px;
-    font-size: 0.95rem;
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 0.92rem;
     font-weight: 700;
     text-decoration: none;
-    transition: var(--transition);
+    transition: all 0.25s ease;
   }
 
   .plan-cta.outline {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.15);
   }
-  
+
   .plan-cta.outline:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: var(--border-bright);
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #60a5fa;
   }
 
   .plan-cta.primary {
-    background: var(--primary);
-    color: #fff;
-    border: 1px solid var(--primary);
-    box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
   }
-  
+
   .plan-cta.primary:hover {
-    background: var(--primary-light);
-    box-shadow: 0 6px 20px rgba(99,102,241,0.4);
     transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(168, 85, 247, 0.45);
+    color: #ffffff;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="pricing-page">
-  <section class="pricing-hero">
-    <div class="bb-container">
-{% raw %}
-      <span class="bb-overline">Premium Protection</span>
-      <h1 class="bb-title">Secure Your Digital Frontiers <span>All-In-One AI Guard</span></h1>
-      <p class="bb-subtitle">Select the plan that matches your ambition. From personal safety to enterprise‑grade threat intel, we’ve got you covered.</p>
-{% endraw %}
-    </div>
-  </section>
+<!-- Pricing Hero -->
+<section class="pricing-hero">
+  <div class="cyber-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    TRANSPARENT PRICING
+  </div>
+  <h1 class="gradient-heading">Secure Your Digital Frontiers with <span class="highlight">AI Guard</span></h1>
+  <p class="pricing-hero-sub">Select the plan that matches your security needs. From personal browsing safety to high-volume enterprise threat intelligence APIs.</p>
+</section>
 
+<div class="pricing-container">
   <div class="pricing-grid">
     
     <!-- Free Plan -->
     <div class="pricing-card">
       <div class="plan-name">Free – Essential</div>
-      <div class="plan-desc">Basic AI‑driven threat detection for personal browsing. No credit card required.</div>
+      <div class="plan-desc">Basic AI threat detection for personal browsing. No credit card required.</div>
       <div class="plan-price">$0<span>/mo</span></div>
       <ul class="plan-features">
         <li>
@@ -303,7 +302,7 @@
     <!-- Professional Plan -->
     <div class="pricing-card">
       <div class="plan-name">Professional – Teams</div>
-      <div class="plan-desc">Full‑suite threat intelligence for growing teams and startups.</div>
+      <div class="plan-desc">Full-suite threat intelligence for growing teams and startups.</div>
       <div class="plan-price">$29<span>/mo</span></div>
       <ul class="plan-features">
         <li>

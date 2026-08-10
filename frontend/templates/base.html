@@ -54,22 +54,76 @@
 
 <body>
   <!-- ================= NAVBAR ================= -->
-  {% if not (request.url.path.startswith('/app') or request.url.path.startswith('/history') or request.url.path.startswith('/block-list') or request.url.path.startswith('/security') or request.url.path.startswith('/ai') or request.url.path.startswith('/settings') or request.url.path.startswith('/admin') or request.url.path.startswith('/leak-checker') or request.url.path.startswith('/scam-map')) %}
   {% block navbar %}
+  {% if not hide_navbar and not (
+    request.url.path.startswith('/app') or
+    request.url.path.startswith('/history') or
+    request.url.path.startswith('/block-list') or
+    request.url.path.startswith('/security') or
+    request.url.path.startswith('/ai') or
+    request.url.path.startswith('/settings') or
+    request.url.path.startswith('/admin') or
+    request.url.path.startswith('/leak-checker') or
+    request.url.path.startswith('/scam-map') or
+    request.url.path.startswith('/url-scanner') or
+    request.url.path.startswith('/password-checker') or
+    request.url.path.startswith('/email-header') or
+    request.url.path.startswith('/ip-lookup') or
+    request.url.path.startswith('/domain-inspector') or
+    request.url.path.startswith('/phishing-sim') or
+    request.url.path.startswith('/darkweb-monitor') or
+    request.url.path.startswith('/ssl-checker') or
+    request.url.path.startswith('/file-hash') or
+    request.url.path.startswith('/qr-scanner') or
+    request.url.path.startswith('/social-scanner') or
+    request.url.path.startswith('/port-scanner') or
+    request.url.path.startswith('/malware-intel') or
+    request.url.path.startswith('/upi-checker') or
+    request.url.path.startswith('/email-verifier') or
+    request.url.path.startswith('/threat-score') or
+    request.url.path.startswith('/header-analyzer') or
+    request.url.path.startswith('/bulk-scanner') or
+    request.url.path.startswith('/metadata-scanner') or
+    request.url.path.startswith('/fingerprint-analyzer') or
+    request.url.path.startswith('/screenshot-analyzer') or
+    request.url.path.startswith('/shopping-detector') or
+    request.url.path.startswith('/security-report') or
+    request.url.path.startswith('/scan-detail') or
+    request.url.path.startswith('/scan/') or
+    request.url.path.startswith('/analytics') or
+    request.url.path.startswith('/support') or
+    request.url.path.startswith('/tickets') or
+    request.url.path.startswith('/extension-setup') or
+    request.url.path.startswith('/ai-assistant') or
+    request.url.path.startswith('/tools/')
+  ) %}
   <header class="main-navbar" id="mainNavbar">
-    <a href="/" class="logo-link">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-      </svg>
-      Block <span style="color:var(--primary);">Bord</span> AI
+    <a href="/" class="logo-link brand-vertical">
+      <div class="brand-top">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="brand-shield-icon">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="url(#shield-grad)" stroke="none"/>
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor"/>
+          <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3b82f6" />
+              <stop offset="100%" stop-color="#8b5cf6" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="brand-name">Block Bord <span class="brand-ai">AI</span></span>
+      </div>
+      <span class="brand-tagline">Know Before You Trust.</span>
     </a>
 
     <nav class="nav-right" id="navMenu">
       {% if not (request.url.path.startswith('/app') or request.url.path.startswith('/history') or request.url.path.startswith('/settings') or request.url.path.startswith('/admin')) %}
       <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Home</a>
-      <a href="/about" class="nav-link {% if request.url.path == '/about' %}active{% endif %}">About</a>
+      <div class="nav-dropdown-wrapper">
+        <a href="/tools" class="nav-link">Scan Tools <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></a>
+      </div>
       <a href="/pricing" class="nav-link {% if request.url.path == '/pricing' %}active{% endif %}">Pricing</a>
-      <a href="/contact" class="nav-link {% if request.url.path == '/contact' %}active{% endif %}">Contact</a>
+      <a href="/about" class="nav-link {% if request.url.path == '/about' %}active{% endif %}">About Us</a>
       {% if request.session.get("user_id") %}
       <a href="/app" class="nav-link">Dashboard</a>
       {% endif %}
@@ -81,18 +135,19 @@
       </div>
       {% else %}
       <div class="mobile-only-nav">
-        <a href="/login" class="nav-link">Log in</a>
-        <a href="/register" class="nav-link">Get started</a>
+        <a href="/login" class="nav-link">Login</a>
+        <a href="/register" class="nav-link">Sign Up</a>
       </div>
       {% endif %}
     </nav>
 
     <div class="nav-actions">
+      
       {% if request.session.get("user_id") %}
-      <a href="/logout" class="btn btn-outline" style="padding: 8px 20px; font-size:0.875rem;" onclick="sessionStorage.clear()">Logout</a>
+      <a href="/logout" class="btn btn-outline nav-login-btn" onclick="sessionStorage.clear()">Logout</a>
       {% else %}
-      <a href="/login"    class="btn btn-ghost"   style="padding: 8px 16px; font-size:0.875rem;">Log in</a>
-      <a href="/register" class="btn btn-primary"  style="padding: 8px 22px; font-size:0.875rem;">Get started</a>
+      <a href="/login"    class="btn btn-outline nav-login-btn">Login</a>
+      <a href="/register" class="btn btn-primary nav-signup-btn">Sign Up</a>
       {% endif %}
       <!-- Mobile hamburger -->
       <button class="mobile-toggle" onclick="handleMobileToggle()" aria-label="Toggle Menu" id="mobileToggle">
@@ -100,8 +155,8 @@
       </button>
     </div>
   </header>
-  {% endblock %}
   {% endif %}
+  {% endblock %}
 
   <!-- ================= CONTENT ================= -->
   <main class="page-main-container">
@@ -115,7 +170,22 @@
       <div class="footer-grid">
         <!-- Brand -->
         <div class="footer-brand-col">
-
+          <a href="/" class="logo-link brand-vertical" style="margin-bottom: 14px; text-decoration: none;">
+            <div class="brand-top">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="brand-shield-icon">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="url(#footer-shield-grad)" stroke="none"/>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor"/>
+                <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                  <linearGradient id="footer-shield-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#3b82f6" />
+                    <stop offset="100%" stop-color="#8b5cf6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span class="brand-name" style="font-size: 1.15rem;">Block Bord <span class="brand-ai">AI</span></span>
+            </div>
+          </a>
           <p class="footer-brand-tagline">
             Enterprise-grade cyber intelligence powered by AI. Protecting the next billion users from digital threats.
           </p>

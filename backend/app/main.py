@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
         raise ValueError("SQLite database is not allowed in production mode.")
 
     # Initialize database tables if they don't exist (with retry logic)
-    max_retries = 5
+    max_retries = 3
     for i in range(max_retries):
         try:
             logger.info(f"Initializing database tables (Attempt {i+1}/{max_retries})...")
@@ -77,11 +77,21 @@ async def lifespan(app: FastAPI):
             break
         except Exception as e:
             if i < max_retries - 1:
-                logger.warning(f"DB Connection failed: {e}. Retrying in 5s...")
+                logger.warning(f"DB Connection failed: {e}. Retrying in 2s...")
                 import time
-                time.sleep(5)
+                time.sleep(2)
             else:
-                logger.error("CRITICAL: Database initialization failed after all retries.")
+                if not settings.is_production:
+                    logger.warning("PostgreSQL DB initialization failed. Switching to local SQLite database fallback...")
+                    from sqlalchemy import create_engine
+                    import backend.app.database.connection as db_conn
+                    sqlite_engine = create_engine("sqlite:///./blockbord_dev.db", connect_args={"check_same_thread": False})
+                    Base.metadata.create_all(bind=sqlite_engine)
+                    db_conn.engine = sqlite_engine
+                    db_conn.SessionLocal.configure(bind=sqlite_engine)
+                    logger.info("Local SQLite database initialized successfully.")
+                else:
+                    logger.error("CRITICAL: Database initialization failed after all retries.")
     
     logger.info(f"Block Bord AI v{app.version} — Mode: {settings.env.upper()}")
     yield
