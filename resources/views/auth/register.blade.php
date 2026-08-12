@@ -1,0 +1,116 @@
+@extends('layouts.app')
+
+@section('title', 'Create Account - Block Bord AI')
+
+@section('content')
+<div class="auth-wrapper">
+  <div class="auth-brand-panel">
+    <div style="position:relative; z-index:1;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:40px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="white">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+        <span style="font-family:var(--font-display); font-size:1.3rem; font-weight:800; color:#fff;">Block Bord AI</span>
+      </div>
+
+      <h2 class="auth-brand-title">Start protecting<br>your digital life.</h2>
+      <p class="auth-brand-sub">Join 50,000+ users who rely on Block Bord AI to detect scams, phishing, and cyber threats before they cause damage.</p>
+
+      <div class="auth-feature-list">
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          Free forever — no credit card needed
+        </div>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          10 free scans per day
+        </div>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          Full dashboard & scan history
+        </div>
+        <div class="auth-feature-item">
+          <div class="auth-feature-icon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+          Upgrade to Pro anytime
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-form-panel">
+    <div class="auth-card">
+      <h2>Create your account</h2>
+      <p class="auth-subtitle">Free forever. Upgrade anytime.</p>
+
+      @if(session('error'))
+      <div class="error-box" style="margin-bottom:20px;">{{ session('error') }}</div>
+      @endif
+
+      <form method="POST" action="{{ route('register') }}" class="auth-form">
+        @csrf
+
+        <div class="input-group">
+          <label for="reg-username">Username</label>
+          <input type="text" id="reg-username" name="username" value="{{ old('username') }}" placeholder="choose_a_username" required autocomplete="username">
+        </div>
+
+        <div class="input-group">
+          <label for="reg-email">Email address</label>
+          <input type="email" id="reg-email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required autocomplete="email">
+        </div>
+
+        <div class="input-group">
+          <label for="reg-password">Password</label>
+          <div style="position:relative;">
+            <input type="password" id="reg-password" name="password" placeholder="Min. 12 chars (A-Z, a-z, 0-9, symbol)" required autocomplete="new-password" style="padding-right:44px;">
+            <button type="button" onclick="togglePass('reg-password')" style="position:absolute; right:14px; top:50%; transform:translateY(-50%); color:var(--text-dim); background:none; border:none; cursor:pointer; display:flex; align-items:center;" aria-label="Show password">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <p style="font-size:0.78rem; color:var(--text-dim); line-height:1.5;">
+          By creating an account you agree to our <a href="{{ route('terms') }}" style="color:var(--primary);">Terms</a> and <a href="{{ route('privacy') }}" style="color:var(--primary);">Privacy Policy</a>.
+        </p>
+
+        <button type="submit" class="btn btn-primary btn-full">
+          Create free account
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        Already have an account? <a href="{{ route('login') }}">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function togglePass(id) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+</script>
+@endsection

@@ -1,23 +1,37 @@
-# Use an official Python runtime as a parent image
-FROM python:3.9-slim
+# Production Dockerfile for PHP 8.3 + Laravel 12 + Nginx
+FROM php:8.3-fpm-alpine
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
-ENV ENV production
+# Install system dependencies & PHP extensions
+RUN apk add --no-cache \
+    nginx \
+    supervisor \
+    curl \
+    git \
+    libpng-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    oniguruma-dev \
+    icu-dev \
+    $PHPIZE_DEPS \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd intl opcache \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
-# Set work directory
-WORKDIR /app
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /var/www
 
-# Copy local code to the container image
-COPY . .
+# Copy application files
+COPY . /var/www
 
-# Expose port (default for uvicorn/FastAPI)
-EXPOSE 8000
+# Set permissions
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Command to run the application
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Copy Nginx config
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+EXPOSE 80
+
+CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]

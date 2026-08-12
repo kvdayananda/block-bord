@@ -1,49 +1,92 @@
-# Running Block Bord AI Locally
+# Running Block Bord AI (PHP 8.3 / Laravel 12 + MySQL 8)
 
-Follow these steps to get the platform running on your local machine.
-
-## 1. Backend Server Setup
-
-### Install Dependencies
-Open your terminal in the project root and run:
-```powershell
-pip install -r requirements.txt
-```
-
-### Initialize AI Model (Recommended)
-To ensure the AI has the latest threat intelligence, run:
-```powershell
-python backend/ml/train_model.py
-```
-
-### Start the Server
-Run the FastAPI backend using Uvicorn:
-```powershell
-python -m uvicorn backend.app.main:app --reload
-```
-The server will be available at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+Follow these steps to run the migrated **Block Bord AI** platform on your local machine.
 
 ---
 
-## 2. Browser Extension Setup
+## Option A: Running with Docker (Recommended)
+
+Docker automatically sets up the PHP 8.3 application, Nginx web server, MySQL 8 database, Redis cache, and Python XGBoost ML microservice.
+
+### 1. Start Docker Containers
+In your terminal, navigate to the project root and run:
+
+```bash
+docker-compose up --build
+```
+
+### 2. Verify Services
+Once started, the following services will be active:
+- **Laravel Web App & API**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+- **API Health Check**: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
+- **Python ML Service**: `http://127.0.0.1:8001`
+- **MySQL 8 Database**: Port `3306`
+
+---
+
+## Option B: Running Locally (PHP + MySQL + Python)
+
+If running without Docker, follow these steps:
+
+### 1. Environment Configuration
+Copy the example environment configuration:
+```powershell
+copy .env.example .env
+```
+
+Ensure your `.env` contains your MySQL database credentials:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=blockbord
+DB_USERNAME=root
+DB_PASSWORD=your_mysql_password
+```
+
+### 2. Database Migrations
+Run the Laravel migrations to create all 11 MySQL tables:
+```powershell
+php artisan migrate
+```
+
+### 3. Start the Python ML Service
+In terminal window #1, start the Python XGBoost microservice:
+```powershell
+pip install -r requirements.txt
+python backend/ml/train_model.py
+python -m uvicorn backend.ml.main:app --port 8001
+```
+
+### 4. Start the Laravel Backend
+In terminal window #2, start the Laravel dev server:
+```powershell
+php artisan serve --port=8000
+```
+Access the application at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
+
+---
+
+## 3. Browser Extension Setup
 
 1. Open **Google Chrome**.
 2. Navigate to `chrome://extensions/`.
-3. Enable **Developer mode** (toggle switch in the top-right corner).
-4. Click the **Load unpacked** button.
-5. Select the `extension` folder located inside: `D:\BlockBord_Premium_SaaS_Style\Block Bord\extension`
-6. Pin the extension to your toolbar for easy access.
+3. Enable **Developer mode** (toggle switch in top-right corner).
+4. Click **Load unpacked**.
+5. Select the `extension` folder in this repository.
+6. Pin the extension to your toolbar.
 
 ---
 
-## 3. Verifying the System
+## 4. Health Check Verification
 
-1.  **Login**: Go to [http://127.0.0.1:8000/login](http://127.0.0.1:8000/login) and log in to your account.
-2.  **Browse**: Open any website (e.g., [google.com](https://google.com)).
-3.  **Check Extension**:
-    - You should see the extension icon update with an **OK** badge.
-    - Click the extension popup to see the real-time risk analysis.
-    - The dashboard at `/app` will track your total scan history.
-
-> [!TIP]
-> If you see "Scan failed" in the popup, ensure your backend server is still running in the terminal.
+Test the health check API endpoint:
+```bash
+curl http://127.0.0.1:8000/api/health
+```
+Expected response:
+```json
+{
+  "status": "healthy"
+}
+```
