@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#6366f1">
-  <link rel="stylesheet" href="/static/style.css?v=7.0">
+  <link rel="stylesheet" href="/static/style.css?v=8.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@700;800;900&display=swap" rel="stylesheet">
@@ -40,7 +40,7 @@
   </script>
   @yield('extra_head')
 </head>
-<body>
+<body style="min-height: 100vh; display: flex; flex-direction: column; background: #060814; color: #f8fafc; margin: 0;">
 
   @if(session('success'))
     <div style="position: fixed; top: 1rem; right: 1rem; z-index: 9999; background: #10B981; color: white; padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
@@ -56,7 +56,7 @@
 
   <x-header />
 
-  <main>
+  <main style="flex: 1;">
     @yield('content')
   </main>
 
