@@ -22,7 +22,10 @@
         "symfony/string": "~6.0.0",
         "symfony/translation": "~6.0.0",
         "symfony/uid": "~6.0.0",
-        "symfony/var-dumper": "~6.0.0"
+        "symfony/var-dumper": "~6.0.0",
+        "egulias/email-validator": "~3.2.6",
+        "doctrine/lexer": "^2.1",
+        "dragonmantank/cron-expression": "^3.3.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.20",
