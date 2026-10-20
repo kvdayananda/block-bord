@@ -68,5 +68,6 @@ return [
     ],
 
     'prefix' => env('CACHE_PREFIX', 'blockbord_cache'),
+    'serializable_classes' => false,
 
 ];

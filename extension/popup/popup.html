@@ -98,6 +98,7 @@
     .details-list li { font-size: 0.72rem; color: var(--text); padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.03); display: flex; align-items: flex-start; gap: 6px; }
     .details-list li::before { content: "•"; color: var(--primary); font-weight: bold; }
     .details-list li:last-child { border-bottom: none; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -111,7 +112,10 @@
           <span id="user-tier-badge" style="display:none; font-size: 0.58rem; padding: 1px 5px; border-radius: 4px; font-weight: 800; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; margin-left: 6px;">FREE</span>
         </span>
       </div>
-      <div class="badge-status offline" id="status-badge">● Offline</div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 3px;">
+        <div class="badge-status offline" id="status-badge">● Offline</div>
+        <div id="quota-badge" style="display:none; font-size: 0.62rem; color: var(--muted); font-weight: 600;">Scans: <span id="quota-used">0</span>/<span id="quota-limit">50</span></div>
+      </div>
     </header>
 
     <!-- Current Page Result -->
@@ -168,9 +172,9 @@
 
     <!-- Footer -->
     <footer class="bb-footer">
-      <a href="http://127.0.0.1:8000/app" target="_blank">Dashboard</a>
-      <span class="bb-footer-ver">v2.0.0</span>
-      <a href="http://127.0.0.1:8000/admin" target="_blank">Scan History</a>
+      <a href="#" id="link-dashboard">Dashboard</a>
+      <span class="bb-footer-ver">v2.5.0</span>
+      <a href="#" id="link-options">Settings ⚙️</a>
     </footer>
   </div>
   <script src="popup.js"></script>

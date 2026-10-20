@@ -32,7 +32,7 @@ document.getElementById('payBtn').addEventListener('click', async function() {
     }
 
     const options = {
-      key: '{{ env("RAZORPAY_KEY_ID", "rzp_test_mockkey") }}',
+      key: result.data.key_id,
       amount: result.data.amount,
       currency: result.data.currency,
       name: 'Block Bord AI',

@@ -9,7 +9,9 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        //
+        // Periodic queue cleanup and heartbeat for production
+        $schedule->command('queue:flush')->daily();
+        $schedule->command('auth:clear-resets')->daily();
     }
 
     protected function commands(): void

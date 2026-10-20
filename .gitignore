@@ -1,6 +1,6 @@
 ##################################################################
 # Block Bord AI — .gitignore
-# Laravel 9 + Python ML Microservice + Chrome Extension
+# Laravel 13 + Python ML Microservice + Chrome Extension
 ##################################################################
 
 # ── SECRETS & ENVIRONMENT ──────────────────────────────────────
@@ -30,6 +30,7 @@ composer.phar
 
 # Laravel temp / debug files
 debug_boot.php
+.phpunit.result.cache
 bootstrap/cache/config.php
 bootstrap/cache/packages.php
 bootstrap/cache/routes-v7.php
@@ -74,7 +75,6 @@ backend/__pycache__/
 backend/alembic/
 backend/alembic.ini
 backend/blockbord.db
-backend/app/
 backend/tests/
 scripts/__pycache__/
 

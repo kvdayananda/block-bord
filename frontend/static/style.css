@@ -2595,13 +2595,236 @@ h1, h2, h3, h4, h5 {
   font-size: 0.875rem;
   font-weight: 600;
 }
+}
 
-.success-box {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  color: #34d399;
-  padding: 12px 16px;
-  border-radius: 10px;
-  font-size: 0.875rem;
-  font-weight: 600;
+/* ========================================================= */
+/* BLOCK BORD AI - MOBILE RESPONSIVE RULES                   */
+/* ========================================================= */
+
+/* HAMBURGER & MOBILE HEADER */
+.hamburger-menu {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 10001;
+}
+.hamburger-menu span {
+  width: 25px;
+  height: 3px;
+  background: #fff;
+  border-radius: 3px;
+  transition: 0.3s;
+}
+.hamburger-menu.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 6px);
+}
+.hamburger-menu.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger-menu.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -6px);
+}
+
+@media (max-width: 768px) {
+  .hamburger-menu {
+    display: flex;
+  }
+  .nav-wrapper {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: #060814;
+    flex-direction: column;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(99,102,241,0.2);
+    display: none;
+    z-index: 10000;
+  }
+  .nav-wrapper.active {
+    display: flex;
+  }
+  .nav-links, .nav-actions {
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+    gap: 1rem;
+  }
+  .nav-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* BOTTOM DASHBOARD NAVIGATION */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    flex-direction: row;
+    z-index: 9999;
+    border-right: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background: rgba(6, 8, 20, 0.95);
+    backdrop-filter: blur(10px);
+    overflow-x: auto;
+    padding: 0;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .sidebar-brand {
+    display: none;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+    width: 100%;
+    padding: 0 10px;
+    gap: 10px;
+  }
+  .nav-item {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 5px;
+    font-size: 0.65rem;
+    gap: 4px;
+    border-radius: 8px;
+    margin-bottom: 0;
+    min-width: 60px;
+  }
+  .nav-item .icon {
+    margin-right: 0;
+    font-size: 1.2rem;
+  }
+}
+
+/* MOBILE CARDS FOR TABLES */
+@media (max-width: 768px) {
+  .table-responsive table,
+  .table-responsive thead,
+  .table-responsive tbody,
+  .table-responsive th,
+  .table-responsive td,
+  .table-responsive tr {
+    display: block;
+  }
+  .table-responsive thead tr {
+    display: none; /* hide header */
+  }
+  .table-responsive tr {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    padding: 1rem;
+  }
+  .table-responsive td {
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: relative;
+    padding-left: 50% !important;
+    text-align: right !important;
+    margin-bottom: 8px;
+  }
+  .table-responsive td:last-child {
+    border-bottom: 0;
+  }
+  .table-responsive td::before {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    width: 45%;
+    transform: translateY(-50%);
+    padding-right: 10px;
+    white-space: nowrap;
+    text-align: left;
+    font-weight: bold;
+    color: #94a3b8;
+    content: attr(data-label);
+  }
+}
+
+/* ========================================================= */
+/* COLLAPSIBLE SIDEBAR (TABLET & DESKTOP)                    */
+/* ========================================================= */
+
+.sidebar-toggle-btn {
+  position: absolute;
+  right: -15px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #6366f1;
+  border: 2px solid #060814;
+  color: white;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  font-size: 0.7rem;
+  transition: 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .sidebar-toggle-btn {
+    display: none;
+  }
+}
+
+.sidebar.collapsed {
+  width: 80px !important;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-toggle-btn {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.sidebar.collapsed .brand-name,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .nav-badge {
+  display: none !important;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.sidebar.collapsed .icon {
+  margin-right: 0;
+  font-size: 1.5rem;
+}
+
+/* ========================================================= */
+/* 4K ULTRA-WIDE SCREENS (MAX CONTENT WIDTH)                 */
+/* ========================================================= */
+@media (min-width: 1920px) {
+  body:has(.sidebar) {
+    background: #000 !important;
+  }
+
+  body:has(.sidebar) > main {
+    max-width: 1800px;
+    margin: 0 auto;
+    width: 100%;
+    background: #060814;
+    border-left: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
+  }
+
+  body:has(.sidebar) .nav-container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
 }

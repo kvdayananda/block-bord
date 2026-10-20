@@ -16,34 +16,42 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // Seed default admin user if not exists
-        User::firstOrCreate(
-            ['email' => 'admin@blockbord.ai'],
-            [
-                'username' => 'admin',
-                'password' => Hash::make('AdminPass123!'),
-                'is_admin' => true,
-                'is_pro' => true,
-                'plan' => 'pro',
-                'is_active' => true,
-                'is_email_verified' => true,
-                'api_key' => 'bb_live_' . Str::random(32),
-            ]
-        );
+        if (app()->environment('production')) {
+            return;
+        }
 
-        // Seed default demo user if not exists
-        User::firstOrCreate(
-            ['email' => 'user@blockbord.ai'],
-            [
-                'username' => 'demouser',
-                'password' => Hash::make('UserPass123!'),
-                'is_admin' => false,
-                'is_pro' => false,
-                'plan' => 'free',
-                'is_active' => true,
-                'is_email_verified' => true,
-                'api_key' => 'bb_live_' . Str::random(32),
-            ]
-        );
+        $adminPassword = env('SEED_ADMIN_PASSWORD');
+        if ($adminPassword) {
+            User::firstOrCreate(
+                ['email' => 'admin@blockbord.ai'],
+                [
+                    'username' => 'admin',
+                    'password' => Hash::make($adminPassword),
+                    'is_admin' => true,
+                    'is_pro' => true,
+                    'plan' => 'pro',
+                    'is_active' => true,
+                    'is_email_verified' => true,
+                    'api_key' => 'bb_live_' . Str::random(32),
+                ]
+            );
+        }
+
+        $demoPassword = env('SEED_DEMO_PASSWORD');
+        if ($demoPassword) {
+            User::firstOrCreate(
+                ['email' => 'user@blockbord.ai'],
+                [
+                    'username' => 'demouser',
+                    'password' => Hash::make($demoPassword),
+                    'is_admin' => false,
+                    'is_pro' => false,
+                    'plan' => 'free',
+                    'is_active' => true,
+                    'is_email_verified' => true,
+                    'api_key' => 'bb_live_' . Str::random(32),
+                ]
+            );
+        }
     }
 }

@@ -1,0 +1,327 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue!70!black,
+    urlcolor=blue!70!black
+}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Block Bord AI — Complete Website Implementation Specification}
+\rhead{\small Page \thepage}
+
+\title{\textbf{\Huge Block Bord AI}\\[0.4em] \Large Complete Website Implementation Specification}
+\author{\textbf{Tagline:} Know Before You Trust. \\ \textbf{Positioning:} AI-Powered Digital Security Platform}
+\date{}
+
+\begin{document}
+
+\maketitle
+\thispagestyle{fancy}
+
+\noindent\textbf{Production blueprint} for a PHP/Laravel + MySQL application with AI, XGBoost ML, security intelligence, Chrome Extension, payments, dashboard, reports, and administration.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+\section{Technology Stack}
+
+\begin{table}[h!]
+\centering
+\begin{tabularx}{\textwidth}{l X}
+\toprule
+\textbf{Layer} & \textbf{Technology} \\
+\midrule
+\textbf{Frontend} & HTML5, CSS3, JavaScript, Blade, responsive UI \\
+\textbf{Backend} & PHP 8.3+, Laravel 12, Eloquent, Sanctum, Queue, Scheduler \\
+\textbf{Database} & MySQL 8.x / InnoDB \\
+\textbf{AI} & Google Gemini + OpenAI fallback \\
+\textbf{ML} & Python + FastAPI + existing XGBoost phishing model \\
+\textbf{Security Intelligence} & Safe Browsing, DNS/WHOIS, IP/reputation services \\
+\textbf{Payments} & Razorpay \\
+\textbf{Email} & SMTP \\
+\textbf{Cache/Queue} & Redis \\
+\textbf{Browser} & Chrome Extension — Manifest V3 \\
+\textbf{Server} & Nginx + PHP-FPM + HTTPS \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Complete Website Areas}
+\begin{itemize}[noitemsep]
+    \item Public website, authentication, 30 security tools, user dashboard, AI platform, Chrome Extension, subscriptions/payments, and admin panel.
+\end{itemize}
+
+\section{Public Pages — 12}
+\begin{itemize}[noitemsep]
+    \item Home, About, Features, All Security Tools, Pricing, Blog, Blog Article, Contact, FAQ, Security, Privacy Policy, Terms \& Conditions.
+\end{itemize}
+
+\section{Authentication Pages — 6}
+\begin{itemize}[noitemsep]
+    \item Register, Login, Forgot Password, Reset Password, Email Verification, Two-Factor Authentication.
+    \item \textbf{Features:} secure password hashing, verification, reset, session management, rate limiting, and 2FA.
+\end{itemize}
+
+\section{Complete 30 Security Tools}
+
+\subsection*{Website Security — 8}
+\begin{itemize}[noitemsep]
+    \item URL Scanner
+    \item Website Safety Checker
+    \item Domain Inspector
+    \item IP Address Lookup
+    \item SSL/TLS Checker
+    \item Security Headers Checker
+    \item Website Technology Checker
+    \item Redirect Checker
+\end{itemize}
+
+\subsection*{Scam Protection — 7}
+\begin{itemize}[noitemsep]
+    \item Scam Detector
+    \item Phishing Checker
+    \item Email Security Checker
+    \item SMS Scam Checker
+    \item Phone Number Checker
+    \item QR Code Security Scanner
+    \item Social Media Scam Checker
+\end{itemize}
+
+\subsection*{Payment Protection — 4}
+\begin{itemize}[noitemsep]
+    \item UPI Scam Checker
+    \item Payment Link Checker
+    \item Bank Scam Message Checker
+    \item Investment Scam Checker
+\end{itemize}
+
+\subsection*{Personal Security — 5}
+\begin{itemize}[noitemsep]
+    \item Password Strength Checker
+    \item Password Leak Checker
+    \item Username Exposure Checker
+    \item Email Breach Checker
+    \item Personal Security Score
+\end{itemize}
+
+\subsection*{File \& Content Security — 4}
+\begin{itemize}[noitemsep]
+    \item File Malware Scanner
+    \item Hash Reputation Checker
+    \item Document Security Checker
+    \item AI Content Scam Analyzer
+\end{itemize}
+
+\subsection*{Advanced Security — 2}
+\begin{itemize}[noitemsep]
+    \item Dark Web Exposure Monitor
+    \item AI Risk Analyzer
+\end{itemize}
+
+\section{Universal Scanner}
+\begin{itemize}[noitemsep]
+    \item Homepage input accepts a URL, domain, IP, email, message, payment link, hash, or other supported content.
+    \item Automatically identify the likely input type and route it to the correct engine.
+    \item Return a unified risk score, risk level, evidence, explanation, and recommended action.
+\end{itemize}
+
+\section{URL Scanner Pipeline}
+\begin{itemize}[noitemsep]
+    \item Validate and normalize URL $\rightarrow$ reputation/Safe Browsing $\rightarrow$ XGBoost $\rightarrow$ heuristics $\rightarrow$ domain/SSL/redirect/header analysis $\rightarrow$ risk engine $\rightarrow$ optional AI explanation $\rightarrow$ save scan $\rightarrow$ report.
+\end{itemize}
+
+\section{Risk Engine}
+\begin{itemize}
+    \item \textbf{Suggested starting weights:} Safe Browsing 30\%, XGBoost 30\%, domain reputation 15\%, URL heuristics 15\%, SSL/security 10\%. Validate and tune against real test data before production.
+    \item \textbf{Risk bands:}
+    \begin{itemize}[noitemsep]
+        \item 0–19: SAFE
+        \item 20–39: LOW
+        \item 40–59: MEDIUM
+        \item 60–79: HIGH
+        \item 80–100: CRITICAL
+        \item Use UNKNOWN when evidence is insufficient.
+    \end{itemize}
+\end{itemize}
+
+\section{AI System}
+\begin{itemize}[noitemsep]
+    \item Use an \texttt{AIManager} service rather than calling providers from controllers.
+    \item Gemini is primary; OpenAI is fallback.
+    \item Handle 400/401/403/429, timeouts, network failures, and provider 5xx errors.
+    \item Never expose API keys in logs, URLs, browser code, or user-facing errors.
+    \item Use AI for explanation, summaries, and recommendations; never treat it as the sole authority for security decisions.
+\end{itemize}
+
+\section{Machine Learning}
+\begin{itemize}[noitemsep]
+    \item Keep the existing XGBoost model in Python.
+    \item Laravel calls a Python FastAPI \texttt{/predict} endpoint.
+    \item Python returns prediction/risk information. Do not rewrite the trained XGBoost model into PHP.
+\end{itemize}
+
+\section{User Dashboard — 9 Pages}
+\begin{itemize}[noitemsep]
+    \item Dashboard Overview, Scan History, Reports, Report Details, Security Score, AI Assistant, Notifications, Subscription, Account Settings.
+\end{itemize}
+
+\section{Dashboard Features}
+\begin{itemize}[noitemsep]
+    \item Total scans, safe scans, threats detected, security score, recent scans, saved reports, AI conversations, alerts, subscription status, and profile/security settings.
+\end{itemize}
+
+\section{Reports}
+\begin{itemize}[noitemsep]
+    \item Scan ID, input/type, date/time, risk score/level, findings, ML result, Safe Browsing result, domain/SSL/redirect details, AI explanation, and recommendations. PDF export for eligible plans.
+\end{itemize}
+
+\section{Chrome Extension}
+\begin{itemize}[noitemsep]
+    \item Manifest V3, scan current website, risk score, warning overlay, open full report, account integration, and Laravel API connection.
+\end{itemize}
+
+\section{Subscription \& Payments}
+\begin{itemize}[noitemsep]
+    \item Free, Pro, and Business plans.
+    \item Store limits in MySQL instead of hardcoding.
+    \item Razorpay payment/order flow with backend signature/webhook verification before subscription upgrade.
+\end{itemize}
+
+\section{Core MySQL Tables}
+\begin{itemize}[noitemsep]
+    \item \texttt{users}, \texttt{user\_profiles}, \texttt{roles}
+    \item \texttt{subscription\_plans}, \texttt{subscriptions}, \texttt{payments}
+    \item \texttt{scans}, \texttt{scan\_results}, \texttt{scan\_features}, \texttt{scan\_reports}
+    \item \texttt{ai\_conversations}, \texttt{ai\_messages}
+    \item \texttt{notifications}, \texttt{feedback}, \texttt{user\_reports}
+    \item \texttt{blacklist\_domains}, \texttt{whitelist\_domains}, \texttt{blocked\_ips}
+    \item \texttt{email\_breaches}, \texttt{phone\_reports}
+    \item \texttt{file\_scans}, \texttt{file\_hashes}
+    \item \texttt{security\_scores}, \texttt{security\_alerts}
+    \item \texttt{api\_usage}, \texttt{tool\_usage}, \texttt{audit\_logs}
+    \item \texttt{sessions}, \texttt{password\_reset\_tokens}
+\end{itemize}
+
+\section{Recommended Laravel Structure}
+\begin{itemize}[noitemsep]
+    \item Controllers for web/API requests; Form Requests for validation; Models for Eloquent; Services/AI for providers; Services/Security for scanners; Services/ML for Python client; Services/Payment for Razorpay; Jobs for background tasks; Notifications for alerts; Policies for authorization; Blade views in \texttt{resources/views}.
+\end{itemize}
+\textbf{Example project structure:}
+\begin{quote}
+\texttt{app/Http/Controllers} \textbar{} \texttt{app/Http/Requests} \textbar{} \texttt{app/Models} \textbar{} \texttt{app/Services/AI} \textbar{} \texttt{app/Services/Security} \textbar{} \texttt{app/Services/ML} \textbar{} \texttt{app/Services/Payment} \textbar{} \texttt{app/Jobs} \textbar{} \texttt{app/Notifications} \textbar{} \texttt{app/Policies} \textbar{} \texttt{resources/views} \textbar{} \texttt{routes/web.php} \textbar{} \texttt{routes/api.php}
+\end{quote}
+
+\section{Main API Endpoints}
+\begin{itemize}[noitemsep]
+    \item \texttt{POST /api/v1/scan/url}, \texttt{/scan/scam}, \texttt{/scan/phishing}, \texttt{/scan/email}, \texttt{/scan/sms}, \texttt{/scan/qr}, \texttt{/scan/file}
+    \item \texttt{POST /api/v1/domain/inspect}, \texttt{/ip/lookup}, \texttt{/ssl/check}, \texttt{/headers/check}
+    \item \texttt{POST /api/v1/ai/chat}, \texttt{/ai/analyze-risk}
+    \item \texttt{GET /api/v1/scans}, \texttt{/scans/\{id\}}, \texttt{/reports/\{id\}}, \texttt{/security-score}
+\end{itemize}
+
+\section{Security Requirements}
+\begin{itemize}[noitemsep]
+    \item CSRF, SQL-injection protection through Eloquent/parameterized queries, XSS protection/output escaping, authentication, authorization, rate limiting, validation, secure file uploads, HTTPS, strict production CORS, secure sessions, security headers, audit logs, and secret management.
+    \item Never expose stack traces, SQL errors, or API credentials to users.
+\end{itemize}
+
+\section{Privacy}
+\begin{itemize}[noitemsep]
+    \item Collect only necessary data. Never store plaintext passwords, OTPs, or banking credentials. Do not send passwords to AI. Minimize retention of sensitive scan content and provide clear deletion/retention policies.
+\end{itemize}
+
+\section{File Security}
+\begin{itemize}[noitemsep]
+    \item Validate extension and MIME type, enforce size limits, randomize storage names, keep uploads outside public directories, scan through the security pipeline, and clean temporary files.
+\end{itemize}
+
+\section{Performance \& Reliability}
+\begin{itemize}[noitemsep]
+    \item Redis caching, queues for long jobs, external API timeouts, selective caching, database indexes based on query patterns, optimized assets, and asynchronous processing for expensive scans.
+\end{itemize}
+
+\section{Admin Panel — 7 Pages}
+\begin{itemize}[noitemsep]
+    \item Admin Dashboard, User Management, Scan Management, Threat Management, Payment \& Subscription Management, AI/API Usage, System Logs \& Settings.
+\end{itemize}
+
+\section{Admin Controls}
+\begin{itemize}[noitemsep]
+    \item Manage users/plans, suspend/reactivate accounts, review reported domains/scams, manage blacklist/whitelist, review false positives/negatives, and monitor API, AI, queue, and payment errors.
+\end{itemize}
+
+\section{Frontend Design}
+\begin{itemize}[noitemsep]
+    \item Simple, clean, professional blue-and-white interface with generous whitespace and rounded cards.
+    \item Minimal header: logo on left; dark-mode toggle, Login, and Sign Up on right.
+    \item Hero: `A Safer Internet Starts Here' with Scan Something and Explore Tools.
+    \item Universal scanner immediately below hero.
+    \item Trust statistics only when backed by real system data.
+    \item Simple security tool cards, four-step How It Works section, Chrome Extension CTA, and structured footer.
+\end{itemize}
+
+\section{Mobile \& Accessibility}
+\begin{itemize}[noitemsep]
+    \item Responsive phone/tablet/desktop layouts, keyboard navigation, visible focus, semantic headings, accessible labels/forms, readable contrast, alt text, and compact mobile navigation.
+\end{itemize}
+
+\section{SEO}
+\begin{itemize}[noitemsep]
+    \item Unique titles/descriptions, canonical URLs, Open Graph, structured data where appropriate, sitemap.xml, robots.txt, semantic HTML, and one meaningful H1 per page.
+\end{itemize}
+
+\section{Testing}
+\begin{itemize}[noitemsep]
+    \item Unit, feature, API, database, AI mock/fallback, ML integration, payment webhook/signature, file-upload security, authorization, rate-limit, and Chrome Extension tests.
+\end{itemize}
+
+\section{Production Deployment}
+\begin{itemize}[noitemsep]
+    \item Nginx $\rightarrow$ PHP-FPM $\rightarrow$ Laravel; restricted MySQL application account; Redis; private/internal Python ML service where possible; HTTPS; environment secrets outside source control; staging/production separation; automated backups; monitoring and recovery testing.
+\end{itemize}
+
+\section{Recommended Development Order}
+\begin{enumerate}[noitemsep]
+    \item Foundation
+    \item Authentication
+    \item Frontend design system
+    \item Core URL/domain/IP/SSL tools
+    \item XGBoost integration
+    \item Scam/phishing/payment tools
+    \item Personal security
+    \item File/content security
+    \item AI
+    \item Dashboard/reports/notifications
+    \item Razorpay
+    \item Chrome Extension
+    \item Admin
+    \item Testing/SEO/accessibility/security audit
+    \item Production deployment
+\end{enumerate}
+
+\section{Final Product Principle}
+\begin{itemize}[noitemsep]
+    \item Simple for normal users; powerful underneath.
+    \item Core journey: Enter $\rightarrow$ Analyze $\rightarrow$ Understand $\rightarrow$ Act.
+    \item The system can combine Safe Browsing, XGBoost, heuristics, DNS/domain intelligence, SSL, reputation data, and AI explanation.
+    \item Never promise 100\% safety or perfect detection.
+    \item design the complete ₹ pricing table + ad-free Pro plan + features/limits for all 3 plans.
+\end{itemize}
+
+\vspace{1em}
+\noindent\textbf{Final Stack:} PHP/Laravel + MySQL + Blade/JavaScript + Gemini/OpenAI + Python/FastAPI/XGBoost + Razorpay + Redis + Chrome Extension + Nginx/HTTPS.
+
+\end{document}

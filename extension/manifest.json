@@ -10,10 +10,11 @@
         "tabs",
         "activeTab",
         "notifications",
-        "scripting"
+        "alarms"
     ],
     "host_permissions": [
-        "${BACKEND_URL}/*",
+        "http://127.0.0.1:8000/*",
+        "http://localhost:8000/*",
         "https://block-bord-ai-pro.onrender.com/*",
         "*://*/*"
     ],

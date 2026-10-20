@@ -1,16 +1,25 @@
 // Content Script for Block Bord AI - Advanced Edition
 
 let BB_REPORT_URL = "http://127.0.0.1:8000";
+let BB_API_KEY = "";
+let AUTO_SCAN_ENABLED = true;
+let WARNING_OVERLAYS_ENABLED = true;
 
-// Initialize dynamic URL
-chrome.storage.local.get(['apiUrl'], (res) => {
+// Initialize dynamic settings
+chrome.storage.local.get(['apiUrl', 'apiKey', 'autoScanEnabled', 'showWarningOverlays'], (res) => {
     if (res.apiUrl) BB_REPORT_URL = res.apiUrl.replace(/\/$/, "");
+    if (res.apiKey) BB_API_KEY = res.apiKey;
+    if (res.autoScanEnabled !== undefined) AUTO_SCAN_ENABLED = res.autoScanEnabled;
+    if (res.showWarningOverlays !== undefined) WARNING_OVERLAYS_ENABLED = res.showWarningOverlays;
 });
 
 // Listen for settings changes
 chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.apiUrl) {
-        BB_REPORT_URL = changes.apiUrl.newValue.replace(/\/$/, "");
+    if (area === 'local') {
+        if (changes.apiUrl) BB_REPORT_URL = changes.apiUrl.newValue.replace(/\/$/, "");
+        if (changes.apiKey) BB_API_KEY = changes.apiKey.newValue || "";
+        if (changes.autoScanEnabled !== undefined) AUTO_SCAN_ENABLED = changes.autoScanEnabled.newValue;
+        if (changes.showWarningOverlays !== undefined) WARNING_OVERLAYS_ENABLED = changes.showWarningOverlays.newValue;
     }
 });
 
@@ -220,6 +229,7 @@ function debouncedExtractPageContent(isUpdate = false) {
 }
 
 function extractPageContent(isUpdate = false) {
+    if (!AUTO_SCAN_ENABLED && !isUpdate) return; // Respect auto-scan preference
     const pageText = document.body ? (document.body.innerText || "") : "";
     const cleanText = pageText.substring(0, 5000).replace(/\s+/g, ' ').trim();
     const timeSinceLoad = Date.now() - bbState.startTime;
@@ -323,12 +333,15 @@ function injectReportButton() {
 function reportCurrentSite() {
     const description = prompt(`Report "${getCurrentDomain()}" as suspicious to Block Bord?\n\nOptionally add a description:`);
     if (description !== null) { 
+        const headers = {
+            'Content-Type': 'application/json',
+            'X-BlockBord-Source': 'extension'
+        };
+        if (BB_API_KEY) headers['X-API-Key'] = BB_API_KEY;
+
         fetch(`${BB_REPORT_URL}/report`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-BlockBord-Source': 'extension'
-            },
+            headers,
             credentials: 'include',
             body: JSON.stringify({ url: getCurrentURL(), description: description || "" })
         }).then(r => r.json()).then(data => {
@@ -354,7 +367,9 @@ function showTemporaryBanner(message, type = "info") {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'showWarning') {
-        injectWarningOverlay(message.data);
+        if (WARNING_OVERLAYS_ENABLED) {
+            injectWarningOverlay(message.data);
+        }
     }
     if (message.action === 'showDownloadBlockedNotice') {
         showDownloadWarning(message.url);

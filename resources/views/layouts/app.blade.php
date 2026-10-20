@@ -31,7 +31,7 @@
 
   <script type="application/ld+json">
   {
-    "@context": "https://schema.org",
+    "@@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Block Bord AI",
     "url": "https://blockbord.ai",

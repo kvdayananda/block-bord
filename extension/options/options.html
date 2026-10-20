@@ -10,6 +10,9 @@
             --card-bg: rgba(30, 41, 59, 0.7);
             --primary: #6366f1;
             --primary-grad: linear-gradient(135deg, #6366f1, #a855f7);
+            --danger: #ef4444;
+            --safe: #10b981;
+            --warn: #f59e0b;
             --text: #f8fafc;
             --muted: #94a3b8;
             --border: rgba(255, 255, 255, 0.1);
@@ -18,70 +21,247 @@
         body {
             background: var(--bg);
             color: var(--text);
-            font-family: 'Inter', system-ui, sans-serif;
-            padding: 40px;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            padding: 40px 20px;
             display: flex;
             justify-content: center;
         }
         .container {
             width: 100%;
-            max-width: 600px;
+            max-width: 640px;
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(16px);
             border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 32px;
+            padding: 36px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
-        h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 8px; }
-        p.subtitle { color: var(--muted); margin-bottom: 32px; font-size: 0.9rem; }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .header-brand { display: flex; align-items: center; gap: 10px; }
+        .header-brand img { width: 32px; height: 32px; }
+        h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+        .version-tag { font-size: 0.7rem; font-weight: 700; color: var(--primary); background: rgba(99, 102, 241, 0.15); padding: 3px 8px; border-radius: 12px; }
+        p.subtitle { color: var(--muted); margin-bottom: 28px; font-size: 0.88rem; line-height: 1.5; }
         
-        .form-group { margin-bottom: 24px; }
+        .section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); font-weight: 700; margin-bottom: 14px; margin-top: 24px; }
+        .form-group { margin-bottom: 20px; }
         label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.05em; }
-        input {
+        .help-text { font-size: 0.75rem; color: var(--muted); margin-top: 6px; }
+
+        input[type="text"], input[type="password"] {
             width: 100%;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.25);
             border: 1px solid var(--border);
             padding: 12px 16px;
             border-radius: 12px;
             color: white;
-            font-size: 1rem;
+            font-size: 0.95rem;
             outline: none;
-            transition: border-color 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input:focus { border-color: var(--primary); }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        /* Toggle switches */
+        .toggle-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: background 0.2s;
+        }
+        .toggle-card:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        .toggle-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .toggle-title { font-size: 0.88rem; font-weight: 600; color: #fff; }
+        .toggle-desc { font-size: 0.75rem; color: var(--muted); }
         
-        .save-btn {
+        /* Switch UI */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: .25s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .25s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
             background: var(--primary-grad);
-            color: white;
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Actions row */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 28px;
+        }
+        .btn {
             border: none;
-            padding: 14px 28px;
+            padding: 12px 24px;
             border-radius: 12px;
             font-weight: 700;
+            font-size: 0.88rem;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .save-btn:hover { transform: translateY(-1px); }
-        
-        #status { margin-top: 16px; font-size: 0.9rem; font-weight: 600; }
-        .success { color: #10b981; }
+        .btn-primary {
+            background: var(--primary-grad);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.25);
+        }
+
+        #status {
+            margin-top: 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 10px 14px;
+            border-radius: 10px;
+            display: none;
+        }
+        .success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); display: block !important; }
+        .error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); display: block !important; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Extension Preferences</h1>
-        <p class="subtitle">Configure how Block Bord AI interacts with your browser.</p>
+        <div class="header">
+            <div class="header-brand">
+                <img src="../icons/icon48.png" alt="Block Bord Logo">
+                <h1>Extension Preferences</h1>
+            </div>
+            <span class="version-tag">v2.5.0 MV3</span>
+        </div>
+
+        <p class="subtitle">Configure AI threat detection sync, backend endpoints, and browser protection preferences.</p>
         
+        <!-- Connection Settings -->
+        <div class="section-title">Backend Connection</div>
         <div class="form-group">
             <label for="api-url">Backend Server URL</label>
             <input type="text" id="api-url" placeholder="http://127.0.0.1:8000">
+            <div class="help-text">Default local development server or your production domain.</div>
         </div>
 
         <div class="form-group">
-            <label for="api-key">API Key (Automatic for Dashboard users)</label>
-            <input type="password" id="api-key" placeholder="bb_live_...">
+            <label for="api-key">API Key (Optional for Cookie Session)</label>
+            <input type="password" id="api-key" placeholder="bb_live_... or leave blank for session auth">
+            <div class="help-text">Obtain from your Block Bord dashboard under API Management.</div>
         </div>
 
-        <button class="save-btn" id="save">Save Configuration</button>
+        <button type="button" class="btn btn-secondary" id="btn-test-connection">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+            Test Connection
+        </button>
+
+        <!-- Protection Preferences -->
+        <div class="section-title">Real-Time Protection Preferences</div>
+
+        <div class="toggle-card">
+            <div class="toggle-info">
+                <div class="toggle-title">Automatic URL & Content Scanning</div>
+                <div class="toggle-desc">Analyze tabs in the background as you browse the web</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="auto-scan" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="toggle-card">
+            <div class="toggle-info">
+                <div class="toggle-title">Threat Warning Overlays</div>
+                <div class="toggle-desc">Show full-page warning before visiting known phishing or malware pages</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="warning-overlays" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <div class="toggle-card">
+            <div class="toggle-info">
+                <div class="toggle-title">System Desktop Notifications</div>
+                <div class="toggle-desc">Display desktop alerts when high-risk or suspicious sites are flagged</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="notifications" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Privacy & Storage -->
+        <div class="section-title">Local Data & History</div>
+        <div class="toggle-card">
+            <div class="toggle-info">
+                <div class="toggle-title">Scan History Storage</div>
+                <div class="toggle-desc" id="history-count">Tracking recent threat checks locally</div>
+            </div>
+            <button type="button" class="btn btn-danger" id="btn-clear-history" style="padding: 6px 14px; font-size: 0.78rem;">
+                Clear History
+            </button>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="save">Save Preferences</button>
+        </div>
+
         <div id="status"></div>
     </div>
     <script src="options.js"></script>

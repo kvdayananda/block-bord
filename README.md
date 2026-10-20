@@ -22,7 +22,7 @@
 
 | Layer | Technology |
 |-------|-----------|
-| **Backend** | PHP 8.0 + Laravel 9 |
+| **Backend** | PHP 8.3+ + Laravel 13 (see `composer.json`) |
 | **Database** | MySQL (via XAMPP) |
 | **ML Microservice** | Python 3 + FastAPI + XGBoost |
 | **AI** | Google Gemini API |
@@ -35,10 +35,10 @@
 ## 🚀 Local Development Setup
 
 ### Prerequisites
-- **XAMPP** (PHP 8.0+, MySQL)
+- **PHP 8.3+** with the Laravel-required extensions, and **MySQL 8**
 - **Composer** (`composer install`)
 - **Python 3.10+** (`pip install -r requirements.txt`)
-- **Node.js** (optional, for asset compilation)
+- **ClamAV daemon** and **zbarimg** for file and QR scanning outside Docker
 
 ### 1. Clone & Install
 
@@ -52,7 +52,7 @@ php artisan key:generate
 
 ### 2. Configure `.env`
 
-Edit `.env` and set:
+Edit `.env`, generate a fresh `APP_KEY` using `php artisan key:generate`, and set:
 ```
 DB_DATABASE=blockbord
 DB_USERNAME=root
@@ -61,9 +61,12 @@ DB_PASSWORD=your_password
 GEMINI_API_KEY=your_key
 RAZORPAY_KEY_ID=your_key
 RAZORPAY_KEY_SECRET=your_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
 GOOGLE_SAFE_BROWSING_API_KEY=your_key
-VIRUSTOTAL_API_KEY=your_key
-ML_SERVICE_URL=http://127.0.0.1:8001
+ML_API_URL=http://127.0.0.1:8001
+ML_API_SECRET=generate_a_long_random_secret
+CLAMAV_HOST=127.0.0.1
+CLAMAV_PORT=3310
 ```
 
 ### 3. Database Setup
@@ -73,11 +76,13 @@ php artisan migrate
 php artisan db:seed
 ```
 
-### 4. Train ML Model
+### 4. Train the ML Model (Optional)
 
+The trained model and PhiUSIIL dataset are not included in this repository. Obtain the dataset from the UCI repository referenced in `backend/ml/train_model.py`, place it at `ml_data/PhiUSIIL_Phishing_URL_Dataset.csv`, then run:
 ```bash
 python backend/ml/train_model.py
 ```
+Without a model artifact, the ML service reports that it is unavailable and Laravel uses its clearly-marked heuristic fallback.
 
 ### 5. Start Servers
 
@@ -86,6 +91,7 @@ python backend/ml/train_model.py
 php artisan serve
 
 # ML Microservice (Terminal 2)
+$env:ML_API_SECRET="same-long-random-secret-as-Laravel"
 python -m uvicorn backend.ml.main:app --host 127.0.0.1 --port 8001
 ```
 
@@ -117,14 +123,9 @@ block-bord/
 
 ---
 
-## 🔑 Default Credentials (Seeded)
+## Seeded accounts
 
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@blockbord.com | Admin@123 |
-| Demo User | demo@blockbord.com | Demo@123 |
-
-> ⚠️ Change these immediately in production!
+No default passwords are embedded. `php artisan db:seed` creates an admin and demo account only when `SEED_ADMIN_PASSWORD` and/or `SEED_DEMO_PASSWORD` are provided, and never seeds accounts in production. Keep these values out of source control.
 
 ---
 

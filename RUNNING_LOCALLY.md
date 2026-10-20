@@ -1,92 +1,76 @@
-# Running Block Bord AI (PHP 8.3 / Laravel 12 + MySQL 8)
+# Running Block Bord AI locally
 
-Follow these steps to run the migrated **Block Bord AI** platform on your local machine.
+The PHP application uses Laravel 13 and requires PHP 8.3 or newer. The optional ML service is FastAPI. The repository does not contain a trained ML model or its PhiUSIIL training dataset.
 
----
+## Docker Compose (recommended)
 
-## Option A: Running with Docker (Recommended)
+Prerequisites: Docker Compose v2 and Composer.
 
-Docker automatically sets up the PHP 8.3 application, Nginx web server, MySQL 8 database, Redis cache, and Python XGBoost ML microservice.
+1. Copy `.env.example` to `.env`.
+2. Install PHP dependencies and generate an application key:
 
-### 1. Start Docker Containers
-In your terminal, navigate to the project root and run:
+   ```powershell
+   composer install
+   php artisan key:generate
+   ```
 
-```bash
-docker-compose up --build
-```
+3. In `.env`, set a non-empty `DB_PASSWORD` and a long random `ML_API_SECRET`. Keep `.env` private; use the same ML secret for the Laravel app and Python service.
+4. Build and start the services, then migrate the database:
 
-### 2. Verify Services
-Once started, the following services will be active:
-- **Laravel Web App & API**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- **API Health Check**: [http://127.0.0.1:8000/api/health](http://127.0.0.1:8000/api/health)
-- **Python ML Service**: `http://127.0.0.1:8001`
-- **MySQL 8 Database**: Port `3306`
+   ```powershell
+   docker compose up --build -d
+   docker compose exec app php artisan migrate --force
+   ```
 
----
+The app is available at `http://127.0.0.1:8000` by default (`APP_PORT` changes the host port), MySQL at port `3307` (`DB_HOST_PORT` changes it), and Redis at port `6379` (`REDIS_HOST_PORT` changes it). The internal ML and ClamAV services are not published to the host. ClamAV may need time to download its initial signature database; scans return an explicit unavailable response until it is ready.
 
-## Option B: Running Locally (PHP + MySQL + Python)
+To enable XGBoost inference, install the Python dependencies locally, download the UCI PhiUSIIL dataset, place it at `ml_data/PhiUSIIL_Phishing_URL_Dataset.csv`, and run:
 
-If running without Docker, follow these steps:
-
-### 1. Environment Configuration
-Copy the example environment configuration:
-```powershell
-copy .env.example .env
-```
-
-Ensure your `.env` contains your MySQL database credentials:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=blockbord
-DB_USERNAME=root
-DB_PASSWORD=your_mysql_password
-```
-
-### 2. Database Migrations
-Run the Laravel migrations to create all 11 MySQL tables:
-```powershell
-php artisan migrate
-```
-
-### 3. Start the Python ML Service
-In terminal window #1, start the Python XGBoost microservice:
 ```powershell
 pip install -r requirements.txt
 python backend/ml/train_model.py
-python -m uvicorn backend.ml.main:app --port 8001
 ```
 
-### 4. Start the Laravel Backend
-In terminal window #2, start the Laravel dev server:
+The trained artifact is stored in the ignored `backend/ml/models` directory and mounted into the ML container. If no artifact exists, its health endpoint reports `ml_available: false` and prediction requests return `503`; Laravel identifies its heuristic fallback in the scan evidence.
+
+## Run services without Docker
+
+Prerequisites: PHP 8.3+, Composer, MySQL 8, Python 3.10+, a reachable ClamAV daemon, and `zbarimg` for QR decoding.
+
+1. Copy `.env.example` to `.env`, run `composer install`, and generate `APP_KEY` with `php artisan key:generate`.
+2. Configure database credentials and set the same strong `ML_API_SECRET` for both services. Configure `CLAMAV_HOST` and `CLAMAV_PORT` to reach ClamAV.
+3. Run migrations:
+
+   ```powershell
+   php artisan migrate
+   ```
+
+4. Start the ML service in one PowerShell window:
+
+   ```powershell
+   $env:ML_API_SECRET = "same-long-random-secret-as-Laravel"
+   python -m uvicorn backend.ml.main:app --host 127.0.0.1 --port 8001
+   ```
+
+5. Start Laravel in another window:
+
+   ```powershell
+   php artisan serve --host 127.0.0.1 --port 8000
+   ```
+
+The ML service can start without a model, but predictions remain unavailable until a trained model artifact is installed. File scans require an available ClamAV daemon; QR scans require `zbarimg`.
+
+## Chrome extension
+
+1. Open `chrome://extensions/` and enable Developer mode.
+2. Select **Load unpacked** and choose the repository's `extension` folder.
+3. Review Chrome's site-access prompt. The extension requests broad site access because its current behavior automatically scans pages across websites.
+
+## Health checks
+
 ```powershell
-php artisan serve --port=8000
-```
-Access the application at: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-
----
-
-## 3. Browser Extension Setup
-
-1. Open **Google Chrome**.
-2. Navigate to `chrome://extensions/`.
-3. Enable **Developer mode** (toggle switch in top-right corner).
-4. Click **Load unpacked**.
-5. Select the `extension` folder in this repository.
-6. Pin the extension to your toolbar.
-
----
-
-## 4. Health Check Verification
-
-Test the health check API endpoint:
-```bash
 curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8001/health
 ```
-Expected response:
-```json
-{
-  "status": "healthy"
-}
-```
+
+Laravel should return `{"status":"healthy"}`. The ML health response also states whether a trained model was loaded.

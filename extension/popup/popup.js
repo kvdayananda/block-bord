@@ -1,8 +1,14 @@
-// Popup JS for Block Bord AI — Full Feature Set
-const API_URL = "http://127.0.0.1:8000";
+// Popup JS for Block Bord AI — Manifest V3 Dynamic Integration
+// ═════════════════════════════════════════════════════════════
+
+let API_URL = "http://127.0.0.1:8000";
+let API_KEY = "";
 
 document.addEventListener('DOMContentLoaded', async () => {
     const statusBadge    = document.getElementById('status-badge');
+    const quotaBadge     = document.getElementById('quota-badge');
+    const quotaUsed      = document.getElementById('quota-used');
+    const quotaLimit     = document.getElementById('quota-limit');
     const resultCard     = document.getElementById('result-card');
     const resultScore    = document.getElementById('result-score');
     const resultLevel    = document.getElementById('result-level');
@@ -17,8 +23,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     const scanDetails    = document.getElementById('scan-details');
     const detailsList    = document.getElementById('details-list');
     const statusIcon     = document.getElementById('status-icon');
+    const linkDashboard  = document.getElementById('link-dashboard');
+    const linkOptions    = document.getElementById('link-options');
 
     let currentUrl = "";
+
+    // ─── Settings Initialization ─────────────────────────────────────────────
+    const settings = await new Promise(resolve => {
+        chrome.storage.local.get(['apiUrl', 'apiKey'], resolve);
+    });
+    if (settings.apiUrl) API_URL = settings.apiUrl.replace(/\/$/, "");
+    if (settings.apiKey) API_KEY = settings.apiKey;
+
+    // Setup dynamic footer links
+    if (linkDashboard) {
+        linkDashboard.addEventListener('click', (e) => {
+            e.preventDefault();
+            chrome.tabs.create({ url: `${API_URL}/app` });
+        });
+    }
+    if (linkOptions) {
+        linkOptions.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (chrome.runtime.openOptionsPage) {
+                chrome.runtime.openOptionsPage();
+            } else {
+                chrome.tabs.create({ url: chrome.runtime.getURL('options/options.html') });
+            }
+        });
+    }
 
     function extractDomain(url) {
         if (!url || !url.startsWith("http")) return "—";
@@ -29,6 +62,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function normalizeUrl(url) {
+        if (!url) return "";
+        try {
+            const u = new URL(url);
+            return (u.hostname + u.pathname).replace(/\/$/, "").toLowerCase();
+        } catch(e) {
+            return url.toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, "");
+        }
+    }
+
+    function normalizeRisk(level) {
+        if (!level) return { class: 'safe', label: 'Safe' };
+        const upper = level.toUpperCase();
+        if (upper === 'SAFE' || upper === 'LOW' || upper === 'OK') {
+            return { class: 'safe', label: 'Safe' };
+        }
+        if (upper === 'MEDIUM' || upper === 'SUSPICIOUS') {
+            return { class: 'suspicious', label: 'Suspicious' };
+        }
+        if (upper === 'HIGH' || upper === 'CRITICAL' || upper === 'BLOCKED') {
+            return { class: 'high', label: upper === 'CRITICAL' ? 'Critical' : 'High Risk' };
+        }
+        return { class: 'safe', label: level };
+    }
+
+    function unwrapResponse(data) {
+        if (!data) return {};
+        if (data.data && typeof data.data === 'object' && ('risk_score' in data.data || 'overall_score' in data.data)) {
+            return {
+                risk_score: data.data.risk_score ?? data.data.overall_score ?? 0,
+                risk_level: data.data.risk_level ?? data.risk_level ?? 'SAFE',
+                reasons: data.data.reasons ?? data.reasons ?? [],
+                category: data.data.category ?? data.category ?? 'General',
+                upgrade_required: data.upgrade_required || data.data.upgrade_required,
+                error: data.error || data.data.error
+            };
+        }
+        return {
+            risk_score: data.risk_score ?? data.overall_score ?? 0,
+            risk_level: data.risk_level ?? 'SAFE',
+            reasons: data.reasons ?? [],
+            category: data.category ?? 'General',
+            upgrade_required: data.upgrade_required,
+            error: data.error
+        };
+    }
+
     // Load stats from local history
     loadLocalStats();
 
@@ -36,34 +116,41 @@ document.addEventListener('DOMContentLoaded', async () => {
     const [tab] = await chrome.tabs?.query({ active: true, currentWindow: true }) || [{}];
     currentUrl = tab?.url || "";
     const domain = extractDomain(currentUrl);
-    
-    function normalizeUrl(url) {
-        if (!url) return "";
-        try {
-            const u = new URL(url);
-            return (u.hostname + u.pathname).replace(/\/$/, "").toLowerCase();
-        } catch(e) { return url.toLowerCase().replace(/^https?:\/\//, "").replace(/\/$/, ""); }
-    }
-
     resultDomain.textContent = domain || "—";
 
     // Check server connection
     try {
-        const r = await fetch(`${API_URL}/`, { credentials: 'include', signal: AbortSignal.timeout(3000) });
+        const headers = {};
+        if (API_KEY) headers['X-API-Key'] = API_KEY;
+        const r = await fetch(`${API_URL}/api/v1/ext/status`, {
+            headers,
+            credentials: 'include',
+            signal: AbortSignal.timeout(3000)
+        });
         if (r.ok) {
             statusBadge.className = 'badge-status online';
             statusBadge.textContent = '● Online';
-            updateExtStatus();
-        } else throw new Error();
+            const statusData = await r.json();
+            handleStatusData(statusData);
+        } else {
+            // Try fallback root ping
+            const fallback = await fetch(`${API_URL}/`, { credentials: 'include', signal: AbortSignal.timeout(2000) });
+            if (fallback.ok) {
+                statusBadge.className = 'badge-status online';
+                statusBadge.textContent = '● Online';
+                updateExtStatusFallback();
+            } else throw new Error();
+        }
     } catch (err) {
         statusBadge.className = 'badge-status offline';
         statusBadge.textContent = '● Offline';
         btnScan.disabled = true;
     }
 
-    // Feature #15 / #91: Show current page result from cache or recent scan
+    // Show current page result from cache or recent scan
     loadCurrentPageResult(currentUrl);
 
+    // Listen for scan events from background
     chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         const normCurrent = normalizeUrl(currentUrl);
         const normIncoming = msg.normalizedUrl || normalizeUrl(msg.url);
@@ -86,7 +173,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="18 15 12 9 6 15"></polyline></svg> Hide scan details';
     });
 
-    // Feature #2: Manual URL Scan Button
+    // Manual URL Scan Button
     btnScan.addEventListener('click', async () => {
         if (!tab?.id) return;
         btnScan.disabled = true;
@@ -94,13 +181,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         setResultState("scanning", "--", "Scanning…", domain, "");
 
         try {
-            // Corrected endpoint to /scan and enabled session credentials
-            const r = await fetch(`${API_URL}/scan`, {
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-BlockBord-Source': 'extension'
+            };
+            if (API_KEY) headers['X-API-Key'] = API_KEY;
+
+            let scanEndpoint = `${API_URL}/api/v1/ext/scan`;
+            let r = await fetch(scanEndpoint, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'X-BlockBord-Source': 'extension'
-                },
+                headers,
                 credentials: 'include', 
                 body: JSON.stringify({ 
                     url: currentUrl, 
@@ -108,14 +198,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                     source: "extension_manual" 
                 })
             });
+
+            // Fallback to /api/v1/scan/url or /scan if dedicated endpoint 404s
+            if (r.status === 404) {
+                scanEndpoint = `${API_URL}/scan`;
+                r = await fetch(scanEndpoint, {
+                    method: 'POST',
+                    headers,
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        url: currentUrl,
+                        content: currentUrl,
+                        source: "extension_manual"
+                    })
+                });
+            }
+
             if (!r.ok) {
-                if (r.status === 401) throw new Error("Please log in to the dashboard first.");
+                if (r.status === 401) throw new Error("Please log in or set an API key.");
+                if (r.status === 429) throw new Error("Daily scan quota reached.");
                 throw new Error("HTTP error " + r.status);
             }
-            const data = await r.json();
+
+            const rawData = await r.json();
+            const data = unwrapResponse(rawData);
             setResultFromData(data, domain);
-            
-            // NEW: Save manual scan to history so it appears in the list below
             saveToHistory(currentUrl, data);
             
         } catch (err) {
@@ -130,36 +237,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     function saveToHistory(url, data) {
         chrome.storage.local.get(['scanHistory'], (result) => {
             const history = result.scanHistory || [];
+            const norm = normalizeRisk(data.risk_level);
             history.unshift({
                 date: new Date().toISOString(),
                 url: url,
                 score: data.risk_score,
-                level: data.risk_level,
+                level: norm.label,
                 category: data.category || "General"
             });
             if (history.length > 50) history.splice(50);
             chrome.storage.local.set({ scanHistory: history }, () => {
-                // Refresh the stats and list in the UI
                 loadLocalStats();
             });
         });
     }
 
-    function setResultFromData(data, domain) {
-        if (!data) return;
+    function setResultFromData(raw, dom) {
+        if (!raw) return;
+        const data = unwrapResponse(raw);
         
-        if (data.upgrade_required || data.error?.includes("Limit")) {
-            setResultState("scanning", "--", "Daily Limit is completed", domain, "Upgrade your plan");
+        if (data.upgrade_required || data.error?.includes("Limit") || data.error?.includes("quota")) {
+            setResultState("scanning", "--", "Daily Limit Reached", dom, "Upgrade your plan");
             return;
         }
 
-        if (!data.risk_level) {
-            setResultState("scanning", "--", "Waiting for data...", domain, "");
-            return;
-        }
-        const lvl = (data.risk_level || "OK").toLowerCase();
+        const norm = normalizeRisk(data.risk_level);
         const reasons = data.reasons || [];
-        setResultState(lvl, data.risk_score, data.risk_level, domain, data.category || "");
+        setResultState(norm.class, data.risk_score, norm.label, dom, data.category || "");
         
         // Populate reasons
         detailsList.innerHTML = '';
@@ -175,13 +279,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             scanDetails.style.display = 'none';
         }
 
-        // Show reasons in tooltip/title as well
-        resultCard.title = reasons.slice(0,5).join('\n') || "No specific reasons detected.";
+        resultCard.title = reasons.slice(0, 5).join('\n') || "No specific threat flags detected.";
     }
 
-    function setResultState(lvl, score, label, domain, category) {
-        const classes = { safe: "safe", ok: "safe", suspicious: "suspicious", high: "high", scanning: "scanning" };
-        const cls = (lvl || "scanning").toLowerCase();
+    function setResultState(cls, score, label, dom, category) {
+        const classes = { safe: "safe", suspicious: "suspicious", high: "high", scanning: "scanning" };
         const validCls = classes[cls] || "scanning";
         
         resultCard.className = `scan-result-card ${validCls}`;
@@ -203,24 +305,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             statusIcon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>';
         }
         
-        // Make "Upgrade your plan" act like a button
         if (category && category.includes("Upgrade")) {
             resultCategory.style.cursor = "pointer";
-            resultCategory.style.transition = "all 0.2s";
-            resultCategory.onmouseover = () => { resultCategory.style.backgroundColor = "var(--border)"; };
-            resultCategory.onmouseout = () => { resultCategory.style.backgroundColor = "var(--bg-alt)"; };
+            resultCategory.onclick = () => chrome.tabs.create({ url: `${API_URL}/pricing` });
         } else {
             resultCategory.style.cursor = "default";
-            resultCategory.onmouseover = null;
-            resultCategory.onmouseout = null;
+            resultCategory.onclick = null;
         }
     }
-
-    resultCategory.addEventListener('click', () => {
-        if (resultCategory.textContent.includes("Upgrade")) {
-            chrome.tabs.create({ url: `${API_URL}/pricing` });
-        }
-    });
 
     async function loadCurrentPageResult(url) {
         if (!url || !url.startsWith("http")) {
@@ -240,8 +332,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const history = result.scanHistory || [];
                 const match = history.find(item => item.url === url);
                 if (match) {
-                    const lvl = match.level || "OK";
-                    setResultState(lvl.toLowerCase(), match.score, lvl, domain, match.category || "");
+                    const norm = normalizeRisk(match.level);
+                    setResultState(norm.class, match.score, norm.label, domain, match.category || "");
                 } else {
                     // 3. Trigger automatic scan if never seen before
                     chrome.runtime.sendMessage({ action: 'startScan', url });
@@ -251,64 +343,84 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Retrieve user premium and stats status
-    async function updateExtStatus() {
+    function handleStatusData(data) {
         const tierBadge = document.getElementById('user-tier-badge');
+        if (!tierBadge) return;
+
+        if (data.logged_in) {
+            tierBadge.style.display = 'inline-block';
+            tierBadge.textContent = (data.plan || 'FREE').toUpperCase();
+            if (data.is_pro) {
+                tierBadge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+            } else {
+                tierBadge.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
+            }
+            const footerVer = document.querySelector('.bb-footer-ver');
+            if (footerVer && data.username) {
+                footerVer.textContent = `@${data.username}`;
+            }
+            if (quotaBadge && data.scans_today !== undefined && data.scan_limit !== undefined) {
+                quotaBadge.style.display = 'block';
+                quotaUsed.textContent = data.scans_today;
+                quotaLimit.textContent = data.scan_limit;
+            }
+        } else {
+            tierBadge.style.display = 'none';
+            if (quotaBadge) quotaBadge.style.display = 'none';
+        }
+    }
+
+    async function updateExtStatusFallback() {
         try {
-            const res = await fetch(`${API_URL}/api/ext/status`, { credentials: 'include' });
+            const headers = {};
+            if (API_KEY) headers['X-API-Key'] = API_KEY;
+            const res = await fetch(`${API_URL}/api/ext/status`, { headers, credentials: 'include' });
             if (res.ok) {
                 const data = await res.json();
-                if (data.logged_in) {
-                    tierBadge.style.display = 'inline-block';
-                    tierBadge.textContent = data.plan.toUpperCase();
-                    if (data.is_pro) {
-                        tierBadge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
-                    } else {
-                        tierBadge.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
-                    }
-                    const footerVer = document.querySelector('.bb-footer-ver');
-                    if (footerVer) {
-                        footerVer.textContent = `@${data.username}`;
-                    }
-                } else {
-                    tierBadge.style.display = 'none';
-                }
+                handleStatusData(data);
             }
         } catch (e) {
-            console.warn("Could not check extension auth status", e);
-            tierBadge.style.display = 'none';
+            console.warn("Status check failed", e);
         }
     }
 
     // Load stats from local scan history
     function loadLocalStats() {
         chrome.storage.local.get(['scanHistory'], (result) => {
-            const history = (result.scanHistory || []).filter(s => s && s.url && s.level);
+            const history = (result.scanHistory || []).filter(s => s && s.url);
             statTotal.textContent = history.length;
-            const susp = history.filter(s => s.level === 'Suspicious').length;
-            const high = history.filter(s => s.level === 'High').length;
-            statSuspicious.textContent = susp;
-            statBlocked.textContent = high;
 
-            // Render recent scans
+            let suspCount = 0;
+            let blockedCount = 0;
+
             recentList.innerHTML = '';
             history.slice(0, 5).forEach(scan => {
+                const norm = normalizeRisk(scan.level);
+                if (norm.class === 'suspicious') suspCount++;
+                if (norm.class === 'high') blockedCount++;
+
                 const item = document.createElement('div');
                 item.className = 'scan-item';
-                const lvl = (scan.level || "OK").toLowerCase();
-                const pillClass = `scan-pill pill-${lvl}`;
+                const pillClass = `scan-pill pill-${norm.class}`;
+                let hostname = scan.url;
                 try {
-                    const hostname = new URL(scan.url || "http://x").hostname;
-                    item.innerHTML = `
-                        <div class="scan-item-url" title="${scan.url}">${hostname}</div>
-                        <div class="${pillClass}">${scan.level}</div>
-                    `;
+                    hostname = new URL(scan.url).hostname;
                 } catch {
-                    item.innerHTML = `<div class="scan-item-url" title="${scan.url}">${(scan.url || "").substring(0,40)}</div>
-                        <div class="${pillClass}">${scan.level}</div>`;
+                    hostname = (scan.url || "").substring(0, 35);
                 }
+                item.innerHTML = `
+                    <div class="scan-item-url" title="${scan.url}">${hostname}</div>
+                    <div class="${pillClass}">${norm.label}</div>
+                `;
                 recentList.appendChild(item);
             });
+
+            // Count for all history items, not just top 5
+            suspCount = history.filter(s => normalizeRisk(s.level).class === 'suspicious').length;
+            blockedCount = history.filter(s => normalizeRisk(s.level).class === 'high').length;
+
+            statSuspicious.textContent = suspCount;
+            statBlocked.textContent = blockedCount;
 
             if (history.length === 0) {
                 recentList.innerHTML = '<div style="padding:12px;font-size:0.78rem;color:var(--muted);text-align:center;">No scan history yet</div>';

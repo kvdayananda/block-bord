@@ -1,22 +1,31 @@
-// Background Service Worker for Block Bord AI – Full Feature Set
-let API_URL = "http://127.0.0.1:8000";
+// Background Service Worker for Block Bord AI – Manifest V3 Compliant
+// ═══════════════════════════════════════════════════════════════════════
 
-// Initialize API_URL from storage
-chrome.storage.local.get(['apiUrl'], (res) => {
+let API_URL = "http://127.0.0.1:8000";
+let API_KEY = "";
+
+// ─── Settings Initialization ─────────────────────────────────────────────────
+chrome.storage.local.get(['apiUrl', 'apiKey'], (res) => {
     if (res.apiUrl) API_URL = res.apiUrl.replace(/\/$/, "");
+    if (res.apiKey) API_KEY = res.apiKey;
 });
 
-// Listen for settings changes
 chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.apiUrl) {
-        API_URL = changes.apiUrl.newValue.replace(/\/$/, "");
-        console.log("Block Bord: API URL updated to:", API_URL);
+    if (area === 'local') {
+        if (changes.apiUrl) {
+            API_URL = changes.apiUrl.newValue.replace(/\/$/, "");
+            console.log("Block Bord: API URL updated to:", API_URL);
+        }
+        if (changes.apiKey) {
+            API_KEY = changes.apiKey.newValue || "";
+            console.log("Block Bord: API Key updated");
+        }
     }
 });
 
-// ─── Browser-side Cache (Feature #11) ────────────────────────────────────────
+// ─── Browser-side Cache ──────────────────────────────────────────────────────
 const scanCache = new Map();
-const CACHE_DURATION_MS = 60 * 1000; // 1 min (reduced from 5 min)
+const CACHE_DURATION_MS = 60 * 1000; // 1 minute
 const tabCooldowns = new Map();
 const COOLDOWN_DURATION_MS = 60 * 1000; // 60 seconds per tab
 
@@ -36,9 +45,73 @@ function getCached(key) {
 }
 function setCache(key, data) { scanCache.set(key, { data, ts: Date.now() }); }
 
-// ─── Context Menu (Feature #2: Manual Scan) ──────────────────────────────────
+// ─── Risk Level Normalization ────────────────────────────────────────────────
+// Backend sends: SAFE, LOW, MEDIUM, HIGH, CRITICAL
+// Extension displays: Safe, Suspicious, High
+function normalizeRiskLevel(backendLevel) {
+    if (!backendLevel) return 'Safe';
+    const upper = backendLevel.toUpperCase();
+    switch (upper) {
+        case 'SAFE':
+        case 'LOW':
+            return 'Safe';
+        case 'MEDIUM':
+            return 'Suspicious';
+        case 'HIGH':
+        case 'CRITICAL':
+            return 'High';
+        default:
+            return backendLevel; // Pass through unknown levels
+    }
+}
+
+// ─── Build Request Headers ───────────────────────────────────────────────────
+function buildHeaders() {
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-BlockBord-Source': 'extension'
+    };
+    if (API_KEY) {
+        headers['Authorization'] = `Bearer ${API_KEY}`;
+    }
+    return headers;
+}
+
+// ─── Context Menu (Manual Scan) ──────────────────────────────────────────────
 chrome.runtime.onInstalled.addListener(() => {
     chrome.contextMenus.create({ id: "scanWithBlockBord", title: "🛡️ Scan with Block Bord AI", contexts: ["selection", "link"] });
+
+    // Set default settings on first install
+    chrome.storage.local.get(['autoScanEnabled', 'showNotifications', 'showWarningOverlays'], (res) => {
+        const defaults = {};
+        if (res.autoScanEnabled === undefined) defaults.autoScanEnabled = true;
+        if (res.showNotifications === undefined) defaults.showNotifications = true;
+        if (res.showWarningOverlays === undefined) defaults.showWarningOverlays = true;
+        if (Object.keys(defaults).length > 0) {
+            chrome.storage.local.set(defaults);
+        }
+    });
+});
+
+// ─── Alarms: Periodic Session Health Check ───────────────────────────────────
+chrome.alarms.create('blockbord-session-check', { periodInMinutes: 30 });
+
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === 'blockbord-session-check') {
+        try {
+            const response = await fetch(`${API_URL}/api/v1/ext/status`, {
+                headers: buildHeaders(),
+                credentials: 'include',
+                signal: AbortSignal.timeout(5000)
+            });
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Block Bord: Session check OK. Logged in:", data.logged_in);
+            }
+        } catch (err) {
+            console.warn("Block Bord: Session check failed:", err.message);
+        }
+    }
 });
 
 // ─── Messages from Content Scripts ───────────────────────────────────────────
@@ -46,16 +119,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const tabId = sender.tab?.id;
 
     if (message.action === 'pageContentDetected') {
-        const url = message.url.toLowerCase();
-        // if ((url.includes("127.0.0.1") || url.includes("localhost")) && !url.includes("/test-")) return;
+        // Check if auto-scan is enabled
+        chrome.storage.local.get(['autoScanEnabled'], (res) => {
+            if (res.autoScanEnabled === false) return;
 
-        updateBadge(tabId, "...", "#3B82F6");
-
-        // Build enriched content including form signals and page title
-        let enrichedContent = `[URL: ${message.url}]\n[TITLE: ${message.title || ""}]\n${message.content || ""}`;
-        
-        // Pass the whole message object (which contains content, formData, telemetry)
-        processScan(tabId, message.url, message);
+            updateBadge(tabId, "...", "#3B82F6");
+            processScan(tabId, message.url, message);
+        });
         return true;
     }
 
@@ -70,38 +140,41 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         sendResponse({ started: true });
         return true;
     }
-    // ... rest of conditions
 
     if (message.action === 'expandShortenedURL') {
-        // Feature #10: Just log it for now; real expansion is done server-side via /api/check-link
         console.log("Block Bord: Shortened URL detected:", message.url);
     }
 
     if (message.action === 'dangerousDownload') {
-        // Feature #14: Notify user about dangerous download
-        chrome.notifications.create(`bb-download-${Date.now()}`, {
-            type: 'basic', iconUrl: 'icons/icon128.png',
-            title: '⚠️ Block Bord AI — Download Blocked',
-            message: `Dangerous file type blocked: ${message.url.substring(0, 80)}`,
-            priority: 2
+        chrome.storage.local.get(['showNotifications'], (res) => {
+            if (res.showNotifications === false) return;
+            chrome.notifications.create(`bb-download-${Date.now()}`, {
+                type: 'basic', iconUrl: 'icons/icon128.png',
+                title: '⚠️ Block Bord AI — Download Blocked',
+                message: `Dangerous file type blocked: ${message.url.substring(0, 80)}`,
+                priority: 2
+            });
         });
     }
 });
 
-// ─── Feature #1: Automatic Real-time URL Scanning ────────────────────────────
-const lastScannedUrls = new Map(); // tabId -> url
+// ─── Automatic Real-time URL Scanning ────────────────────────────────────────
+const lastScannedUrls = new Map();
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    // Trigger ONLY on complete to prevent duplicate scans during loading redirects
     if (changeInfo.status === 'complete' && tab.url && tab.url.startsWith('http')) {
         const url = tab.url.toLowerCase();
-        
+
         // Avoid redundant scans if the URL hasn't changed for this tab
         if (lastScannedUrls.get(tabId) === url) return;
         lastScannedUrls.set(tabId, url);
 
-        console.log(`Block Bord: Auto-trigger (complete):`, url);
-        processScan(tabId, tab.url);
+        // Check if auto-scan is enabled
+        chrome.storage.local.get(['autoScanEnabled'], (res) => {
+            if (res.autoScanEnabled === false) return;
+            console.log(`Block Bord: Auto-trigger (complete):`, url);
+            processScan(tabId, tab.url);
+        });
     }
 });
 
@@ -110,7 +183,6 @@ chrome.tabs.onRemoved.addListener((tabId) => {
     tabCooldowns.delete(tabId);
 });
 
-// ─── Core Scan Logic ─────────────────────────────────────────────────────────
 // ─── Core Scan Logic ─────────────────────────────────────────────────────────
 async function processScan(tabId, url, scanData = null) {
     const isEnriched = !!(scanData && (scanData.content || scanData.telemetry));
@@ -133,7 +205,6 @@ async function processScan(tabId, url, scanData = null) {
         tabCooldowns.set(tabId, { ts: Date.now(), enriched: isEnriched });
     }
 
-    // scanData can be the full message object from content.js
     const pageContent = scanData ? scanData.content : null;
     const contentHash = scanData && scanData.contentHash ? scanData.contentHash : 'nohash';
     const cacheKey = `${url}_${contentHash}`;
@@ -146,8 +217,6 @@ async function processScan(tabId, url, scanData = null) {
     }
 
     try {
-        // Enforce the correct backend endpoint: /scan (not /api/check-link)
-        // Ensure credentials: 'include' is set so session cookies are sent
         const payload = { 
             url: url, 
             content: pageContent || url,
@@ -156,15 +225,24 @@ async function processScan(tabId, url, scanData = null) {
             hasRedirected: scanData?.hasRedirected || false
         };
 
-        const response = await fetch(`${API_URL}/scan`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'X-BlockBord-Source': 'extension'
-            },
-            credentials: 'include', 
-            body: JSON.stringify(payload)
-        });
+        // Try the dedicated extension endpoint first, fallback to /scan
+        let response;
+        try {
+            response = await fetch(`${API_URL}/api/v1/ext/scan`, {
+                method: 'POST',
+                headers: buildHeaders(),
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+        } catch (e) {
+            // Fallback to legacy /scan endpoint
+            response = await fetch(`${API_URL}/scan`, {
+                method: 'POST',
+                headers: buildHeaders(),
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+        }
 
         if (!response.ok) {
             if (response.status === 401) {
@@ -175,7 +253,23 @@ async function processScan(tabId, url, scanData = null) {
             throw new Error(`HTTP ${response.status}`);
         }
 
-        const data = await response.json();
+        let data = await response.json();
+
+        // Unwrap if response is wrapped in {success, data} format
+        if (data.success !== undefined && data.data) {
+            data = data.data;
+        }
+
+        // Normalize risk level from backend bands to extension display categories
+        if (data.risk_level) {
+            data.risk_level = normalizeRiskLevel(data.risk_level);
+        }
+
+        // Map evidence array to reasons if needed
+        if (!data.reasons && data.evidence) {
+            data.reasons = data.evidence;
+        }
+
         console.log("Block Bord:", url, "→", data.risk_level, `(${data.risk_score})`);
 
         setCache(cacheKey, data); 
@@ -192,40 +286,49 @@ function updateBadge(tabId, text, color) {
     if (!tabId) return;
     chrome.action.setBadgeText({ text: text, tabId: tabId });
     chrome.action.setBadgeBackgroundColor({ color: color, tabId: tabId });
-    // Ensure text is white for better contrast
     if (chrome.action.setBadgeTextColor) {
         chrome.action.setBadgeTextColor({ color: "#FFFFFF", tabId: tabId });
     }
 }
 
-// ─── Feature #3/#4: Handle Scan Results ──────────────────────────────────────
+// ─── Handle Scan Results ─────────────────────────────────────────────────────
 function handleScanResult(tabId, data, url) {
     if (tabId) {
-        if (data.risk_level === 'High') {
+        const level = (data.risk_level || 'Safe').toLowerCase();
+
+        if (level === 'high') {
             updateBadge(tabId, "!!!", "#EF4444");
-            chrome.notifications.create(`bb-high-${Date.now()}`, {
-                type: 'basic', iconUrl: 'icons/icon128.png',
-                title: '🚨 Block Bord AI — Dangerous Site!',
-                message: `High-risk site detected! Score: ${data.risk_score}/100. Category: ${data.category || "Phishing"}.`,
-                priority: 2
+            chrome.storage.local.get(['showNotifications'], (res) => {
+                if (res.showNotifications === false) return;
+                chrome.notifications.create(`bb-high-${Date.now()}`, {
+                    type: 'basic', iconUrl: 'icons/icon128.png',
+                    title: '🚨 Block Bord AI — Dangerous Site!',
+                    message: `High-risk site detected! Score: ${data.risk_score}/100. Category: ${data.category || "Phishing"}.`,
+                    priority: 2
+                });
             });
             // Trigger full-page warning overlay via content script
-            chrome.tabs.sendMessage(tabId, { action: 'showWarning', data: data }).catch(() => {});
-        } else if (data.risk_level === 'Suspicious') {
-            updateBadge(tabId, "WARN", "#F59E0B");
-            chrome.notifications.create(`bb-susp-${Date.now()}`, {
-                type: 'basic', iconUrl: 'icons/icon128.png',
-                title: '⚠️ Block Bord AI — Suspicious Site',
-                message: `This site looks suspicious. Risk: ${data.risk_score}/100`,
-                priority: 1
+            chrome.storage.local.get(['showWarningOverlays'], (res) => {
+                if (res.showWarningOverlays === false) return;
+                chrome.tabs.sendMessage(tabId, { action: 'showWarning', data: data }).catch(() => {});
             });
-            // For suspicious sites, we only show badge/notification, no full overlay
+        } else if (level === 'suspicious') {
+            updateBadge(tabId, "WARN", "#F59E0B");
+            chrome.storage.local.get(['showNotifications'], (res) => {
+                if (res.showNotifications === false) return;
+                chrome.notifications.create(`bb-susp-${Date.now()}`, {
+                    type: 'basic', iconUrl: 'icons/icon128.png',
+                    title: '⚠️ Block Bord AI — Suspicious Site',
+                    message: `This site looks suspicious. Risk: ${data.risk_score}/100`,
+                    priority: 1
+                });
+            });
         } else {
             updateBadge(tabId, "SAFE", "#10B981");
         }
     }
 
-    // Notify any open popups or tabs about the new result (always broadcast)
+    // Notify any open popups or tabs about the new result
     chrome.runtime.sendMessage({ 
         action: 'scanComplete', 
         url, 
@@ -234,27 +337,16 @@ function handleScanResult(tabId, data, url) {
     }).catch(() => {});
 }
 
-// ─── Feature #9: Login Notification ─────────────────────────────────────────
-function showLoginNotification() {
-    chrome.notifications.create('bb-login-needed', {
-        type: 'basic', iconUrl: 'icons/icon128.png',
-        title: 'Block Bord AI',
-        message: 'Please log in to the dashboard to enable scanning.',
-        priority: 2
-    });
-}
-
-// ─── Feature #2: Context Menu Scan ───────────────────────────────────────────
+// ─── Context Menu Scan ───────────────────────────────────────────────────────
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === "scanWithBlockBord") {
         const textToScan = info.selectionText || info.linkUrl || "";
         chrome.storage.local.set({ lastManualScan: textToScan });
-        // Trigger popup to open
         chrome.action.openPopup?.().catch(() => {});
     }
 });
 
-// ─── Feature #11: Save to Local History ──────────────────────────────────────
+// ─── Save to Local History ───────────────────────────────────────────────────
 function saveToHistory(url, data) {
     chrome.storage.local.get(['scanHistory'], (result) => {
         const history = result.scanHistory || [];

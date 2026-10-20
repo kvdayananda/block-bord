@@ -39,6 +39,9 @@
           <li style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #10b981; font-weight: 800;">✓</span> Chrome Extension Access
           </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #f59e0b; font-weight: 800;">✓</span> Standard Ads Included
+          </li>
           <li style="display: flex; align-items: center; gap: 10px; opacity: 0.4;">
             <span>✕</span> Gemini AI Copilot
           </li>
@@ -79,10 +82,13 @@
             <span style="color: #10b981; font-weight: 800;">✓</span> Dark Web & Password Leak Alerts
           </li>
           <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #10b981; font-weight: 800;">✓</span> <strong>100% Ad-Free Experience</strong>
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #10b981; font-weight: 800;">✓</span> Priority Extension Auto-Block
           </li>
           <li style="display: flex; align-items: center; gap: 10px;">
-            <span style="color: #10b981; font-weight: 800;">✓</span> Dedicated API Key for Custom Tools
+            <span style="color: #10b981; font-weight: 800;">✓</span> Standard API Key (100 req/day limit)
           </li>
         </ul>
       </div>
@@ -108,10 +114,13 @@
             <span style="color: #10b981; font-weight: 800;">✓</span> Everything in Pro Shield
           </li>
           <li style="display: flex; align-items: center; gap: 10px;">
-            <span style="color: #10b981; font-weight: 800;">✓</span> High-Rate Limit API Keys (10k req/min)
+            <span style="color: #10b981; font-weight: 800;">✓</span> High-Rate Limit API Keys (10k req/day limit)
           </li>
           <li style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #10b981; font-weight: 800;">✓</span> Custom Blacklist/Whitelist Sync
+          </li>
+          <li style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #10b981; font-weight: 800;">✓</span> SOC Analytics Dashboard
           </li>
           <li style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #10b981; font-weight: 800;">✓</span> 24/7 Priority Security Engineer Support
